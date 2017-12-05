@@ -1,0 +1,37 @@
+.button-left {
+    margin: 10px;
+}
+
+.button-right {
+    margin-top: 10px;
+    margin-button: 10px;
+    margin-right: 10px;
+    margin-left: -20px;
+}
+
+.container {
+    width: 1440px;
+}
+
+.panel.panel-default .list-group{
+    text-align: left;
+}
+
+g.center circle {
+    fill: "gray";
+    stroke: "#333";
+}
+
+g.center text {
+    font-color: "white";
+}
+
+
+.properties {
+    overflow: auto;
+}
+/*
+.properties-revise {
+    overflow: auto;
+}
+*/
