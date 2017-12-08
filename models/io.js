@@ -20,18 +20,47 @@ function ioConfig(server){
         })
 
         socket.on('get',function(msg){
-            data.instance_model = msg.instance_model;
         })
 
         socket.on('revise',function(msg){
-            data.instance_model = msg.instance_model;
+            [type,reply] = reviseMsg(msg);
+            socket.emit(type,reply);
         })
 
         socket.on('recommend',function(msg){
-            data.instance_model = msg.instance_model;
         })
 
     });
+}
+
+
+function reviseMsg(msg){
+/*
+ {
+     "operation": "create_node" ,
+     "user_id": "u1" ,
+     //"operationID": "操作的时间" //用来区分操作
+     "node": {
+     "nodeid": "__front__1",
+     "tags": ["人"]
+ }
+*/
+    switch(msg.operation){
+        case "create_node":
+            break;
+        case "delete_node":
+            break;
+        case "revise_node":
+            break;
+
+        case "create_relation":
+            break;
+        case "delete_relation":
+            break;
+        case "revise_relation":
+            break;
+    }
+
 }
 
 module.exports = ioConfig;
