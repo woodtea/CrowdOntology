@@ -1,27 +1,55 @@
 <div class="row search-row" style="padding:10px"></div>
 <div class="row graph-row">
-  <div class="col-xs-1"></div>
-  <div class="col-xs-2" style="text-align:center">
-    <div class="list-group-item" style="border:1px dashed;color: black">
-      <div class="input-group">
-        <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
-        <span class="input-group-btn">
-            <button class="btn btn-default" type="button" id="stigmod-search-left-btn"><span class="glyphicon glyphicon-search"></span></button>
-        </span>
-      </div>
-    </div>
-
-    <div class="index" style="border:1px dashed;height:550px">
-      <div class="row">
-        <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>
-        <div class="col-xs-8"><h4>索引</h4></div>
-        <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>
-      </div>
-      <hr style='margin:8px'>
-    </div>
-  </div>
+  <div class="col-xs-2"></div>
   <div class="col-xs-6 middle-content" style="border:1px solid">
-    <!--div style="text-align: center;"><h4>测试版</h4><hr style='margin:8px'></div-->
+    <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
+      <div class="col-xs-3">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default" aria-label="Index" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" data-tooltip="tooltip" data-placement="top" title="索引">
+            <span class="glyphicon glyphicon-list"></span>
+          </button>
+          <ul class="dropdown-menu index">
+            <li><a href="#">贾宝玉</a></li>
+            <li><a href="#">林黛玉</a></li>
+            <li><a href="#">薛宝钗</a></li>
+          </ul>
+          <button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="新建">
+            <span class="fa fa-plus" aria-hidden="true" type="class"></span>
+          </button>
+        </div>
+
+
+<!--div class="btn-group">
+  <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+
+</div>
+<button type="button" class="glyphicon glyphicon glyphicon-plus-sign  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+
+<!--div class="btn-group">
+  <button type="button" class="btn btn-default" style="width: 82px">索引</button>
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <ul class="dropdown-menu index">
+    <li><a href="#">贾宝玉</a></li>
+    <li><a href="#">林黛玉</a></li>
+    <li><a href="#">薛宝钗</a></li>
+  </ul>
+</div-->
+      </div>
+      <div class="col-xs-6" style="text-align: center"><h4>红楼梦</h4></div>
+      <div class="col-xs-3">
+          <div class="input-group" style="margin:auto;">
+            <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" id="stigmod-search-left-btn"><span class="glyphicon glyphicon-search"></span></button>
+            </span>
+          </div>
+      </div>
+    </div>
+    <hr style='margin:8px'>
+    <svg class="graph" width="700" height="532"></svg>
   </div>
   <div class="col-xs-2" style="text-align:center;">
     <div class="properties list-group" style="border:1px dashed;height:605px">
@@ -41,25 +69,35 @@
       <hr style='margin:8px'>
     </div>
   </div>
-  <div class="col-xs-1"></div>
+  <div class="col-xs-2"></div>
 </div>
 <!--script src="https://d3js.org/d3.v4.min.js"></script-->
-<script src="/javascripts/d3.js"></script>
-<script src="/javascripts/jquery-1.11.3.min.js"></script>
+<script src="/javascripts/lib/d3.js"></script>
+<script src="/javascripts/lib/jquery-1.11.3.min.js"></script>
+<!--script src="/javascripts/lib/typeahead.bundle.js"></script-->
+<script src="/javascripts/lib/bootstrap.js"></script>
+<script src="/javascripts/lib/bootstrap3-typeahead.js"></script>
+<!--script src="/javascripts/lib/objectid.js"></script-->
+<script src="/socket.io/socket.io.js"></script>
 
-<!--script src="/javascripts/data.js"></script-->
+
+<script src="/javascripts/data.js"></script>
 <script src="/javascripts/model.js"></script>
 <script src="/javascripts/draw.js"></script>
 <script src="/javascripts/function.js"></script>
 <script src="/javascripts/fortest.js"></script>
-<script src="/javascripts/typeahead.bundle.js"></script>
-<script src="/javascripts/typeahead.js"></script>
+<script src="/javascripts/typeahead-bootstrap.js"></script>
 
-<script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/io.js"></script>
 
 <script language="javascript">
+    window.onload = function() {
+        user = $(".glyphicon-user").parent().text();
+        user = user.replace(/(^\s*)/g, "");
+    }
     window.onbeforeunload = function() {
-        socketEmit('save model',data={"instance_model":instance_model})
+        //let user = $(".glyphicon-user").parent().text();
+        //user = user.replace(/(^\s*)/g, "")
+        socketEmit('save model',data={"instance_model":instance_model,"user":user})
     }
 </script>

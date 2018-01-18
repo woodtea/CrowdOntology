@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <!--meta name="viewport" content="width=device-width, initial-scale=1"--><!-- 禁用响应式布局 -->
-  <title>Collective Knowledge Graph - <%= locals.title %></title>
+  <title>Collective-KG | <%= locals.title %></title>
   <!-- CSS -->
   <link href="/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/font-awesome.min.css" rel="stylesheet">
@@ -18,14 +18,14 @@
 
 <!-- 顶部导航条 -->
 <nav class="navbar navbar-default navbar-fixed-top stigmod-hide-when-full-screen" role="navigation" id="navbarTop">
-  <div class="container">
+  <div class="head container">
     <div class="navbar-header">
-      <!--a class="navbar-brand" href="/"><img src="/src/img/stigmod_logo_sm.png" alt="stigmod-logo-sm"/></a-->
+      <a class="navbar-brand" href="/"><img src="/images/favicon48.ico" alt="stigmod-logo-sm"/></a>
     </div>
     <div class="collapse navbar-collapse">
       <form class="navbar-form navbar-left" role="search">
         <div class="form-group">
-          <input type="text" class="twitter-typeahead form-control" placeholder="Search CrowdOntology" id="stigmod-navbar-input">
+          <input type="text" class="twitter-typeahead form-control" placeholder="Search Collective-KG" id="stigmod-navbar-input">
         </div>
       </form>
       <ul class="nav navbar-nav">
@@ -37,9 +37,9 @@
         <li><a href="/signup"><span class="glyphicon glyphicon-flash"></span> Sign up</a></li>
         <li><a href="/signin"><span class="glyphicon glyphicon-log-in"></span> &nbsp;Sign in</a></li>
           <% } else { %>
-        <li><a href="/u"><span class="glyphicon glyphicon-user"></span> <%= locals.user.mail %></a></li>
-        <li><a href="/u/settings/profile"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
-        <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Sign out</a></li>
+        <li><a href="/user"><span class="glyphicon glyphicon-user"></span> <%= locals.user.mail %></a></li>
+        <li><a href="/user/settings/profile"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+        <li><a href="/signout"><span class="glyphicon glyphicon-log-out"></span> Sign out</a></li>
           <% } %>
       </ul>
     </div>

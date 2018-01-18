@@ -9,12 +9,21 @@ var debug = require('debug')('knowledgegraph:server');
 var http = require('http');
 //var data = require('../models/data');
 
+// get os platform
+var os=require('os');
+var platform=os.platform();
+console.log(platform);
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var tmpPORT = '3000';
+
+if(platform != 'darwin') tmpPORT = '80';
+
+var port = normalizePort(process.env.PORT || tmpPORT);
 app.set('port', port);
+
 
 /**
  * Create HTTP server.

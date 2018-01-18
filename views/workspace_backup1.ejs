@@ -1,0 +1,81 @@
+<div class="row search-row" style="padding:10px"></div>
+<div class="row graph-row">
+  <div class="col-xs-1"></div>
+  <div class="col-xs-2" style="text-align:center">
+    <div class="list-group-item" style="border:1px dashed;color: black">
+      <div class="input-group">
+        <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="stigmod-search-left-btn"><span class="glyphicon glyphicon-search"></span></button>
+        </span>
+      </div>
+    </div>
+
+    <div class="index" style="border:1px dashed;height:490px">
+      <div class="row">
+        <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>
+        <div class="col-xs-8"><h4>索引</h4></div>
+        <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>
+      </div>
+      <hr style='margin:8px'>
+    </div>
+    <div class="list-group-item" style="border:1px dashed;color: black">
+      <a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center;">
+        <span class="fa fa-plus" type="class"></span>
+      </a>
+    </div>
+
+  </div>
+  <div class="col-xs-6 middle-content" style="border:1px solid">
+    <!--div style="text-align: center;"><h4>测试版</h4><hr style='margin:8px'></div-->
+  </div>
+  <div class="col-xs-2" style="text-align:center;">
+    <div class="properties list-group" style="border:1px dashed;height:605px">
+      <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8"><h4>详情</h4></div>
+        <div class="col-xs-2"><span class="glyphicon glyphicon-chevron-right button-right"></span></div>
+      </div>
+      <hr style='margin:8px'>
+    </div>
+    <div class="properties-revise list-group" style="border:1px dashed;height:605px;display:none">
+      <div class="row">
+        <div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left"></span></div>
+        <div class="col-xs-8"><h4>修改</h4></div>
+        <div class="col-xs-2"></div>
+      </div>
+      <hr style='margin:8px'>
+    </div>
+  </div>
+  <div class="col-xs-1"></div>
+</div>
+<!--script src="https://d3js.org/d3.v4.min.js"></script-->
+<script src="/javascripts/lib/d3.js"></script>
+<script src="/javascripts/lib/jquery-1.11.3.min.js"></script>
+<!--script src="/javascripts/lib/typeahead.bundle.js"></script-->
+<script src="/javascripts/lib/bootstrap.js"></script>
+<script src="/javascripts/lib/bootstrap3-typeahead.js"></script>
+<!--script src="/javascripts/lib/objectid.js"></script-->
+<script src="/socket.io/socket.io.js"></script>
+
+
+<script src="/javascripts/data.js"></script>
+<script src="/javascripts/model.js"></script>
+<script src="/javascripts/draw.js"></script>
+<script src="/javascripts/function.js"></script>
+<script src="/javascripts/fortest.js"></script>
+<script src="/javascripts/typeahead-bootstrap.js"></script>
+
+<script src="/javascripts/io.js"></script>
+
+<script language="javascript">
+    window.onload = function() {
+        user = $(".glyphicon-user").parent().text();
+        user = user.replace(/(^\s*)/g, "");
+    }
+    window.onbeforeunload = function() {
+        //let user = $(".glyphicon-user").parent().text();
+        //user = user.replace(/(^\s*)/g, "")
+        socketEmit('save model',data={"instance_model":instance_model,"user":user})
+    }
+</script>

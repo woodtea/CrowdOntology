@@ -4,6 +4,7 @@
 
 var clicks = 0;
 $(function () {
+    $('[data-tooltip="tooltip"]').tooltip()
     //点击导航
     $(document).on("click", '.index li', function () {
         let id = $(this).attr("nodeid");
@@ -26,11 +27,10 @@ $(function () {
         }
     })
     $(document).on("dblclick", 'g', function () {
-        if (d3.select(this).classed("isRecommendation") == true) {
+        if (d3.select(this).classed("isRecommendation") == true) { //forTest
             clickTimeout.clear();
             //进行添加
             let nodeID = $(this).attr("id");
-
             instance_model.nodes[nodeID] = {
                 "dataType": recommend_model[nodeID].dataType,
                 "value": recommend_model[nodeID].value
@@ -57,6 +57,10 @@ $(function () {
                 return;
             }
             clickTimeout.clear();
+            let nodeID = $(this).attr("id");
+            recommend_model = shiftModel(recommend_model_whole,nodeID);
+            //console.log("recommend_model");
+            //console.log(recommend_model);
             drawRecommendation(recommend_model, instance_model);
         }
     })
@@ -91,6 +95,9 @@ $(function () {
 
         let type = $(this).attr("type");
         switch (type) {
+            case "class":
+                classRevise(this, "add");
+                break;
             case "attribute":
                 attributeRevise(this, "add");
                 break;
@@ -137,6 +144,9 @@ $(function () {
         //alert("修改成功");
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
+            case "class-revise":
+                classReviseSubmit(item);
+                break;
             case "attribute-revise":
                 attributeReviseSubmit(item);
                 break;
@@ -144,16 +154,24 @@ $(function () {
                 relationReviseSubmit(item);
                 break;
         }
-
-
     });
 
     $(document).on("click", '.properties-revise .glyphicon-ban-circle', function () {
-        $(".properties-revise .button-left").click();
+        let item = $(this).parent().parent();
+        switch ($(item).attr("id")) {
+            case "class-revise":
+                break;
+            case "attribute-revise":
+                $(".properties-revise .button-left").click();
+                break;
+            case "relation-revise":
+                $(".properties-revise .button-left").click();
+                break;
+        }
     });
 });
 
-
+/* draw detail */
 function drawNodeDetails(id) {
     let isEntity = drawEntity(id, instance_model);
     if (isEntity) {
@@ -270,6 +288,36 @@ function drawRoles(id) {
     $(property).find("#role").append(generatePlusLogo("role"));
 }
 
+function classRevise(item, type = "add") {
+    $(".properties").hide();
+    $(".properties-revise").show();
+    $(".properties-revise").children().remove();
+    let html = '<div class="row">' +
+        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
+        '<div class="col-xs-8"><h4>添加</h4></div>' +
+        '<div class="col-xs-2"></div>' +
+        '</div>' +
+        '<hr style="margin:8px">';
+    $(".properties-revise").append(html);
+
+
+    html = generateTitle("实体", "class-revise");
+    $(".properties-revise").append(html);
+
+    html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
+        '<div class="row">' +
+        '<div class="col-xs-4" style="padding: 3px"><input type="text" class="stigmod-input type-input" stigmod-inputcheck="class-modify" value="" placeholder="类型"></div>' +
+        '<div class="col-xs-8" style="padding: 3px"><input type="text" class="stigmod-input value-input" stigmod-inputcheck="class-modify" value="" placeholder="名称:String"></div>' +
+        '</div></a>';
+    $(".properties-revise").find("#class-revise").append(html);
+
+    html = generateSubmitLogo();
+    $(".properties-revise").find("#class-revise").append(html);
+
+    let array = ["人", "住址"];
+    setClassTypeTypeahead(array);
+}
+
 function attributeRevise(item, type = "add") {
     $(".properties").hide();
     $(".properties-revise").show();
@@ -296,7 +344,7 @@ function attributeRevise(item, type = "add") {
     html = generateSubmitLogo();
     $(".properties-revise").find("#attribute-revise").append(html);
 
-    let array = ["身高", "排行"]
+    let array = ["身高", "性别"]
     setAttributeTypeTypeahead(array);
 }
 
@@ -468,8 +516,9 @@ function getRoles(relation) {
  }
  */
 
-function generateFrontNodeID() {
+function generateFrontNodeID(val) {
     let n = getJsonLength(instance_model.nodes);
+    if(val) n=val;
     let nodeID = "front_n" + n;
 
     while (instance_model.nodes[nodeID] != undefined) {
@@ -492,13 +541,39 @@ function generateFrontRelationID() {
     return relationID;
 }
 
-function attributeReviseSubmit(item) {
+function classReviseSubmit(item) {
 
-    let type = $(item).find(".type-input.tt-input").val();
+    let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
     //生成值节点，理论上应该先检查
-    let nodeID = generateFrontNodeID();        //let n = getJsonLength(instance_model.nodes);
+    let nodeID = generateFrontNodeID(value);        //let n = getJsonLength(instance_model.nodes);
+    //let nodeID = "n" + n;
+    instance_model.nodes[nodeID] = {
+        "tags":[type],
+        "dataType": "姓名",
+        "value": value
+    }
+
+    drawIndex();
+    drawEntity(nodeID);
+    indexArray = getIndexArray();
+    setIndexTypeahead(indexArray);
+
+    $("#" + nodeID).click();
+    //$(".properties-revise").children().remove();
+
+    return;
+
+}
+
+function attributeReviseSubmit(item) {
+
+    let type = $(item).find(".type-input").val();
+    let value = $(item).find(".value-input").val();
+
+    //生成值节点，理论上应该先检查
+    let nodeID = generateFrontNodeID(value);        //let n = getJsonLength(instance_model.nodes);
     //let nodeID = "n" + n;
     instance_model.nodes[nodeID] = {
         "dataType": "String",
@@ -534,9 +609,8 @@ function attributeReviseSubmit(item) {
 
 function relationReviseSubmit(item) {
 
-    let type = $(item).find(".type-input.tt-input").val();
-    let value = $(item).find(".value-input.tt-input").val();
-
+    let type = $(item).find(".type-input").val();
+    let value = $(item).find(".value-input").val();
     //关系的节点已经存在
     let nodeID = getEntityIdByValue(value, instance_model);
     if (nodeID == undefined) {
@@ -595,16 +669,22 @@ function checkRecommendation(recommend_model, instance_model) {
 }
 
 function getAngle(N, RN, pRN, i) {
+
+    if(N == 0) return 2 * Math.PI * i/RN;
+
     let gap = Math.floor(i / pRN) + 1;
     let angle;
     if (gap != N) {
         angle = 2 * Math.PI * (i + gap) / (N * (pRN + 1));
     }
-    if (gap == N) {
+    if (gap == N) { //最后一块进行平分
         let resti = i - (gap - 1) * pRN + 1;
         let restpRN = RN - Math.floor(RN/N)*N;
         angle = 2 * Math.PI * (gap - 1) / N + 2 * Math.PI * (resti) / (N * (restpRN + 1));
     }
+    angle = 2 * Math.PI * (i + gap) / (N * (pRN + 1));  //test不错处理
+
+    //console.log(i+" "+gap+" "+N+" "+ pRN +" "+angle);
 
     return angle;
 }
@@ -630,5 +710,27 @@ function getStartAngle(entity1,entity2){
     }
 
     return [-(2 * Math.PI * offset1 / i),-(2 * Math.PI * offset2 / j)];
+
+}
+
+function shiftModel(recommend_model_whole,nodeID) {
+
+    //console.log("recommend_model_whole");
+    //console.log(recommend_model_whole);
+    let tmpModel = {};
+    for(let relation in recommend_model_whole.relations){
+        for(let n in recommend_model_whole.relations[relation].roles){
+            if(recommend_model_whole.relations[relation].roles[n]["node_id"] == nodeID){
+                let id = recommend_model_whole.relations[relation].roles[1-n]["node_id"];
+                if(instance_model.nodes[id]) break;
+                tmpModel[id] = recommend_model_whole["nodes"][id]
+                tmpModel[id].id = id;
+                tmpModel[id].relations = [];
+                tmpModel[id].relations.push({"id":relation,"value":recommend_model_whole.relations[relation].type});
+                break;
+            }
+        }
+    }
+    return tmpModel;
 
 }

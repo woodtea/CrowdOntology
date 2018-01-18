@@ -1,5 +1,6 @@
 
 var data = require('./data');
+var db = require('./db');
 
 
 function ioConfig(server){
@@ -8,15 +9,19 @@ function ioConfig(server){
 
     io.on('connection', function(socket){
         console.log('a user connected');
-        socket.emit('data',data)
+        socket.emit('data',db)
 
         socket.on('disconnect',function(){
             console.log('user disconnected');
         })
 
         socket.on('save model',function(msg){
-            data.instance_model = msg.instance_model;
+            //console.log("save model")
+            //console.log(msg);
+            db["instance_model"][msg.user] = msg.instance_model;
+            //data.instance_model = msg.instance_model;
             //socket.emit('chat message',msg)
+            console.log(db);
         })
 
         socket.on('get',function(msg){
@@ -52,7 +57,6 @@ function reviseMsg(msg){
             break;
         case "revise_node":
             break;
-
         case "create_relation":
             break;
         case "delete_relation":

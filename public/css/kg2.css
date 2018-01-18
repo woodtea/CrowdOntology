@@ -13,6 +13,10 @@
     width: 1440px;
 }
 
+.head.container {
+    width: 1200px;
+}
+
 .panel.panel-default .list-group{
     text-align: left;
 }
@@ -35,3 +39,8 @@ g.center text {
     overflow: auto;
 }
 */
+.navbar-default .navbar-brand {
+    padding-top:2px;
+    padding-bottom: 0;
+    margin-right: -30px;
+}

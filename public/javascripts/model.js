@@ -1,3 +1,5 @@
+var user;
+
 function getModel() {
     return instance_model;
 }

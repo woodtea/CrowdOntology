@@ -176,22 +176,22 @@ blockquote {
 
 /* 输入框内容合法性检查中的 BS tooltip 的颜色 */
 .tooltip.top .tooltip-inner {
-  background-color: #c9302c;
+  /* background-color: #c9302c; */
   max-width: 400px;
   /*margin-left: -30px;*/
   /*margin-right: -30px;*/
 }
 .tooltip.top .tooltip-arrow {
-  border-top-color: #c9302c;
+  /* border-top-color: #c9302c; */
 }
 .tooltip.bottom .tooltip-inner {
-  background-color: #c9302c;
+  /* background-color: #c9302c; */
   max-width: 400px;
   /*margin-left: -30px;*/
   /*margin-right: -30px;*/
 }
 .tooltip.bottom .tooltip-arrow {
-  border-bottom-color: #c9302c;
+  /* background-color: #c9302c; */
 }
 
 /* 强制元素显示在同一行的hacking */
