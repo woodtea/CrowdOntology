@@ -294,15 +294,17 @@ function getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend
 }
 
 function getPath(centX, centY, R, r, angle, node) {
+    //let rotate = angle;
+    //angle = 0; //2018.2.26更新，angle变为rotate处理
 
     let verAnglue = angle + Math.PI / 2; //angle的垂直方向
     let path = [];
-
+/*
     if ($("#" + node.id)[0]) {    //isRelation则变大
         r = 3 * r;
         R = 3 * R + R / 12;
     }
-
+ */
     //sx/y起始点、ex/y终止点
     sx = centX;
     sy = centY;
@@ -367,8 +369,10 @@ function getPath(centX, centY, R, r, angle, node) {
             ox2,
             oy2,
             data: node.relations[i]
+            //,rotate
         });
     }
+    console.log(path);
     return path;
 }
 
@@ -413,6 +417,11 @@ function drawPath(path) {
                 return str;
             }
         });
+/*
+        let originPosition = ""+width/2+"px "+height/2+"px";
+        let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
+        $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
+*/
     svg
         .append("text")
         .attr("text-anchor", "middle")

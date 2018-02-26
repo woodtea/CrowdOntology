@@ -604,7 +604,8 @@ function attributeReviseSubmit(item) {
         delete instance_model.relations[origRelation];
     }
     //更新页面
-    $("#" + centerID).click();
+    //$("#" + centerID).click();
+    transAnimation(centerID,nodeID,relationID,instance_model);
 }
 
 function relationReviseSubmit(item) {
@@ -733,4 +734,95 @@ function shiftModel(recommend_model_whole,nodeID) {
     }
     return tmpModel;
 
+}
+
+function transAnimation(centerID,neighbourID,relationID,model) {
+    //获取新增节点信息
+    let entity = getEntity(centerID, model);
+    if (entity == undefined) return false;  //如果不是实体的话
+
+    let neighbours = getJsonLength(entity.neighbours);
+    let relations = getJsonLength(entity.neighbours[neighbourID].relations);
+    //如果是两个节点间形成多个关系，则直接重绘
+    if(relations>1) {
+        $("#" + centerID).click();
+        return;
+    }
+    //如果是新的节点，则需要移动老的节点
+    /*
+    //获取坐标信息
+    let gList = $("g");
+    for (let n=0;n<gList.length;n++) {
+        let id = $(gList[n]).attr("id");
+        if(id == centerID) continue;    //如果是中心的话不操作
+
+        // 移动圆圈位置
+        let angle = 2 * Math.PI * getRank(id,entity) / neighbours + 0;
+        cx = width/2 + R * Math.cos(angle);
+        cy = height/2 + R * Math.sin(angle);
+        $(gList[n]).transition({x:cx,y:cy});
+
+    }
+    */
+    $("path").next().remove();
+    $("path").remove();
+
+    let n,tmpNodeID,tmpRelationID,tmpItem;
+    let originPosition,rotateAngle;
+    for(tmpNodeID in entity.neighbours){
+        tmpItem = $("#"+tmpNodeID)
+        let angle = 2 * Math.PI * getRank(tmpNodeID,entity) / neighbours + 0;
+        cx = width/2 + R * Math.cos(angle);
+        cy = height/2 + R * Math.sin(angle);
+        $(tmpItem).transition({x:cx,y:cy});
+        /* 旋转关系反转比较麻烦
+        for(n in entity.neighbours[tmpNodeID].relations){//旋转关系
+            tmpRelationID = entity.neighbours[tmpNodeID].relations[n].id;
+            tmpItem = $("#"+tmpRelationID);
+            originPosition = ""+width/2+"px "+height/2+"px";
+            //rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours - (getRank(tmpNodeID,entity)-1) / (neighbours-1)))%360;
+            rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours ))%360;
+            $(tmpItem).css({transformOrigin: originPosition}).transition({rotate: rotateAngle});
+            $(tmpItem).next()
+        }
+        */
+    }
+    let paths = getPaths(width / 2, height / 2, R, r, 0, entity.neighbours);
+    console.log(paths);
+    for (let path of paths) {
+        drawPath(path);
+    }
+    //画出新增节点
+    let tmpNode = {};
+    tmpNode[neighbourID] = entity.neighbours[neighbourID];
+    drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * (getRank(neighbourID,entity)+1) / neighbours);//不知道为什么要+1
+    //将圆圈更新到前面
+    svgBringToFront($("g"));
+
+    //更新详细栏目信息
+    if (entity) {
+        //处理后面
+        $(".properties-revise .button-left").click();
+        $(property).children().remove();
+        drawPropertyTitle();
+        drawTypes(centerID);
+        drawAttributes(centerID);
+        drawRelations(centerID);
+    }
+    return true;
+}
+
+function getRank(id,entity){
+    let i = 0;
+    for(let key in entity.neighbours){
+        if(key == id) break;
+        i++;
+    }
+    return i;
+}
+
+function svgBringToFront(item) {
+    var parent = $(item).parent();
+    $(item).remove();
+    $(parent).append(item);
 }
