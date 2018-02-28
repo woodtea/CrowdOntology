@@ -764,8 +764,10 @@ function transAnimation(centerID,neighbourID,relationID,model) {
 
     }
     */
+    /*
     $("path").next().remove();
     $("path").remove();
+    */
 
     let n,tmpNodeID,tmpRelationID,tmpItem;
     let originPosition,rotateAngle;
@@ -775,7 +777,7 @@ function transAnimation(centerID,neighbourID,relationID,model) {
         cx = width/2 + R * Math.cos(angle);
         cy = height/2 + R * Math.sin(angle);
         $(tmpItem).transition({x:cx,y:cy});
-        /* 旋转关系反转比较麻烦
+        //旋转关系反转比较麻烦
         for(n in entity.neighbours[tmpNodeID].relations){//旋转关系
             tmpRelationID = entity.neighbours[tmpNodeID].relations[n].id;
             tmpItem = $("#"+tmpRelationID);
@@ -785,19 +787,27 @@ function transAnimation(centerID,neighbourID,relationID,model) {
             $(tmpItem).css({transformOrigin: originPosition}).transition({rotate: rotateAngle});
             $(tmpItem).next()
         }
-        */
+
     }
+    /*
     let paths = getPaths(width / 2, height / 2, R, r, 0, entity.neighbours);
     console.log(paths);
     for (let path of paths) {
         drawPath(path);
-    }
+    }*/
     //画出新增节点
     let tmpNode = {};
     tmpNode[neighbourID] = entity.neighbours[neighbourID];
     drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * (getRank(neighbourID,entity)+1) / neighbours);//不知道为什么要+1
+
+    $(".textPath").remove();
+    let paths = getPathTexts(width / 2, height / 2, R, r, 0, entity.neighbours);
+    //console.log(paths);
+    for (let path of paths) {
+        drawPathText(path);
+    }
     //将圆圈更新到前面
-    svgBringToFront($("g"));
+    svgBringToFront($("#"+centerID));
 
     //更新详细栏目信息
     if (entity) {

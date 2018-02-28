@@ -264,9 +264,26 @@ function getPaths(centX, centY, R, r, startAngle, neighbours) {
         neighbours[key].id = key;
         angle = 2 * Math.PI * i / N + startAngle;
         let path = getPath(centX, centY, R, r, angle, neighbours[key]);
+        //console.log(path);
         paths.push(...path);
         i++;
     }
+    console.log(i);
+    return paths;
+}
+
+function getPathTexts(centX, centY, R, r, startAngle, neighbours) {
+    let N = getJsonLength(neighbours);//不知道为什么要+1
+    let paths = [];
+    let i = 0;
+    for (let key in neighbours) {
+        neighbours[key].id = key;
+        angle = 2 * Math.PI * i / N + startAngle;
+        let path = getPathText(centX, centY, R, r, angle, neighbours[key]);
+        paths.push(...path);
+        i++;
+    }
+    console.log(i);
     return paths;
 }
 
@@ -294,17 +311,17 @@ function getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend
 }
 
 function getPath(centX, centY, R, r, angle, node) {
-    //let rotate = angle;
-    //angle = 0; //2018.2.26更新，angle变为rotate处理
+    let rotate = angle;
+    angle = 0; //2018.2.26更新，angle变为rotate处理
 
     let verAnglue = angle + Math.PI / 2; //angle的垂直方向
     let path = [];
-/*
+
     if ($("#" + node.id)[0]) {    //isRelation则变大
         r = 3 * r;
         R = 3 * R + R / 12;
     }
- */
+
     //sx/y起始点、ex/y终止点
     sx = centX;
     sy = centY;
@@ -369,7 +386,87 @@ function getPath(centX, centY, R, r, angle, node) {
             ox2,
             oy2,
             data: node.relations[i]
-            //,rotate
+            ,rotate
+        });
+    }
+    console.log(path);
+    return path;
+}
+
+
+function getPathText(centX, centY, R, r, angle, node) {
+    let rotate = angle;
+    angle = 0; //2018.2.26更新，angle变为rotate处理
+
+    let verAnglue = angle + Math.PI / 2; //angle的垂直方向
+    let path = [];
+
+    if ($("#" + node.id)[0]) {    //isRelation则变大
+        r = 3 * r;
+        R = 3 * R + R / 12;
+    }
+
+    //sx/y起始点、ex/y终止点
+    sx = centX;
+    sy = centY;
+    ex = centX + R * Math.cos(angle);
+    ey = centY + R * Math.sin(angle);
+
+    //mx/y1文本起始点，mx/y2文本起终止
+    mx1 = sx + 1.3 * r * Math.cos(angle);
+    mx2 = ex - 1.3 * r * Math.cos(angle);
+    my1 = sy + 1.3 * r * Math.sin(angle);
+    my2 = ey - 1.3 * r * Math.sin(angle);
+
+    //对于组边的处理
+    let n = node.relations.length;
+    let m = n - n % 2;
+    let shiftX = 0, shiftY = 0;
+    if (m != 0) {
+        shiftX = r * Math.cos(verAnglue) / m;
+        shiftY = r * Math.sin(verAnglue) / m;
+    }
+
+    for (let i = 0; i < n; i++) {
+
+        //算是偏移后 cx/y1文本起始点，cx/y2文本起终止
+        cx1 = mx1 + shiftX * (i - m / 2);
+        cx2 = mx2 + shiftX * (i - m / 2);
+        cy1 = my1 + shiftY * (i - m / 2);
+        cy2 = my2 + shiftY * (i - m / 2);
+
+        //nx/y1,ox/y1起始点三次贝塞尔曲线
+        nx1 = cx1 - 0.4 * r * Math.cos(angle);
+        ny1 = cy1 - 0.4 * r * Math.sin(angle);
+        ox1 = sx + 0.4 * r * Math.cos(angle);
+        oy1 = sy + 0.4 * r * Math.sin(angle);
+        //nx/y2,ox/y2起始点三次贝塞尔曲线
+        nx2 = cx2 + 0.4 * r * Math.cos(angle);
+        ny2 = cy2 + 0.4 * r * Math.sin(angle);
+        ox2 = ex - 0.4 * r * Math.cos(angle);
+        oy2 = ey - 0.4 * r * Math.sin(angle);
+
+
+        if ((i - m / 2) == -1 && m == n) m = m - 2;
+        path.push({
+            sx,
+            sy,
+            ex,
+            ey,
+            cx1,
+            cy1,
+            cx2,
+            cy2,
+            nx1,
+            ny1,
+            nx2,
+            ny2,
+            ox1,
+            oy1,
+            ox2,
+            oy2,
+            data: node.relations[i]
+            ,rotate
         });
     }
     console.log(path);
@@ -417,11 +514,11 @@ function drawPath(path) {
                 return str;
             }
         });
-/*
+
         let originPosition = ""+width/2+"px "+height/2+"px";
         let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
         $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
-*/
+
     svg
         .append("text")
         .attr("text-anchor", "middle")
@@ -430,8 +527,23 @@ function drawPath(path) {
         .attr("href", "#" + path.data.id)
         .attr("startOffset", "50%")
         .style('font-size', '10px')
+        .classed("textPath", true)
         .text(path.data.value);
 }
+
+function drawPathText(path) {
+    svg
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-5")
+        .append("textPath")
+        .attr("href", "#" + path.data.id)
+        .attr("startOffset", "50%")
+        .style('font-size', '10px')
+        .classed("textPath", true)
+        .text(path.data.value);
+}
+
 
 function refillNode(data) {
     svg.select("#" + data.id + " circle")
