@@ -2,6 +2,11 @@
 var data = require('./data');
 var db = require('./db');
 
+var server_config = {
+    passwd:"",
+    address:"localhost:7687"
+};
+var dm = require('./dm')(server_config);
 
 function ioConfig(server){
 
