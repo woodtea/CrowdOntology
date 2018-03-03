@@ -252,3 +252,12 @@ function io_recommend_insModel_relation_done(msg){
         return;
     }
 }
+
+function io_test(){
+    msg = "hello";
+    socketEmit('iotest', msg);
+}
+
+socket.on('iotest_back', function(msg){
+    console.log(msg);
+});

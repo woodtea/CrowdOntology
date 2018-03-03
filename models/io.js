@@ -34,7 +34,11 @@ function ioConfig(server){
 
         socket.on('recommend',function(msg){
         })
-
+        
+        socket.on('iotest',function(msg){
+            console.log(msg);
+            socket.emit('iotest_back', 'received');
+        })
     });
 }
 
