@@ -6,7 +6,9 @@ var server_config = {
     passwd:"",
     address:"localhost:7687"
 };
-var dm = require('./dm')(server_config);
+var DataManager = require('./dm');
+var dm = new DataManager(server_config);
+console.log(dm);
 
 function ioConfig(server){
 
@@ -42,7 +44,8 @@ function ioConfig(server){
         
         socket.on('iotest',function(msg){
             console.log(msg);
-            socket.emit('iotest_back', 'received');
+            reply = dm.handle(msg);
+            socket.emit('iotest_back', reply);
         })
     });
 }
