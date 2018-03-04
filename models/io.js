@@ -88,7 +88,13 @@ function ioConfig(server){
                     }
                 ]
             }
-            reply = dm.handle(msg4, function(rep){
+            msg5 = {
+                operation: 'mget',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2'
+            }
+            reply = dm.handle(msg5, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });

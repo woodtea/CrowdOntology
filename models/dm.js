@@ -27,6 +27,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'mcreate_relation':
                 this.mCreateRelation(msg, callback);
                 break;
+            case 'mget':
+                this.mGet(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -46,14 +49,14 @@ DataManager.prototype.initDatabse = function (msg, callback) {
             session.run('CREATE CONSTRAINT ON (u:User) ASSERT u.name IS UNIQUE')
                 .then(function (result) {
                     session
-                    .run('CREATE CONSTRAINT ON (p:Project) ASSERT p.name IS UNIQUE')
-                    .then(function(result){
-                        callback(result);
-                        session.close();
-                    })
-                    .catch(function (err){
-                        callback(err);
-                    })
+                        .run('CREATE CONSTRAINT ON (p:Project) ASSERT p.name IS UNIQUE')
+                        .then(function (result) {
+                            callback(result);
+                            session.close();
+                        })
+                        .catch(function (err) {
+                            callback(err);
+                        })
                 })
                 .catch(function (err) {
                     callback(err);
@@ -128,7 +131,7 @@ msg : {
 }
 */
 //先保证一个点的情况
-DataManager.prototype.mCreateNode = function (msg, callback){
+DataManager.prototype.mCreateNode = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var cypher = 'MATCH (p:Project {name: {pname}})\
         CREATE (p)-[:has]->(c:Concept {tag: {ctag}, value:{cvalue}})\
@@ -170,22 +173,22 @@ msg : {
 }
 */
 //先考虑一个关系，并且没有多元性多重性
-DataManager.prototype.mCreateRelation = function(msg, callback){
+DataManager.prototype.mCreateRelation = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var relation = msg.relations[0];
     var roles = relation.roles;
-
+    //match id(n) = id better
     var start_str = 'START ';
     var role_str = '';
-    for (var i = 0; i < roles.length; i++){
+    for (var i = 0; i < roles.length; i++) {
         var role = roles[i];
         start_str += 'role' + i.toString() + '=node(' + role.node_id + ') ';
         if (i != roles.length - 1) start_str += ',';
-        role_str += 'CREATE (r)-[:has_role {name:\''+ role.role_name +'\'}]->(role' + i.toString() + ') ';
+        role_str += 'CREATE (r)-[:has_role {name:\'' + role.role_name + '\'}]->(role' + i.toString() + ') ';
     }
     var cypher = start_str + 'MATCH (p:Project {name: {pname}})\
     CREATE (p)-[:has]->(r:Relation {value: {rname}})' + role_str +
-    'RETURN id(r) AS relationId, r AS relation';
+        'RETURN id(r) AS relationId, r AS relation';
 
     session
         .run(cypher, {
@@ -196,6 +199,78 @@ DataManager.prototype.mCreateRelation = function(msg, callback){
             var nodeId = res.records[0].get('relationId').toString(); //获取id
             session.close();
             callback(nodeId);
+        })
+        .catch(function (err) {
+            callback(err);
+        });
+}
+
+/*
+msg : {
+    operation : 'mget',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+}
+*/
+DataManager.prototype.mGet = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var nodeCypher = 'MATCH (p:Project {name: {pname}})\
+    MATCH (p)-[:has]->(c:Concept)\
+    RETURN id(c) AS nodeId, c AS node';
+    var relationCypher = 'MATCH (p:Project {name: {pname}})\
+    MATCH (p)-[:has]->(r:Relation)\
+    MATCH (r)-[hr:has_role]->(tgt)\
+    RETURN id(r) AS relationId, r.value AS value, hr.name AS roleName, id(tgt) AS roleId';
+
+    session
+        .run(nodeCypher, {
+            pname: msg.project_id
+        })
+        .then(function (res) {
+            var nodes = {};
+            for (var i = 0; i < res.records.length; i++) {
+                var rec = res.records[i];
+                var nodeId = rec.get('nodeId').toString();
+                var prop = rec.get('node').properties;
+                // prop.id = nodeId;
+                nodes[nodeId] = prop;
+                console.log(prop);
+            }
+            session.run(relationCypher, {
+                    pname: msg.project_id
+                })
+                .then(function (res) {
+                    var relations = {};
+
+                    for (var i = 0; i < res.records.length; i++) {
+                        var rec = res.records[i];
+                        var relationId = rec.get('relationId').toString();
+                        var relationName = rec.get('value');
+                        var roleName = rec.get('roleName');
+                        var roleId = rec.get('roleId').toString();
+
+                        if (relations[relationId] == undefined) {
+                            relations[relationId] = {
+                                value: relationName,
+                                roles: []
+                            };
+                        }
+                        relations[relationId].roles.push({
+                            rolename: roleName,
+                            node_id: roleId
+                        });
+                        // console.log(relationId, relationName, roleName, roleId);
+                    }
+                    session.close();
+                    var model = {
+                        nodes: nodes,
+                        relations: relations
+                    };
+                    console.log(model);
+                    callback(model);
+                });
+            // session.close();
         })
         .catch(function (err) {
             callback(err);
