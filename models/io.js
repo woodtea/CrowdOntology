@@ -44,15 +44,51 @@ function ioConfig(server){
         
         socket.on('iotest',function(msg){
             console.log(msg);
-            // msg = {
-            //     operation:'init'
-            // };
-            msg = {
+            msg0 = {
+                operation:'init'
+            };
+            msg1 = {
                 operation: 'create_user',
                 operation_id: 'opt1',
                 name: 'wahaha'
             };
-            reply = dm.handle(msg, function(rep){
+            msg2 = {
+                operation: 'create_project',
+                operation_id: 'opt2',
+                name: '西游记'
+            };
+            msg3 = {
+                operation: 'mcreate_node',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                nodes :[
+                    {
+                        front_id: '',
+                        tag : 'Value',
+                        value : 'date'
+                    }
+                ]
+            }
+            msg4 = {
+                operation: 'mcreate_relation',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        value: '姓名',
+                        roles:[
+                            {role_name : '',
+                            node_id : 96},
+                            {role_name : '姓名',
+                            node_id : 41}
+                        ]
+                    }
+                ]
+            }
+            reply = dm.handle(msg4, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
