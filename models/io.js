@@ -44,8 +44,19 @@ function ioConfig(server){
         
         socket.on('iotest',function(msg){
             console.log(msg);
-            reply = dm.handle(msg);
-            socket.emit('iotest_back', reply);
+            // msg = {
+            //     operation:'init'
+            // };
+            msg = {
+                operation: 'create_user',
+                operation_id: 'opt1',
+                name: 'wahaha'
+            };
+            reply = dm.handle(msg, function(rep){
+                console.log('[CALLBACK]')
+                console.log(rep);
+            });
+            socket.emit('iotest_back', 'reply');
         })
     });
 }
