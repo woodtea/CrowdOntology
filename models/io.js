@@ -121,7 +121,7 @@ function ioConfig(server){
                             node_id : 42,
                         },
                         {
-                            role_name : '朋友',
+                            role_name : '兄弟',
                             node_id : 138,
                         }
                         ]
@@ -142,8 +142,17 @@ function ioConfig(server){
                 nodes: [
                     42
                 ]
+            };
+            msg10 = {
+                operation: 'remove_relation',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                relations: [
+                    154
+                ]
             }
-            reply = dm.handle(msg9, function(rep){
+            reply = dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });

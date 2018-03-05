@@ -64,6 +64,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'remove_node':
                 this.removeNode(msg, callback);
                 break;
+            case 'remove_relation':
+                this.removeRelation(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -583,6 +586,49 @@ DataManager.prototype.removeNode = function (msg, callback) {
             pname: msg.project_id,
             uname: msg.user_id,
             nodeId: msg.nodes[0]
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('relationId').toString(); //获取id
+            console.log(res);
+            session.close();
+            callback(res);
+        })
+        .catch(function (err) {
+            callback(err);
+        });
+}
+
+
+
+/*
+msg : {
+    operation: 'remove_relation',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    relations: [
+        'relationId'
+    ]
+}
+*/
+//实际也是解除引用
+DataManager.prototype.removeRelation = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (r) WHERE id(r)={relationId}\n\
+    MATCH (p)-[:has]->(r:RelInst)<-[r0:refer]-(u)\n\
+    MATCH (r)-[:from]->(:inst_of)<-[r1:refer]-(u)\n\
+    DELETE r0, r1\n';
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id,
+            relationId: msg.relations[0]
         })
         .then(function (res) {
             // var nodeId = res.records[0].get('relationId').toString(); //获取id
