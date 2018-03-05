@@ -8,7 +8,7 @@ var server_config = {
 };
 var DataManager = require('./dm');
 var dm = new DataManager(server_config);
-console.log(dm);
+// console.log(dm);
 
 function ioConfig(server){
 
@@ -152,7 +152,7 @@ function ioConfig(server){
                     164
                 ]
             };
-            reply = dm.handle(msg8, function(rep){
+            dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
