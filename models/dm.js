@@ -55,6 +55,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'create_node':
                 this.createNode(msg, callback);
                 break;
+            case 'create_relation':
+                this.createRelation(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -337,9 +340,6 @@ DataManager.prototype.createNode = function (msg, callback) {
         tagCypher += 'CREATE (u)-[:refer]->({iofi})\n'.format({
             iofi: 'iof' + i.toString()
         });
-        // tagCypher += 'MATCH (c' + i.toString() + ') WHERE id(c' + i.toString() +')=' + tags[i] + ' ';
-        // tagCypher += '(i)-[iof' + i.toString() + ':inst_of]->(c+' + i.toString() +')';
-        // tagCypher += '(u)-[:refer]->(iof'+ i.toString() +  ')';
     }
 
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
@@ -368,5 +368,74 @@ DataManager.prototype.createNode = function (msg, callback) {
             callback(err);
         });
 }
+
+/*
+msg : {
+    operation: 'create_relation',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    relations:[
+        {
+            front_id:'',
+            tag: 7, //用tagid表示
+            roles:[
+                role_name : 'r1',
+                node_id : 7,
+                ...
+            ]
+        }
+    ]
+}
+*/
+//先考虑一个关系，并且没有多元性多重性
+DataManager.prototype.createRelation = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var relation = msg.relations[0];
+    var roles = relation.roles;
+
+    var startCypher = '';
+    var roleCypher = '';
+    for (var i = 0; i < roles.length; i++) {
+        var role = roles[i];
+        startCypher += 'MATCH ({rolei}) WHERE id({rolei})={node_id}\n'.format({
+            rolei: 'role' + i.toString(),
+            node_id: role.node_id
+        });
+        roleCypher += 'CREATE (r)-[:has_role {name:\'{role_name}\'}]->({rolei})\n'.format({
+            role_name: role.role_name,
+            rolei: 'role' + i.toString()
+        });
+    }
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (tag) WHERE id(tag)={tag}\n' +
+        startCypher +
+        'CREATE (p)-[:has]->(r:RelInst)\n\
+    CREATE (u)-[:refer]->(r)\n\
+    CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+    CREATE (u)-[:refer]->(iof)\n' +
+        roleCypher +
+        'RETURN id(r) AS relationId, r AS relation';
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id,
+            rname: relation.value,
+            tag: relation.tag
+        })
+        .then(function (res) {
+            var nodeId = res.records[0].get('relationId').toString(); //获取id
+            session.close();
+            callback(nodeId);
+        })
+        .catch(function (err) {
+            callback(err);
+        });
+}
+
 
 module.exports = DataManager;

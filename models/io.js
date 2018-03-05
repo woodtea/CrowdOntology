@@ -69,7 +69,7 @@ function ioConfig(server){
                         value : 'date'
                     }
                 ]
-            }
+            };
             msg4 = {
                 operation: 'mcreate_relation',
                 user_id : 'wahaha',
@@ -87,13 +87,13 @@ function ioConfig(server){
                         ]
                     }
                 ]
-            }
+            };
             msg5 = {
                 operation: 'mget',
                 user_id : 'wahaha',
                 project_id : '西游记',
                 operation_id : 'op2'
-            }
+            };
             msg6 = {
                 operation: 'create_node',
                 user_id : 'wahaha',
@@ -106,8 +106,29 @@ function ioConfig(server){
                         value: '宝玉' //实体的value为空
                     }
                 ]
-            }
-            reply = dm.handle(msg6, function(rep){
+            };
+            msg7 = {
+                operation: 'create_relation',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        tag: 42, //用tagid表示
+                        roles:[{
+                            role_name : '丈夫',
+                            node_id : 130,
+                        },
+                        {
+                            role_name : '妻子',
+                            node_id : 130,
+                        }
+                        ]
+                    }
+                ]
+            };
+            reply = dm.handle(msg7, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
