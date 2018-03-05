@@ -1,5 +1,5 @@
 # neo4j接口说明v0.01
-基于官方的js接口实现。具体实现参考`models/dm.js`，使用方式参考`models/io.js`中`socket.on(iotest的)`
+基于官方的js接口实现。
 
 ## 使用说明
 ```javascript
