@@ -94,7 +94,20 @@ function ioConfig(server){
                 project_id : '西游记',
                 operation_id : 'op2'
             }
-            reply = dm.handle(msg5, function(rep){
+            msg6 = {
+                operation: 'create_node',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                nodes :[
+                    {
+                        front_id: '',
+                        tags : [96, 127], //tag用id表示
+                        value: '宝玉' //实体的value为空
+                    }
+                ]
+            }
+            reply = dm.handle(msg6, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
