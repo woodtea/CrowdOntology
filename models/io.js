@@ -66,7 +66,7 @@ function ioConfig(server){
                     {
                         front_id: '',
                         tag : 'Entity',
-                        value : '人'
+                        value : '西瓜'
                     }
                 ]
             };
@@ -81,9 +81,9 @@ function ioConfig(server){
                         value: '朋友',
                         roles:[
                             {role_name : '',
-                            node_id : 136},
+                            node_id : 159},
                             {role_name : '朋友',
-                            node_id : 136}
+                            node_id : 159}
                         ]
                     }
                 ]
@@ -102,8 +102,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [136], //tag用id表示
-                        value: '木头人' //实体的value为空
+                        tags : [159], //tag用id表示
+                        value: '冬瓜人' //实体的value为空
                     }
                 ]
             };
@@ -115,14 +115,14 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 137, //用tagid表示
+                        tag: 161, //用tagid表示
                         roles:[{
                             role_name : '',
-                            node_id : 42,
+                            node_id : 76,
                         },
                         {
                             role_name : '兄弟',
-                            node_id : 138,
+                            node_id : 76,
                         }
                         ]
                     }
@@ -140,7 +140,7 @@ function ioConfig(server){
                 project_id : '西游记',
                 operation_id : 'op2',
                 nodes: [
-                    42
+                    162
                 ]
             };
             msg10 = {
@@ -149,9 +149,9 @@ function ioConfig(server){
                 project_id : '西游记',
                 operation_id : 'op2',
                 relations: [
-                    154
+                    164
                 ]
-            }
+            };
             reply = dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);

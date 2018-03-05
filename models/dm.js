@@ -8,6 +8,16 @@ function DataManager(cfg) {
     ogmneo.Connection.logCypherEnabled = true;
 }
 
+function extractBasic(msg){
+    console.log(msg);
+    return {
+        operation: msg.operation,
+        user_id: msg.user_id,
+        project_id: msg.project_id,
+        operation_id: msg.operation_id
+    };
+}
+
 String.prototype.format = function (args) {
     var result = this;
     if (arguments.length > 0) {
@@ -78,8 +88,9 @@ DataManager.prototype.handle = function (msg, callback) {
 //dev
 DataManager.prototype.initDatabse = function (msg, callback) {
     var session = ogmneo.Connection.session();
-    // var uniqCyp = 'CREATE CONSTRAINT ON (u:User) ASSERT u.name IS UNIQUE\
-    // CREATE CONSTRAINT ON (u:Project) ASSERT p.name IS UNIQUE';
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run('MATCH (n) DETACH DELETE n')
         .then(function (result) {
@@ -88,19 +99,26 @@ DataManager.prototype.initDatabse = function (msg, callback) {
                     session
                         .run('CREATE CONSTRAINT ON (p:Project) ASSERT p.name IS UNIQUE')
                         .then(function (result) {
-                            callback(result);
                             session.close();
+                            resp.msg = 'Success';
+                            callback(resp);
                         })
                         .catch(function (err) {
-                            callback(err);
+                            resp.error = true;
+                            resp.msg = err;
+                            callback(resp);
                         })
                 })
                 .catch(function (err) {
-                    callback(err);
+                    resp.error = true;
+                    resp.msg = err;
+                    callback(resp);
                 });
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 
 }
@@ -114,17 +132,22 @@ msg : {
 */
 DataManager.prototype.createUser = function (msg, callback) {
     var session = ogmneo.Connection.session();
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run('CREATE (u:User {name : {nameParam}})', {
             nameParam: msg.name
         })
         .then(function (res) {
-            console.log(res);
             session.close();
-            callback(res);
+            resp.msg = 'Success';
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 
 }
@@ -138,17 +161,22 @@ msg : {
 */
 DataManager.prototype.createProject = function (msg, callback) {
     var session = ogmneo.Connection.session();
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run('CREATE (p:Project {name : {nameParam}})', {
             nameParam: msg.name
         })
         .then(function (res) {
-            console.log(res);
             session.close();
-            callback(res);
+            resp.msg = 'Success';
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -173,6 +201,9 @@ DataManager.prototype.mCreateNode = function (msg, callback) {
     var cypher = 'MATCH (p:Project {name: {pname}})\
         CREATE (p)-[:has]->(c:Concept {tag: {ctag}, value:{cvalue}})\
         RETURN id(c) AS nodeId, c AS node';
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run(cypher, {
             pname: msg.project_id,
@@ -181,11 +212,16 @@ DataManager.prototype.mCreateNode = function (msg, callback) {
         })
         .then(function (res) {
             var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            resp.migrate = {};
+            resp.migrate[msg.nodes[0].front_id] = nodeId;
             session.close();
-            callback(nodeId);
+            resp.msg = 'Success';
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -201,8 +237,10 @@ msg : {
             front_id:'',
             value: '',
             roles:[
+                {
                 role_name : 'r1',
                 node_id : 7,
+                }
                 ...
             ]
         }
@@ -227,18 +265,26 @@ DataManager.prototype.mCreateRelation = function (msg, callback) {
     CREATE (p)-[:has]->(r:Relation {value: {rname}})' + role_str +
         'RETURN id(r) AS relationId, r AS relation';
 
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run(cypher, {
             pname: msg.project_id,
             rname: relation.value
         })
         .then(function (res) {
-            var nodeId = res.records[0].get('relationId').toString(); //获取id
+            var relationId = res.records[0].get('relationId').toString(); //获取id
+            resp.migrate = {};
+            resp.migrate[relation.front_id] = relationId;
+            resp.msg = 'Success';
             session.close();
-            callback(nodeId);
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -259,6 +305,9 @@ DataManager.prototype.mGet = function (msg, callback) {
         MATCH (p)-[:has]->(r:Relation)\
         MATCH (r)-[hr:has_role]->(tgt)\
         RETURN id(r) AS relationId, r.value AS value, hr.name AS roleName, id(tgt) AS roleId';
+
+    var resp = extractBasic(msg);
+    resp.error = false;
 
     session
         .run(nodeCypher, {
@@ -300,17 +349,18 @@ DataManager.prototype.mGet = function (msg, callback) {
                         // console.log(relationId, relationName, roleName, roleId);
                     }
                     session.close();
-                    var model = {
-                        nodes: nodes,
-                        relations: relations
-                    };
-                    console.log(model);
-                    callback(model);
+                    resp.nodes = nodes;
+                    resp.relations = relations;
+                    resp.msg = 'Success';
+                    // console.log(model);
+                    callback(resp);
                 });
             // session.close();
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -363,6 +413,10 @@ DataManager.prototype.createNode = function (msg, callback) {
         'RETURN id(i) AS nodeId, i AS node';
     console.log('[CYPHER]');
     console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run(cypher, {
             pname: msg.project_id,
@@ -374,10 +428,15 @@ DataManager.prototype.createNode = function (msg, callback) {
         .then(function (res) {
             var nodeId = res.records[0].get('nodeId').toString(); //获取id
             session.close();
-            callback(nodeId);
+            resp.msg = 'Success';
+            resp.migrate = {};
+            resp.migrate[msg.nodes[0].front_id] = nodeId;
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -392,8 +451,10 @@ msg : {
             front_id:'',
             tag: 7, //用tagid表示
             roles:[
+                {
                 role_name : 'r1',
                 node_id : 7,
+                }
                 ...
             ]
         }
@@ -433,6 +494,9 @@ DataManager.prototype.createRelation = function (msg, callback) {
     console.log('[CYPHER]');
     console.log(cypher);
 
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run(cypher, {
             pname: msg.project_id,
@@ -441,12 +505,18 @@ DataManager.prototype.createRelation = function (msg, callback) {
             tag: relation.tag
         })
         .then(function (res) {
-            var nodeId = res.records[0].get('relationId').toString(); //获取id
+            var relationId = res.records[0].get('relationId').toString(); //获取id
+            
+            resp.migrate = {};
+            resp.migrate[relation.front_id] = relationId;
+            resp.msg = 'Success';
             session.close();
-            callback(nodeId);
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -479,6 +549,9 @@ DataManager.prototype.get = function (msg, callback) {
     console.log(nodeCypher);
     console.log(relationCypher);
     console.log(instCypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
 
     session
         .run(nodeCypher, {
@@ -539,18 +612,18 @@ DataManager.prototype.get = function (msg, callback) {
                                 }
                             }
                             session.close();
-                            var model = {
-                                nodes: nodes,
-                                relations: relations
-                            };
-                            console.log(model);
-                            callback(model);
+                            resp.msg = 'Success';
+                            resp.nodes = nodes;
+                            resp.relations = relations;
+                            callback(resp);
                         });
                 });
             // session.close();
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -581,6 +654,9 @@ DataManager.prototype.removeNode = function (msg, callback) {
     console.log('[CYPHER]');
     console.log(cypher);
 
+    var resp = extractBasic(msg);
+    resp.error = false;
+
     session
         .run(cypher, {
             pname: msg.project_id,
@@ -589,12 +665,15 @@ DataManager.prototype.removeNode = function (msg, callback) {
         })
         .then(function (res) {
             // var nodeId = res.records[0].get('relationId').toString(); //获取id
-            console.log(res);
+            // console.log(res);
+            resp.msg = 'Success';
             session.close();
-            callback(res);
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
@@ -623,6 +702,9 @@ DataManager.prototype.removeRelation = function (msg, callback) {
 
     console.log('[CYPHER]');
     console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
 
     session
         .run(cypher, {
@@ -632,12 +714,15 @@ DataManager.prototype.removeRelation = function (msg, callback) {
         })
         .then(function (res) {
             // var nodeId = res.records[0].get('relationId').toString(); //获取id
-            console.log(res);
+            // console.log(res);
+            resp.msg = 'Success';
             session.close();
-            callback(res);
+            callback(resp);
         })
         .catch(function (err) {
-            callback(err);
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
         });
 }
 
