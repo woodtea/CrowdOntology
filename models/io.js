@@ -133,8 +133,17 @@ function ioConfig(server){
                 user_id : 'wahaha',
                 project_id : '西游记',
                 operation_id : 'op2'
+            };
+            msg9 = {
+                operation: 'remove_node',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2',
+                nodes: [
+                    42
+                ]
             }
-            reply = dm.handle(msg8, function(rep){
+            reply = dm.handle(msg9, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
