@@ -65,8 +65,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tag : 'Value',
-                        value : 'date'
+                        tag : 'Entity',
+                        value : '人'
                     }
                 ]
             };
@@ -78,12 +78,12 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        value: '姓名',
+                        value: '朋友',
                         roles:[
                             {role_name : '',
-                            node_id : 96},
-                            {role_name : '姓名',
-                            node_id : 41}
+                            node_id : 136},
+                            {role_name : '朋友',
+                            node_id : 136}
                         ]
                     }
                 ]
@@ -102,8 +102,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [96, 127], //tag用id表示
-                        value: '宝玉' //实体的value为空
+                        tags : [136], //tag用id表示
+                        value: '木头人' //实体的value为空
                     }
                 ]
             };
@@ -115,20 +115,26 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 42, //用tagid表示
+                        tag: 137, //用tagid表示
                         roles:[{
-                            role_name : '丈夫',
-                            node_id : 130,
+                            role_name : '',
+                            node_id : 42,
                         },
                         {
-                            role_name : '妻子',
-                            node_id : 130,
+                            role_name : '朋友',
+                            node_id : 138,
                         }
                         ]
                     }
                 ]
             };
-            reply = dm.handle(msg7, function(rep){
+            msg8 = {
+                operation: 'get',
+                user_id : 'wahaha',
+                project_id : '西游记',
+                operation_id : 'op2'
+            }
+            reply = dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });

@@ -58,6 +58,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'create_relation':
                 this.createRelation(msg, callback);
                 break;
+            case 'get':
+                this.get(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -244,12 +247,12 @@ msg : {
 DataManager.prototype.mGet = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var nodeCypher = 'MATCH (p:Project {name: {pname}})\
-    MATCH (p)-[:has]->(c:Concept)\
-    RETURN id(c) AS nodeId, c AS node';
+        MATCH (p)-[:has]->(c:Concept)\
+        RETURN id(c) AS nodeId, c AS node';
     var relationCypher = 'MATCH (p:Project {name: {pname}})\
-    MATCH (p)-[:has]->(r:Relation)\
-    MATCH (r)-[hr:has_role]->(tgt)\
-    RETURN id(r) AS relationId, r.value AS value, hr.name AS roleName, id(tgt) AS roleId';
+        MATCH (p)-[:has]->(r:Relation)\
+        MATCH (r)-[hr:has_role]->(tgt)\
+        RETURN id(r) AS relationId, r.value AS value, hr.name AS roleName, id(tgt) AS roleId';
 
     session
         .run(nodeCypher, {
@@ -340,6 +343,9 @@ DataManager.prototype.createNode = function (msg, callback) {
         tagCypher += 'CREATE (u)-[:refer]->({iofi})\n'.format({
             iofi: 'iof' + i.toString()
         });
+        tagCypher += 'CREATE (p)-[:has]->({iofi})\n'.format({
+            iofi: 'iof' + i.toString()
+        });
     }
 
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
@@ -408,13 +414,14 @@ DataManager.prototype.createRelation = function (msg, callback) {
         });
     }
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
-    MATCH (u:User {name: {uname}})\n\
-    MATCH (tag) WHERE id(tag)={tag}\n' +
+        MATCH (u:User {name: {uname}})\n\
+        MATCH (tag) WHERE id(tag)={tag}\n' +
         startCypher +
         'CREATE (p)-[:has]->(r:RelInst)\n\
-    CREATE (u)-[:refer]->(r)\n\
-    CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
-    CREATE (u)-[:refer]->(iof)\n' +
+        CREATE (u)-[:refer]->(r)\n\
+        CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+        CREATE (u)-[:refer]->(iof)\n\
+        CREATE (p)-[:has]->(iof)' +
         roleCypher +
         'RETURN id(r) AS relationId, r AS relation';
     console.log('[CYPHER]');
@@ -437,5 +444,108 @@ DataManager.prototype.createRelation = function (msg, callback) {
         });
 }
 
+/*
+msg : {
+    operation : 'get',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+}
+*/
+DataManager.prototype.get = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var nodeCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n\
+        MATCH (p)-[:has]->(i:Inst)<-[:refer]-(u)\n\
+        RETURN id(i) AS nodeId, i AS node';
+    var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n\
+        MATCH (p)-[:has]->(r:RelInst)<-[:refer]-(u)\n\
+        MATCH (r)-[hr:has_role]->(tgt)\n\
+        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId';
+    var instCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n\
+        MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)\n\
+        MATCH (i)-[:from]->(iof)-[:to]->(j)\n\
+        RETURN id(i) AS iId, id(j) AS jId';
+
+    console.log('[CYPHER]');
+    console.log(nodeCypher);
+    console.log(relationCypher);
+    console.log(instCypher);
+
+    session
+        .run(nodeCypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res) {
+            var nodes = {};
+            for (var i = 0; i < res.records.length; i++) {
+                var rec = res.records[i];
+                var nodeId = rec.get('nodeId').toString();
+                var prop = rec.get('node').properties;
+                // prop.id = nodeId;
+                prop['tags'] = [];
+                nodes[nodeId] = prop;
+
+                // console.log(prop);
+            }
+            session.run(relationCypher, {
+                    pname: msg.project_id,
+                    uname: msg.user_id
+                })
+                .then(function (res) {
+                    var relations = {};
+
+                    for (var i = 0; i < res.records.length; i++) {
+                        var rec = res.records[i];
+                        var relationId = rec.get('relationId').toString();
+                        var roleName = rec.get('roleName');
+                        var roleId = rec.get('roleId').toString();
+
+                        if (relations[relationId] == undefined) {
+                            relations[relationId] = {
+                                roles: []
+                            };
+                        }
+                        relations[relationId].roles.push({
+                            rolename: roleName,
+                            node_id: roleId
+                        });
+                    }
+                    session.run(instCypher, {
+                            pname: msg.project_id,
+                            uname: msg.user_id
+                        })
+                        .then(function (res) {
+                            for (var i = 0; i < res.records.length; i++) {
+                                var rec = res.records[i];
+                                var iId = rec.get('iId').toString();
+                                var jId = rec.get('jId').toString();
+                                console.log(iId, jId);
+                                if (nodes[iId] != undefined) {
+                                    nodes[iId].tags.push(jId);
+                                } else if (relations[iId] != undefined) {
+                                    relations[iId].value = jId;
+                                } else {
+                                    throw 'fatal error: no such iId';
+                                }
+                            }
+                            session.close();
+                            var model = {
+                                nodes: nodes,
+                                relations: relations
+                            };
+                            console.log(model);
+                            callback(model);
+                        });
+                });
+            // session.close();
+        })
+        .catch(function (err) {
+            callback(err);
+        });
+}
 
 module.exports = DataManager;
