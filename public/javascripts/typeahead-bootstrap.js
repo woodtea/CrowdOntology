@@ -6,7 +6,6 @@ function setSource(array){
 }
 
 function getIndexArray(model = instance_model){
-    //return ["1","2","3"];
     let indexArray = [];
     for (let id in model.nodes) {
         if (model.nodes[id].tags != undefined) {

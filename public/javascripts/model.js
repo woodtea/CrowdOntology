@@ -1,5 +1,11 @@
 var user;
 
+/*
+  * 其实可以改模型为类
+  * class model {
+  *  constructor(){}
+  * */
+
 function getModel() {
     return instance_model;
 }
@@ -27,7 +33,7 @@ function getEntity(id, model = instance_model) {
         centerNode: {},
         neighbours: {}
     }
-    //处理自己的时间
+    //处理自己的事件
     entity.centerNode[id] = {
         "value": model.nodes[id].value,
         "tages": model.nodes[id].tags
@@ -88,8 +94,3 @@ function getEntityIdByValue(value, model = instance_model) {
     }
     return ;
 }
-
-
-//console.log(getIndex(instance_model));
-//console.log(getEntity("n0",instance_model));
-//console.log(getRelation("n0","n2",instance_model));

@@ -16,9 +16,6 @@ socket.on('data', function(msg){
         if(user != tmpUser) recommend_model_whole = msg.instance_model[tmpUser]
     }
 
-    //console.log(instance_model)
-    //console.log(recommend_model_whole)
-
     drawIndex();
 
     let indexArray = getIndexArray({});
@@ -28,7 +25,6 @@ socket.on('data', function(msg){
 
     instance_model = msg.instance_model;
     recommend_model = msg.recommend_model;
-
 
     model = msg.model;
     indexArray = getIndexArray(instance_model);

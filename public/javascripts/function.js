@@ -4,20 +4,21 @@
 
 var clicks = 0;
 $(function () {
+
+    //使得提示工具Tooltip生效
     $('[data-tooltip="tooltip"]').tooltip()
-    //点击导航
-    $(document).on("click", '.index li', function () {
-        let id = $(this).attr("nodeid");
-        drawEntity(id, instance_model);
-        $("#" + id).click();//这个不对哦
-    })
-    //点击节点
-    $(document).on("click", 'g', function () {
+
+    /*
+    * 主区域
+    * */
+
+    //过度动画结束
+    $(document).on("transitionend", 'g', function () {
         let item = this;
         if(d3.select(this).classed("isRecommendation") == true){
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
-                alert("显示推荐详细");
+                alert("显示推荐节点详情");
             });
         }else{
             clickTimeout.set(function () {
@@ -26,18 +27,42 @@ $(function () {
             });
         }
     })
+
+    //点击索引
+    $(document).on("click", '.index li', function () {
+        let id = $(this).attr("nodeid");
+        drawEntity(id, instance_model); //画出中心区域
+        $("#" + id).click();    //点击中心节点
+    })
+
+    //单击节点
+    $(document).on("click", 'g', function () {
+        let item = this;
+        if(d3.select(this).classed("isRecommendation") == true){
+            clickTimeout.set(function () {
+                let id = $(item).attr('id');
+                alert("显示推荐节点详情");
+            });
+        }else{
+            clickTimeout.set(function () {
+                let id = $(item).attr('id');
+                drawNodeDetails(id);
+            });
+        }
+    })
+
+    //双击节点
     $(document).on("dblclick", 'g', function () {
-        if (d3.select(this).classed("isRecommendation") == true) { //forTest
+        if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
             clickTimeout.clear();
-            //进行添加
+            //引用推荐节点
             let nodeID = $(this).attr("id");
             instance_model.nodes[nodeID] = {
                 "dataType": recommend_model[nodeID].dataType,
                 "value": recommend_model[nodeID].value
             }
             if(recommend_model[nodeID].tags) instance_model.nodes[nodeID].tags = recommend_model[nodeID].tags;
-
-            //生成关系
+            //引用推荐节点与当前节点间的关系
             let centerID = $(".graph .center").attr("id");
             for(let relation of recommend_model[nodeID].relations){
                 relationID = relation.id;
@@ -51,6 +76,7 @@ $(function () {
                 }
             }
             $("#"+centerID).click();
+            //更新索引信息
             drawIndex();
         } else {
             if (d3.select(this).classed("isCentralized") == false) {
@@ -58,17 +84,19 @@ $(function () {
             }
             clickTimeout.clear();
             let nodeID = $(this).attr("id");
-            recommend_model = shiftModel(recommend_model_whole,nodeID);
+            recommend_model = shiftModel(recommend_model_whole,nodeID); //获取推荐模型
             //console.log("recommend_model");
             //console.log(recommend_model);
-            drawRecommendation(recommend_model, instance_model);
+            drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
         }
     })
 
-    //点击关系
-    $(document).on("click", 'text', function () {
-        $(this).prev("path").click();
+    //点击关系文本
+    $(document).on("click", 'textPath', function () {
+        //$(this).prev("path").click();
+        $($(this).attr("href")).click();
     })
+
     //点击关系
     $(document).on("click", 'path', function () {
         let item = this;
@@ -76,19 +104,23 @@ $(function () {
         drawPathDetails(id);
     })
 
+    /*
+     * 右侧栏
+     * */
+    // 右划
     $(document).on("click", '.properties .button-right', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").hide();
         $(item).children(".properties-revise").show();
     })
-
+    // 左划
     $(document).on("click", '.properties-revise .button-left', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").show();
         $(item).children(".properties-revise").hide();
     })
 
-
+    // 点击添加
     $(document).on("click", '.fa-plus', function () {
 
         $(".properties .active").removeClass("active");
@@ -109,6 +141,7 @@ $(function () {
         }
     });
 
+    // 点击属性修改
     $(document).on("click", '#attribute .fa-edit', function () {
 
         let item = $(this).parent().parent();
@@ -125,6 +158,7 @@ $(function () {
         //给一个标志位吧
     });
 
+    // 点击关系修改
     $(document).on("click", '#relation .fa-edit', function () {
 
         let item = $(this).parent().parent();
@@ -140,6 +174,7 @@ $(function () {
 
     });
 
+    // 点击修改成功
     $(document).on("click", '.properties-revise .glyphicon-ok', function () {
         //alert("修改成功");
         let item = $(this).parent().parent();
@@ -156,6 +191,7 @@ $(function () {
         }
     });
 
+    // 点击修改取消
     $(document).on("click", '.properties-revise .glyphicon-ban-circle', function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
@@ -171,7 +207,9 @@ $(function () {
     });
 });
 
-/* draw detail */
+/*
+* 右侧区域的绘制
+* */
 function drawNodeDetails(id) {
     let isEntity = drawEntity(id, instance_model);
     if (isEntity) {
