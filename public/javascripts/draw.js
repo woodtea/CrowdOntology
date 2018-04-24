@@ -20,10 +20,16 @@ const property = $("body .graph-row .properties");
 const graph = $("body .graph-row .graph");
 const index = $("body .graph-row .index");
 
+
+/*
+    基础元素绘制
+ */
 function drawTitle(str) {
-    svg.append("title")
-        .text(str);
+    //svg.append("title")
+    //    .text(str);
+    $("body .graph-row .title").html("<h4>"+str+"</h4>");
 }
+
 
 function drawCircle(centX, centY, R) {
     svg
@@ -110,6 +116,80 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
 
 }
 
+
+function drawPath(path,centX=width/2, centY=height/2) {
+    svg
+        .append("path")
+        .style("stroke", "grey")
+        .style("stroke-width", "1px")
+        .style("fill", "none")
+        .attr("id", path.data.id)
+        .attr("d", function (d) {
+            if (path.cx1 == undefined) {
+                return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
+            } else {
+                /*
+                 let str;
+                 if(path.sx<path.ex){
+                 str =  "M" + path.sx + "," + path.sy +
+                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.cx1 + "," +path.cy1 +
+                 "L"+ path.cx2 + "," + path.cy2 +
+                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.ex + "," + path.ey;
+                 }else{
+                 str =  "M" + path.ex + "," + path.ey +
+                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.cx2 + "," +path.cy2 +
+                 "L"+ path.cx1 + "," + path.cy1 +
+                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
+                 }
+                 return str;
+                 */
+                let str;
+                if (path.sx < path.ex) {
+                    str = "M" + path.sx + "," + path.sy +
+                        "C" + path.ox1 + "," + path.oy1 + "," + path.nx1 + "," + path.ny1 + "," + path.cx1 + "," + path.cy1 +
+                        "L" + path.cx2 + "," + path.cy2 +
+                        "C" + path.nx2 + "," + path.ny2 + "," + path.ox2 + "," + path.oy2 + "," + path.ex + "," + path.ey;
+                } else {
+                    str = "M" + path.ex + "," + path.ey +
+                        "Q" + path.nx2 + "," + path.ny2 + "," + path.cx2 + "," + path.cy2 +
+                        "L" + path.cx1 + "," + path.cy1 +
+                        "Q" + path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
+                }
+                return str;
+            }
+        });
+
+    let originPosition = ""+centX+"px "+centY+"px";
+    let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
+    $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
+
+    svg
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-5")
+        .append("textPath")
+        .attr("href", "#" + path.data.id)
+        .attr("startOffset", "50%")
+        .style('font-size', '10px')
+        .classed("textPath", true)
+        .text(path.data.value);
+}
+
+function drawPathText(path) {
+    svg
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-5")
+        .append("textPath")
+        .attr("href", "#" + path.data.id)
+        .attr("startOffset", "50%")
+        .style('font-size', '10px')
+        .classed("textPath", true)
+        .text(path.data.value);
+}
+
+//
+
 /* index */
 function drawIndex(model = instance_model) {
     $(index).find("li").remove();
@@ -119,7 +199,7 @@ function drawIndex(model = instance_model) {
             html += generateIndex(model.nodes[id].value, id);
         }
     }
-    console.log(html);
+    //console.log(html);
     $(index).append(html);
 }
 
@@ -155,10 +235,14 @@ function drawRelation(id1, id2, model = instance_model) {
     drawNeighbours(width * 1 / 4, height * 1 / 2, r * 3 / 4, R * 3 / 4, entity1.neighbours, startAngle1);
     drawNeighbours(width * 3 / 4, height * 1 / 2, r * 3 / 4, R * 3 / 4, entity2.neighbours, startAngle2 +Math.PI);
 
+    svgBringToFront($("#"+id1));
+    svgBringToFront($("#"+id2));
+/*
     $("#" + id1).remove();
     $("#" + id2).remove();
     drawNode(width * 1 / 4, height * 1 / 2, r * 3 / 4, entity1.centerNode, true);
     drawNode(width * 3 / 4, height * 1 / 2, r * 3 / 4, entity2.centerNode, true);
+*/
 }
 
 
@@ -186,7 +270,7 @@ function drawNeighbours(centX, centY, r, R, neighbours, startAngle = 0) {
     //let startAngle = 0; //应该是不确定的
     let paths = getPaths(centX, centY, R, r, startAngle, neighbours);
     for (let path of paths) {
-        drawPath(path);
+        drawPath(path,centX, centY);
     }
     let nodes = getNodes(centX, centY, R, startAngle, neighbours);
     for (let node of nodes) {
@@ -250,7 +334,7 @@ function getRecommendNodes(centX, centY, R, startAngle, neighbours,recommend) {
         cx = centX + R * Math.cos(angle);
         cy = centY + R * Math.sin(angle);
         nodes.push({cx, cy, "data": data});
-        console.log(angle+" "+nodes);
+        //console.log(angle+" "+nodes);
         i++;
     }
     return nodes;
@@ -268,7 +352,7 @@ function getPaths(centX, centY, R, r, startAngle, neighbours) {
         paths.push(...path);
         i++;
     }
-    console.log(i);
+    //console.log(i);
     return paths;
 }
 
@@ -283,7 +367,7 @@ function getPathTexts(centX, centY, R, r, startAngle, neighbours) {
         paths.push(...path);
         i++;
     }
-    console.log(i);
+    //console.log(i);
     return paths;
 }
 
@@ -389,7 +473,7 @@ function getPath(centX, centY, R, r, angle, node) {
             ,rotate
         });
     }
-    console.log(path);
+    //console.log(path);
     return path;
 }
 
@@ -469,80 +553,10 @@ function getPathText(centX, centY, R, r, angle, node) {
             ,rotate
         });
     }
-    console.log(path);
+    //console.log(path);
     return path;
 }
 
-function drawPath(path) {
-    svg
-        .append("path")
-        .style("stroke", "grey")
-        .style("stroke-width", "1px")
-        .style("fill", "none")
-        .attr("id", path.data.id)
-        .attr("d", function (d) {
-            if (path.cx1 == undefined) {
-                return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
-            } else {
-                /*
-                 let str;
-                 if(path.sx<path.ex){
-                 str =  "M" + path.sx + "," + path.sy +
-                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.cx1 + "," +path.cy1 +
-                 "L"+ path.cx2 + "," + path.cy2 +
-                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.ex + "," + path.ey;
-                 }else{
-                 str =  "M" + path.ex + "," + path.ey +
-                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.cx2 + "," +path.cy2 +
-                 "L"+ path.cx1 + "," + path.cy1 +
-                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
-                 }
-                 return str;
-                 */
-                let str;
-                if (path.sx < path.ex) {
-                    str = "M" + path.sx + "," + path.sy +
-                        "C" + path.ox1 + "," + path.oy1 + "," + path.nx1 + "," + path.ny1 + "," + path.cx1 + "," + path.cy1 +
-                        "L" + path.cx2 + "," + path.cy2 +
-                        "C" + path.nx2 + "," + path.ny2 + "," + path.ox2 + "," + path.oy2 + "," + path.ex + "," + path.ey;
-                } else {
-                    str = "M" + path.ex + "," + path.ey +
-                        "Q" + path.nx2 + "," + path.ny2 + "," + path.cx2 + "," + path.cy2 +
-                        "L" + path.cx1 + "," + path.cy1 +
-                        "Q" + path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
-                }
-                return str;
-            }
-        });
-
-        let originPosition = ""+width/2+"px "+height/2+"px";
-        let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
-        $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
-
-    svg
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-5")
-        .append("textPath")
-        .attr("href", "#" + path.data.id)
-        .attr("startOffset", "50%")
-        .style('font-size', '10px')
-        .classed("textPath", true)
-        .text(path.data.value);
-}
-
-function drawPathText(path) {
-    svg
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-5")
-        .append("textPath")
-        .attr("href", "#" + path.data.id)
-        .attr("startOffset", "50%")
-        .style('font-size', '10px')
-        .classed("textPath", true)
-        .text(path.data.value);
-}
 
 
 function refillNode(data) {
