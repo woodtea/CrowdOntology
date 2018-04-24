@@ -1,4 +1,5 @@
 var user;
+var project;
 
 /*
   * 其实可以改模型为类
