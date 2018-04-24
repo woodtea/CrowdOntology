@@ -6,8 +6,9 @@ var server_config = {
     passwd:"",
     address:"localhost:7687"
 };
-var DataManager = require('./dm');
-var dm = new DataManager(server_config);
+
+//var DataManager = require('./dm');
+//var dm = new DataManager(server_config);
 // console.log(dm);
 
 function ioConfig(server){
@@ -15,13 +16,14 @@ function ioConfig(server){
     var io = require('socket.io')(server);
 
     io.on('connection', function(socket){
+        //socket建立连接
         console.log('a user connected');
         socket.emit('data',db)
-
+        //socket断开连接
         socket.on('disconnect',function(){
             console.log('user disconnected');
         })
-
+        //测试用
         socket.on('save model',function(msg){
             //console.log("save model")
             //console.log(msg);
@@ -31,6 +33,38 @@ function ioConfig(server){
             console.log(db);
         })
 
+        socket.on('insModel', function(msg){
+            let emitMsg;
+            switch (msg.operation){
+                case 'get':
+                    emitMsg = io_get_insModel(msg);
+                    break;
+                case 'create_node':
+                    emitMsg = io_create_insModel_node(msg);
+                    break;
+                case 'remove_node':
+                    emitMsg = io_remove_insModel_node(msg);
+                    break;
+                case 'create_relation':
+                    emitMsg = io_create_insModel_relation(msg);
+                    break;
+                case 'remove_relation':
+                    emitMsg = io_remove_insModel_relation(msg);
+                    break;
+                case 'revise_relation':
+                    emitMsg = io_revise_insModel_relation(msg);
+                    break;
+                case 'rcmd_node':
+                    emitMsg = io_recommend_insModel_node(msg);
+                    break;
+                case 'rcmd_relation':
+                    emitMsg = io_recommend_insModel_relation(msg);
+                    break;
+            }
+            socket.emit('insModel',emitMsg);
+        });
+
+        //先不管。。。我也不知道写的什么
         socket.on('get',function(msg){
         })
 
@@ -152,10 +186,12 @@ function ioConfig(server){
                     164
                 ]
             };
+            /*
             dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
+            */
             socket.emit('iotest_back', 'reply');
         })
     });
@@ -188,6 +224,52 @@ function reviseMsg(msg){
             break;
     }
 
+}
+
+function emitMsgHeader(rcvMsg,err,msg){
+    let emitMsg = {
+        "operation":rcvMsg.operation,
+        "user":rcvMsg.user,
+        "project": rcvMsg.project, //仅测试使用
+        "operationId":rcvMsg.operationId,
+        "err":err,
+        "msg":msg,
+        "migrate":{}
+    }
+    return emitMsg;
+}
+
+function io_create_insModel_node(rcvMsg){
+    //forTest
+    let emitMsg = emitMsgHeader(rcvMsg,null,null);
+    for(let key in rcvMsg.nodes){
+        emitMsg.migrate[key] = "back_"+key.slice(6);
+        break;
+    }
+    return emitMsg;
+}
+
+function io_remove_insModel_node(rcvMsg){
+    let emitMsg = emitMsgHeader(rcvMsg,null,null);
+    return emitMsg;
+}
+
+function io_create_insModel_relation(rcvMsg){
+    let emitMsg = emitMsgHeader(rcvMsg,null,null);
+    for(let key in rcvMsg.relations){
+        emitMsg.migrate[key] = "back_"+key.slice(6);
+        for(let n in rcvMsg.relations[key].roles) {
+            let tmpId = rcvMsg.relations[key].roles[n].node_id;
+            if(tmpId.indexOf("front_")!=-1) emitMsg.migrate[tmpId] = "back_"+tmpId.slice(6);
+        }
+        break;
+    }
+    return emitMsg;
+}
+
+function io_remove_insModel_relation(rcvMsg){
+    let emitMsg = emitMsgHeader(rcvMsg,null,null);
+    return emitMsg;
 }
 
 module.exports = ioConfig;
