@@ -1,4 +1,8 @@
 var socket = io();
+var tmpMsg = {
+    emit:[],
+    on:[]
+};
 
 socket.on('chat message', function(msg){
     alert(msg);
@@ -48,6 +52,7 @@ socket.on('model', function(msg){
 });
 
 socket.on('insModel', function(msg){
+    console.log(msg);
     switch (msg.operation){
         case 'get':
             io_get_insModel_done(msg);
@@ -79,10 +84,23 @@ socket.on('insModel', function(msg){
 
 
 function socketEmit(type,msg){
+    console.log(msg);
+    tmpMsg.emit.push(msg);
     socket.emit(type, msg);
 }
 
 /* socket emit */
+function emitMsgHeader(operation){
+    let msgHeader = {
+        "operation":operation,
+        "user":user,
+        "project": project, //仅测试使用
+        "operationId":generateFrontOperationID()
+    }
+    return msgHeader;
+}
+
+/* model */
 function io_get_model(user_id,projectId){
     let msg = generate_msg_base(user_id,projectId,'get');
     socketEmit('model',msg);
@@ -95,32 +113,35 @@ function io_save_model(user_id,projectId,model){
     socketEmit('model',msg);
 }
 
+/* insModel */
 function io_get_insModel(user_id,projectId){
     let msg = generate_msg_base(user_id,projectId,'get');
     socketEmit('insModel',msg);
 }
 
-function io_create_insModel_node(user_id,projectId,nodes){
-    let msg = generate_msg_base(user_id,projectId,'create_node');
+function io_create_insModel_node(nodes){
+    let msg = emitMsgHeader('create_node');
     msg["nodes"] = nodes;
     socketEmit('insModel',msg);
 }
 
-function io_remove_insModel_node(user_id,projectId,nodes){
-    let msg = generate_msg_base(user_id,projectId,'remove_node');
-    msg["nodes"] = nodes;
+function io_remove_insModel_node(nodeId){
+    let msg = emitMsgHeader('remove_node');
+    msg["nodes"] = {};
+    msg["nodes"][nodeId] = {}
     socketEmit('insModel',msg);
 }
 
-function io_create_insModel_relation(user_id,projectId,relations){
-    let msg = generate_msg_base(user_id,projectId,'create_relation');
+function io_create_insModel_relation(relations){
+    let msg = emitMsgHeader('create_relation');
     msg["relations"] = relations;
     socketEmit('insModel',msg);
 }
 
-function io_remove_insModel_relation(user_id,projectId,relations){
-    let msg = generate_msg_base(user_id,projectId,'remove_relation');
-    msg["relations"] = relations;
+function io_remove_insModel_relation(relationId){
+    let msg = emitMsgHeader('remove_relation');
+    msg["relations"] = {};
+    msg["relations"][relationId] = {}
     socketEmit('insModel',msg);
 }
 
@@ -155,6 +176,7 @@ function generate_msg_base(user_id,projectId,operation){
 }
 
 /* socket on */
+/* model */
 function io_get_model_done(msg){
     if(msg.error){
         return;
@@ -173,7 +195,7 @@ function io_save_model_done(msg){
         return;
     }
 }
-
+/* instanceModel */
 function io_get_insModel_done(msg){
     if(msg.error){
         return;
@@ -189,6 +211,15 @@ function io_create_insModel_node_done(msg){
     if(msg.error){
         return;
     }else{
+        let node = tmpMsgPop(msg.operationId).nodes //tmpMsg.emit.nodes;
+        let nodeId;
+        for(nodeId in node){
+            instance_model.nodes[nodeId] = node[nodeId];
+            break;
+        }
+        if(msg.migrate[nodeId]) nodeId = msg.migrate[nodeId];
+        migrate(msg.migrate);
+        svgOperation.clickNode(nodeId)
         return;
     }
 }
@@ -197,6 +228,10 @@ function io_remove_insModel_node_done(msg){
     if(msg.error){
         return;
     }else{
+        let node = tmpMsgPop(msg.operationId).nodes;
+        let nodeId;
+        for(nodeId in node) break;
+        removeNode(nodeId);
         return;
     }
 }
@@ -205,6 +240,23 @@ function io_create_insModel_relation_done(msg){
     if(msg.error){
         return;
     }else{
+        let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
+        let relationId;
+        for(relationId in relation){
+            instance_model.relations[relationId] = relation[relationId];
+            break;
+        }
+        if(msg.migrate[relationId]) relationId = msg.migrate[relationId];
+        migrate(msg.migrate);
+
+        let centerId = $("g.center.isCentralized").attr("id");
+        let nodeId;
+        for(let n in instance_model.relations[relationId].roles){
+            nodeId = instance_model.relations[relationId].roles[n].node_id;
+            if(nodeId != centerId) break;
+        }
+
+        transAnimation(centerId,nodeId,relationId,instance_model);
         return;
     }
 }
@@ -213,6 +265,10 @@ function io_remove_insModel_relation_done(msg){
     if(msg.error){
         return;
     }else{
+        let relation = tmpMsgPop(msg.operationId).relations;
+        let relationId;
+        for(relationId in relation) break;
+        delete instance_model["relations"][relationId];
         return;
     }
 }
@@ -249,7 +305,7 @@ function io_recommend_insModel_relation_done(msg){
     }
 }
 
-function io_test(){
+io_test = function(){
     msg = "hello";
     socketEmit('iotest', msg);
 }
@@ -257,3 +313,64 @@ function io_test(){
 socket.on('iotest_back', function(msg){
     console.log(msg);
 });
+
+migrate = function(obj,model=instance_model){
+    if(obj == undefined) return;
+    for(let key in obj){
+        if(key.indexOf("front_n")!=-1){
+            if(model["nodes"][obj[key]] == undefined) model["nodes"][obj[key]]={};
+            copyObj(model["nodes"][obj[key]],model["nodes"][key])
+            delete model["nodes"][key];
+
+            for(let rel in model["relations"]){
+                for(let n in model["relations"][rel]["roles"]){
+                    let tmp = model["relations"][rel]["roles"][n];
+                    if(tmp["node_id"] == key)  tmp["node_id"]=obj[key];
+                }
+            }
+        }
+        if(key.indexOf("front_r")!=-1){
+            if(model["relations"][obj[key]] == undefined) model["relations"][obj[key]]={};
+            copyObj(model["relations"][obj[key]],model["relations"][key])
+            delete model["relations"][key];
+        }
+    }
+    return;
+}
+
+copyObj = function(obj1,obj2){
+
+    for(let key in obj2){
+        obj1[key] = obj2[key];
+    }
+    return;
+}
+
+removeNode = function(nodeId,model=instance_model){
+
+    for(let rel in model["relations"]){
+        for(let n in model["relations"][rel]["roles"]){
+            let tmp = model["relations"][rel]["roles"][n];
+            if(tmp["node_id"] == nodeId)  {
+                if(model.nodes[nodeId].tags != undefined){
+                    alert("存在其他关系，节点无法删除")
+                }
+                return;
+            }
+        }
+    }
+    delete model["nodes"][nodeId];
+}
+
+tmpMsgPop= function(operationId){
+
+    let tmpObj = {};
+    for(let n in tmpMsg.emit){
+        if(tmpMsg.emit[n].operationId == operationId){
+            copyObj(tmpObj,tmpMsg.emit[n])
+            tmpMsg.emit.splice(n,1);
+        }
+    }
+
+    return tmpObj;
+}
