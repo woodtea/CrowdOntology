@@ -38,7 +38,7 @@
   </ul>
 </div-->
       </div>
-      <div class="col-xs-6" style="text-align: center"><h4>红楼梦</h4></div>
+      <div class="col-xs-6 title" style="text-align: center"><h4>红楼梦</h4></div>
       <div class="col-xs-3">
           <div class="input-group" style="margin:auto;">
             <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
@@ -93,8 +93,9 @@
 
 <script language="javascript">
     window.onload = function() {
-        user = $(".glyphicon-user").parent().text();
-        user = user.replace(/(^\s*)/g, "");
+        user = $(".glyphicon-user").parent().text().slice(1);
+        //user = user.replace(/(^\s*)/g, "");
+        project = "红楼梦";
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
