@@ -633,6 +633,19 @@ function attributeReviseSubmit(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
+    //删除旧的节点和关系
+    let origItem = $(".properties").find(".active");
+    let origNode = $(origItem).find(".nodeID").attr("value");
+    let origRelation = $(origItem).find(".relationID").attr("value");
+    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
+    }
+    if (origNode != "") {
+        io_remove_insModel_node(origNode);
+    }else{//则当前节点为中心节点
+        io_remove_insModel_node($(".graph .center").attr("id"));
+    }
+
     //生成节点
     let nodes = {};
     let nodeId = generateFrontNodeID(value)
@@ -654,6 +667,8 @@ function attributeReviseSubmit(item) {
         ]
     }
     io_create_insModel_relation(relations);
+
+    return;
 }
 
 function attributeRemoveSubmit(item) {
@@ -677,6 +692,22 @@ function attributeRemoveSubmit(item) {
 }
 
 function relationReviseSubmit(item) {
+
+    //删除旧的节点和关系
+    let origItem = $(".properties").find(".active");
+    let origNode = $(origItem).find(".nodeID").attr("value");
+    let origRelation = $(origItem).find(".relationID").attr("value");
+    /* 好像是不需要产出实体的
+    if (origNode != "") {
+        io_remove_insModel_node(origNode);
+    }else{//则当前节点为中心节点
+        io_remove_insModel_node($(".graph .center").attr("id"));
+    }
+    */
+    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
+    }
+
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
@@ -710,12 +741,13 @@ function relationRemoveSubmit(item){
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-
+    /* 好像是不需要产出实体的
     if (origNode != "") {
         io_remove_insModel_node(origNode);
     }else{//则当前节点为中心节点
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
+    */
     if (origRelation != "") {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
