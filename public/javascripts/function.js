@@ -594,9 +594,34 @@ var OperationCounter = 0;
 function generateFrontOperationID() {
 
     OperationCounter = (OperationCounter+1)%100;
-    let id = localStorage.mongoMachineId + new Date().valueOf() + OperationCounter;
-
+    //let id = localStorage.mongoMachineId + new Date().valueOf() + OperationCounter;
+    let id = hash(user) + new Date().valueOf() + OperationCounter;
     return id;
+}
+
+var I64BIT_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-'.split('');
+
+function hash(input){
+    var hash = 5381;
+    var i = input.length - 1;
+
+    if(typeof input == 'string'){
+        for (; i > -1; i--)
+            hash += (hash << 5) + input.charCodeAt(i);
+    }
+    else{
+        for (; i > -1; i--)
+            hash += (hash << 5) + input[i];
+    }
+    var value = hash & 0x7FFFFFFF;
+
+    var retValue = '';
+    do{
+        retValue += I64BIT_TABLE[value & 0x3F];
+    }
+    while(value >>= 6);
+
+    return retValue;
 }
 
 function generateFrontRelationID() {
@@ -710,7 +735,7 @@ function relationReviseSubmit(item) {
 
 
     let type = $(item).find(".type-input").val();
-    let value = $(item).find(".value-input").val();
+    let value = $(item).find(".value-nput").val();
 
     //判断关系两端的节点是否存在
     let nodeId = getEntityIdByValue(value, instance_model);
