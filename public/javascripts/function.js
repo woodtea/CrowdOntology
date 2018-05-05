@@ -167,7 +167,7 @@ $(function () {
     });
 
     // 点击修改成功
-    $(document).on("click", '.properties-revise .glyphicon-ok', function () {
+    $(document).on("click", '.properties-revise .button-ok', function () {
         //alert("修改成功");
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
@@ -184,7 +184,7 @@ $(function () {
     });
 
     // 点击修改删除
-    $(document).on("click", '.properties-revise .glyphicon-ban-circle', function () {
+    $(document).on("click", '.properties-revise .button-cancel', function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
             case "class-revise":
@@ -199,8 +199,8 @@ $(function () {
     });
 
     // 点击修改删除
-    $(document).on("click", '.properties-revise .glyphicon-remove', function () {
-        let item = $(this).parent().parent().children(".list-group");
+    $(document).on("click", '.properties-revise .button-remove', function () {
+        let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
             case "class-revise":
                 break;
@@ -473,7 +473,7 @@ function generateXTitle(title, type) {
     let html = '<div class="panel panel-default">' +
         '<div class="panel-heading">' +
         '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
-        '<span class="glyphicon glyphicon-remove" type="remove" style="z-index: 2"></span>' +
+        //'<span class="glyphicon glyphicon-remove" type="remove" style="z-index: 2"></span>' +
         '</div>' +
         '<div class="list-group" id=' + type + '></div>' +
         '</div>';
@@ -503,9 +503,11 @@ function generatePlusLogo(type) {
 
 function generateSubmitLogo() {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
-        '<span class="glyphicon glyphicon-ok" type="ok"></span>' +
+        '<span class="button-ok" type="ok"><button type="button" style="font-size: 10px;">确认</button></span>' +
         '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
-        '<span class="glyphicon glyphicon-ban-circle" type="cancel"></span>' +
+        '<span class="button-cancel" type="cancel"><button type="button" style="font-size: 10px;">取消</button></span>' +
+        '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+        '<span class="button-remove" type="remove"><button type="button" style="font-size: 10px;">删除</button></span>' +
         '</a>';
     return html;
 }
@@ -735,7 +737,7 @@ function relationReviseSubmit(item) {
 
 
     let type = $(item).find(".type-input").val();
-    let value = $(item).find(".value-nput").val();
+    let value = $(item).find(".value-input").val();
 
     //判断关系两端的节点是否存在
     let nodeId = getEntityIdByValue(value, instance_model);
