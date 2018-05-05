@@ -183,7 +183,7 @@ $(function () {
         }
     });
 
-    // 点击修改删除
+    // 点击修改取消
     $(document).on("click", '.properties-revise .glyphicon-ban-circle', function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
@@ -729,13 +729,13 @@ function relationReviseSubmit(item) {
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     */
-    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+    if (origRelation != "" || origRelation != undefined) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
 
 
     let type = $(item).find(".type-input").val();
-    let value = $(item).find(".value-nput").val();
+    let value = $(item).find(".value-input").val();
 
     //判断关系两端的节点是否存在
     let nodeId = getEntityIdByValue(value, instance_model);
