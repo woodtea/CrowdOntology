@@ -7,8 +7,8 @@ var server_config = {
     address:"localhost:7687"
 };
 
-//var DataManager = require('./dm');
-//var dm = new DataManager(server_config);
+var DataManager = require('./dm');
+var dm = new DataManager(server_config);
 // console.log(dm);
 
 function ioConfig(server){
@@ -186,12 +186,12 @@ function ioConfig(server){
                     164
                 ]
             };
-            /*
+
             dm.handle(msg8, function(rep){
                 console.log('[CALLBACK]')
                 console.log(rep);
             });
-            */
+
             socket.emit('iotest_back', 'reply');
         })
     });
