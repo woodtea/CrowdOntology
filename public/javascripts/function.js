@@ -183,7 +183,8 @@ $(function () {
         }
     });
 
-    // 点击修改删除
+
+    // 点击修改取消
     $(document).on("click", '.properties-revise .button-cancel', function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
@@ -503,11 +504,11 @@ function generatePlusLogo(type) {
 
 function generateSubmitLogo() {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
-        '<span class="button-ok" type="ok"><button type="button" style="font-size: 10px;">确认</button></span>' +
-        '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
-        '<span class="button-cancel" type="cancel"><button type="button" style="font-size: 10px;">取消</button></span>' +
-        '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
-        '<span class="button-remove" type="remove"><button type="button" style="font-size: 10px;">删除</button></span>' +
+        '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >确认</button></span>' +
+        '<span>&nbsp;</span>' +
+        '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >取消</button></span>' +
+        '<span>&nbsp;</span>' +
+        '<span class="button-remove" type="remove"><button class="btn btn-default btn-sm" type="button" >删除</button></span>' +
         '</a>';
     return html;
 }
@@ -731,7 +732,7 @@ function relationReviseSubmit(item) {
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     */
-    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+    if (origRelation != "" || origRelation != undefined) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
 
