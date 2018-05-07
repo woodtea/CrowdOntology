@@ -1,2 +1,5 @@
 .idea/
 node_modules/
+server_config.json
+remind
+models/format.js
