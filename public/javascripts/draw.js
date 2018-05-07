@@ -90,7 +90,8 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
         .attr("fill", "#eee")
         .attr("stroke", "gray")
         .attr("stroke-width", 1)
-    svg.select("#" + data.id)
+    //svg.select("#" + data.id)
+    svg.select("[id='" + data.id+"']")
         .append("text")
         .text(data.value)
         .attr("font-size", "12px")
@@ -98,19 +99,23 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
         .attr("dy", "0.4em");
 
     if (isCenter) {
-        svg.select("#" + data.id)
+        //svg.select("#" + data.id)
+        svg.select("[id='" + data.id+"']")
             .classed("center", true);
-        svg.select("#" + data.id)
+        //svg.select("#" + data.id)
+        svg.select("[id='" + data.id+"']")
             .select("circle")
             .attr("fill", "#F8F8F8")
             .attr("stroke", "#00008B");
     }
     if (isCentralized) {
-        svg.select("#" + data.id)
+        //svg.select("#" + data.id)
+        svg.select("[id='" + data.id+"']")
             .classed("isCentralized", true);
     }
     if (isRecommendation) {
-        svg.select("#" + data.id)
+        //svg.select("#" + data.id)
+        svg.select("[id='" + data.id+"']")
             .classed("isRecommendation",true);
     }
 
@@ -560,11 +565,14 @@ function getPathText(centX, centY, R, r, angle, node) {
 
 
 function refillNode(data) {
-    svg.select("#" + data.id + " circle")
+    //svg.select("#" + data.id + " circle")
+    svg.select("[id='" + data.id+"']" + " circle")
         .attr("fill", "#eee")
         .attr("stroke", "gray")
         .attr("stroke-width", 1);
-    svg.select("#" + data.id + " text")
+    //svg.select("#" + data.id + " text")
+    svg.select("[id='" + data.id+"']" + " text")
+
         .text(data.value)
         .attr("font-size", "12px")
         .attr("text-anchor", "middle")
