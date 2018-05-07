@@ -238,7 +238,7 @@ msg : {
             value: '',
             roles:[
                 {
-                role_name : 'r1',
+                rolename : 'r1',
                 node_id : 7,
                 }
                 ...
@@ -259,7 +259,7 @@ DataManager.prototype.mCreateRelation = function (msg, callback) {
         var role = roles[i];
         start_str += 'role' + i.toString() + '=node(' + role.node_id + ') ';
         if (i != roles.length - 1) start_str += ',';
-        role_str += 'CREATE (r)-[:has_role {name:\'' + role.role_name + '\'}]->(role' + i.toString() + ') ';
+        role_str += 'CREATE (r)-[:has_role {name:\'' + role.rolename + '\'}]->(role' + i.toString() + ') ';
     }
     var cypher = start_str + 'MATCH (p:Project {name: {pname}})\
     CREATE (p)-[:has]->(r:Relation {value: {rname}})' + role_str +
@@ -452,7 +452,7 @@ msg : {
             tag: 7, //用tagid表示
             roles:[
                 {
-                role_name : 'r1',
+                rolename : 'r1',
                 node_id : 7,
                 }
                 ...
@@ -475,8 +475,8 @@ DataManager.prototype.createRelation = function (msg, callback) {
             rolei: 'role' + i.toString(),
             node_id: role.node_id
         });
-        roleCypher += 'CREATE (r)-[:has_role {name:\'{role_name}\'}]->({rolei})\n'.format({
-            role_name: role.role_name,
+        roleCypher += 'CREATE (r)-[:has_role {name:\'{rolename}\'}]->({rolei})\n'.format({
+            rolename: role.rolename,
             rolei: 'role' + i.toString()
         });
     }
