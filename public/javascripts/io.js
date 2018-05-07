@@ -1,8 +1,11 @@
 var socket = io();
 var tmpMsg = {
+    type:[],
     emit:[],
     on:[]
 };
+
+var socket_mutex = false;
 
 socket.on('chat message', function(msg){
     alert(msg);
@@ -86,7 +89,11 @@ socket.on('insModel', function(msg){
 function socketEmit(type,msg){
     console.log(msg);
     tmpMsg.emit.push(msg);
-    socket.emit(type, msg);
+    tmpMsg.type.push(type);
+    if(!socket_mutex){
+        socket.emit(type, msg);
+        socket_mutex = true;
+    }
 }
 
 /* socket emit */
@@ -369,8 +376,14 @@ tmpMsgPop= function(operationId){
         if(tmpMsg.emit[n].operationId == operationId){
             copyObj(tmpObj,tmpMsg.emit[n])
             tmpMsg.emit.splice(n,1);
+            tmpMsg.type.splice(n,1)
         }
     }
 
+    if(tmpMsg.emit.length > 0) {    //为什么明明等于0还是等进入
+        socketEmit(tmpMsg.type[0],tmpMsg.emit[0]);
+    }else{
+        socket_mutex = false
+    }
     return tmpObj;
 }
