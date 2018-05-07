@@ -662,10 +662,10 @@ function attributeReviseSubmit(item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
-    if (origNode != "") {
+    if (!(origNode != "" || origRelation == undefined)) {
         io_remove_insModel_node(origNode);
     }else{//则当前节点为中心节点
         io_remove_insModel_node($(".graph .center").attr("id"));
@@ -703,10 +703,12 @@ function attributeRemoveSubmit(item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+    console.log(origNode)
+    console.log(origRelation)
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
-    if (origNode != "") {
+    if (!(origNode != "" || origNode == undefined)) {
         io_remove_insModel_node(origNode);
     }else{//则当前节点为中心节点
         io_remove_insModel_node($(".graph .center").attr("id"));
@@ -729,7 +731,9 @@ function relationReviseSubmit(item) {
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     */
-    if (origRelation != "" || origRelation != undefined) {   //好像肯定是有的，只是没有值而已
+    console.log(origNode)
+    console.log(origRelation)
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
 
@@ -773,7 +777,7 @@ function relationRemoveSubmit(item){
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     */
-    if (origRelation != "") {   //好像肯定是有的，只是没有值而已
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
     //更新页面
@@ -902,7 +906,8 @@ function transAnimation(centerID,neighbourID,relationID,model) {
             rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours ))%360;
             $(tmpItem).transition({rotate: rotateAngle}).end(refreshText(entity));
             //$(tmpItem).next()
-            d3.select("#"+tmpRelationID).transition().style("rotate",rotateAngle).on( "start", function() {
+            //d3.select("#"+tmpRelationID).transition().style("rotate",rotateAngle).on( "start", function() {
+            d3.select("[id='" + tmpRelationID+"']").transition().style("rotate",rotateAngle).on( "start", function() {
                 mutex++;
             }).on( "end", function() {
                 if( --mutex === 0 ) {
