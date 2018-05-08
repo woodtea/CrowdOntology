@@ -11,6 +11,8 @@ socket.on('chat message', function(msg){
     alert(msg);
 });
 
+
+
 socket.on('data', function(msg){
 
     instance_model = {nodes:{},relations:{}};
@@ -43,9 +45,21 @@ socket.on('data', function(msg){
     setIndexTypeahead(indexArray);
 });
 
+
+
+socket.on('iotest', function(msg){
+    alert(msg);
+});
+
 socket.on('model', function(msg){
     switch (msg.operation){
-        case 'get':
+        //case 'get':
+        case 'mget':
+            if(Object.keys(msg.nodes).length == 0){
+                socket.emit("iotest", "99");
+                socket_mutex = false;
+                return;
+            }
             io_get_model_done(msg);
             break;
         case 'save':
@@ -55,6 +69,7 @@ socket.on('model', function(msg){
 });
 
 socket.on('insModel', function(msg){
+    tagReformat.id2value(msg);
     console.log(msg);
     switch (msg.operation){
         case 'get':
@@ -87,12 +102,18 @@ socket.on('insModel', function(msg){
 
 
 function socketEmit(type,msg){
-    console.log(msg);
+    tagReformat.value2id(msg);
+    //console.log(msg);
+    //console.log(socket_mutex);
+
     tmpMsg.emit.push(msg);
     tmpMsg.type.push(type);
+    //alert(socket_mutex);
     if(!socket_mutex){
-        socket.emit(type, msg);
+        console.log(type)
+        console.log(msg)
         socket_mutex = true;
+        socket.emit(type, msg);
     }
 }
 
@@ -185,6 +206,7 @@ function generate_msg_base(user_id,projectId,operation){
 /* socket on */
 /* model */
 function io_get_model_done(msg){
+    socket_mutex = false;
     if(msg.error){
         return;
     }else{
@@ -204,6 +226,7 @@ function io_save_model_done(msg){
 }
 /* instanceModel */
 function io_get_insModel_done(msg){
+    socket_mutex = false;
     if(msg.error){
         return;
     }else{
@@ -211,6 +234,7 @@ function io_get_insModel_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
+        drawIndex();
     }
 }
 
@@ -218,7 +242,12 @@ function io_create_insModel_node_done(msg){
     if(msg.error){
         return;
     }else{
-        let node = tmpMsgPop(msg.operationId).nodes //tmpMsg.emit.nodes;
+        migrateEmitMsg(msg.migrate);
+        let curMsg = tmpMsgPop(msg.operationId);
+        //console.log(curMsg);
+        tagReformat.id2value(curMsg);
+
+        let node = curMsg.nodes //tmpMsg.emit.nodes;
         let nodeId;
         for(nodeId in node){
             instance_model.nodes[nodeId] = node[nodeId];
@@ -247,7 +276,11 @@ function io_create_insModel_relation_done(msg){
     if(msg.error){
         return;
     }else{
-        let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
+        migrateEmitMsg(msg.migrate);
+        let curMsg = tmpMsgPop(msg.operationId);
+        let relation = curMsg.relations;
+        tagReformat.id2value(curMsg);
+        //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
         for(relationId in relation){
             instance_model.relations[relationId] = relation[relationId];
@@ -318,6 +351,7 @@ io_test = function(){
 }
 
 socket.on('iotest_back', function(msg){
+    alert("123")
     console.log(msg);
 });
 
@@ -342,8 +376,54 @@ migrate = function(obj,model=instance_model){
             delete model["relations"][key];
         }
     }
+    //console.log(tmpMsg.emit)
     return;
 }
+
+migrateEmitMsg = function(obj){
+    if(obj == undefined) return;
+    for(let key in obj){
+        if(key.indexOf("front_n")!=-1){
+            //更新emit里面的id
+            for(let emitMsgOrder in tmpMsg.emit){
+                let tmpMsp = tmpMsg.emit[emitMsgOrder];
+                if(tmpMsp["nodes"]){
+                    if(tmpMsp["nodes"][obj[key]] == undefined) tmpMsp["nodes"][obj[key]]={};
+                    copyObj(tmpMsp["nodes"][obj[key]],tmpMsp["nodes"][key])
+                    delete tmpMsp["nodes"][key];
+                }
+                if(tmpMsp["relations"]){
+                    for(let rel in tmpMsp["relations"]){
+                        for(let n in tmpMsp["relations"][rel]["roles"]){
+                            let tmp = tmpMsp["relations"][rel]["roles"][n];
+                            if(tmp["node_id"] == key)  {
+                                tmp["node_id"]=obj[key];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(key.indexOf("front_r")!=-1){
+            //更新emit里面的id
+            for(let emitMsgOrder in tmpMsg.emit) {
+                let tmpMsp = tmpMsg.emit[emitMsgOrder];
+                if(tmpMsp["relations"]){
+                    if (tmpMsp["relations"][obj[key]] == undefined) tmpMsp["relations"][obj[key]] = {};
+                    copyObj(tmpMsp["relations"][obj[key]], tmpMsp["relations"][key])
+                    delete tmpMsp["relations"][key];
+                }
+            }
+        }
+    }
+    //console.log("******")
+    //console.log(obj);
+    //console.log(tmpMsg.emit)
+    //console.log("******")
+
+    return;
+    }
+
 
 copyObj = function(obj1,obj2){
 
@@ -381,7 +461,7 @@ tmpMsgPop= function(operationId){
     }
 
     if(tmpMsg.emit.length > 0) {    //为什么明明等于0还是等进入
-        socketEmit(tmpMsg.type[0],tmpMsg.emit[0]);
+        socket.emit(tmpMsg.type[0],tmpMsg.emit[0]);
     }else{
         socket_mutex = false
     }
