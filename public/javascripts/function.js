@@ -482,6 +482,7 @@ function generateXTitle(title, type) {
 }
 
 function generateContent(type, value, nodeID = "", relationID = "") {
+    if(type == undefined) type="姓名";
     //alert(nodeID);
     //alert(relationID);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
@@ -667,9 +668,10 @@ function attributeReviseSubmit(item) {
     }
     if (!(origNode != "" || origRelation == undefined)) {
         io_remove_insModel_node(origNode);
-    }else{//则当前节点为中心节点
-        io_remove_insModel_node($(".graph .center").attr("id"));
     }
+    //else{//则当前节点为中心节点
+    //    io_remove_insModel_node($(".graph .center").attr("id"));
+    //}
 
     //生成节点
     let nodes = {};
@@ -679,7 +681,6 @@ function attributeReviseSubmit(item) {
         "value": value
     }
     io_create_insModel_node(nodes)
-
     //生成关系
     let centerId = $(".graph .center").attr("id");
     let relationId = generateFrontRelationID();
@@ -692,7 +693,6 @@ function attributeReviseSubmit(item) {
         ]
     }
     io_create_insModel_relation(relations);
-
     return;
 }
 
@@ -972,5 +972,61 @@ let svgOperation = {
         setIndexTypeahead(indexArray);
 
         $("#" + nodeId).click();
+    }
+}
+
+let tagReformat = {
+    value2id : function(msg) {
+        console.log("******value2id")
+        console.log(msg)
+        if(msg.nodes){
+            //alert("nodes")
+            for(let nodeId in msg.nodes){
+                let tmp = msg.nodes[nodeId].tags;
+                if(tmp == undefined) tmp = ["Symbol"];
+                for(let n in tmp){
+                    tmp[n] = getValueId(tmp[n],model.nodes);
+                }
+            }
+        }
+        if(msg.relations){
+            //alert(relations)
+            for(let relationId in msg.relations){
+                let tmp = msg.relations[relationId].type; //前后不统一
+                msg.relations[relationId].type = getValueId(tmp,model.relations);
+            }
+        }
+        console.log(msg);
+        console.log("value2id******")
+    },
+    id2value : function(msg) {
+        console.log("******")
+        console.log(msg)
+        if(msg.nodes){
+            for(let nodeId in msg.nodes){
+                let tmpDatatype = msg.nodes[nodeId].dataType;
+                if(tmpDatatype == undefined) tmpDatatype = "姓名";
+
+                let tmp = msg.nodes[nodeId].tags;
+                for(let n in tmp){
+                    tmp[n] = [model.nodes[tmp[n]].value]
+                }
+            }
+        }
+        if(msg.relations){
+            for(let relationId in msg.relations){
+                let tmp = msg.relations[relationId].value; //这个就不对吧，应该是tag啊
+                if(tmp == undefined) tmp = msg.relations[relationId].type; //好乱啊这里
+                if(tmp == undefined) tmp = msg.relations[relationId].tag; //好乱啊这里
+                //alert(tmp);
+                msg.relations[relationId].type = model.relations[tmp].value;
+            }
+        }
+    }
+}
+
+getValueId = function(value,item){
+    for(let key in item){
+        if(item[key]["value"] == value) return key;
     }
 }
