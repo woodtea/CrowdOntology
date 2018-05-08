@@ -480,9 +480,24 @@ DataManager.prototype.createRelation = function (msg, callback) {
             rolei: 'role' + i.toString()
         });
     }
+    /*
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
         MATCH (u:User {name: {uname}})\n\
         MATCH (tag) WHERE id(tag)={tag}\n' +
+        startCypher +
+        'CREATE (p)-[:has]->(r:RelInst)\n\
+        CREATE (u)-[:refer]->(r)\n\
+        CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+        CREATE (u)-[:refer]->(iof)\n\
+        CREATE (p)-[:has]->(iof)' +
+        roleCypher +
+        'RETURN id(r) AS relationId, r AS relation';
+        */
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n'+
+        'MATCH (tag) WHERE id(tag)={tag}\n'.format({
+            tag:relation.tag
+        }) +
         startCypher +
         'CREATE (p)-[:has]->(r:RelInst)\n\
         CREATE (u)-[:refer]->(r)\n\
