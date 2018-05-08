@@ -96,6 +96,24 @@
         user = $(".glyphicon-user").parent().text().slice(1);
         //user = user.replace(/(^\s*)/g, "");
         project = "红楼梦";
+        //forTest
+        //判断是否存在图谱，如果不存在就初始化图谱
+        let msg = {
+            operation: 'mget',  //先这么用着再说吧
+            user_id : user,
+            project_id : '红楼梦',
+            operation_id : 'op1'
+        };
+        //socketEmit("model",msg);
+        socket.emit("model",msg);
+        let msg2 = {
+            operation: 'get',
+            user_id : user,
+            project_id : '红楼梦',
+            operation_id : 'op2'
+        }
+        //socketEmit("insModel",msg2);
+        socket.emit("insModel",msg2);
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
