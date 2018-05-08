@@ -1,5 +1,4 @@
 
-var symbol = 143;
 
 var data = require('./data');
 var db = require('./db');
@@ -15,22 +14,39 @@ function ioConfig(server){
 
     var io = require('socket.io')(server);
 
-    io.on('connection', function(socket){
+    io.on('connection', function(socket) {
         //socket建立连接
         console.log('a user connected');
-        socket.emit('data',db)
+        socket.emit('data', db)
         //socket断开连接
-        socket.on('disconnect',function(){
+        socket.on('disconnect', function () {
             console.log('user disconnected');
         })
         //测试用
-        socket.on('save model',function(msg){
+        socket.on('save model', function (msg) {
             //console.log("save model")
             //console.log(msg);
             db["instance_model"][msg.user] = msg.instance_model;
             //data.instance_model = msg.instance_model;
             //socket.emit('chat message',msg)
             console.log(db);
+        })
+        socket.on('model', function(msg){
+            console.log(msg);
+            let emitMsg;
+            switch (msg.operation){
+                case 'mget':
+                    /*
+                    emitMsg = io_get_model(msg,function(emitMsg){
+                        socket.emit('model',emitMsg);
+                    });*/
+                    dm.handle(msg, function(rep){
+                        console.log("model")
+                        console.log(rep)
+                        socket.emit("model",rep);
+                    });
+                    break;
+            }
         })
 
         socket.on('insModel', function(msg){
@@ -39,7 +55,15 @@ function ioConfig(server){
 
             switch (msg.operation){
                 case 'get':
-                    emitMsg = io_get_insModel(msg);
+                    /*
+                    emitMsg = io_get_insModel(msg,function(emitMsg){
+                        socket.emit('insModel',emitMsg);
+                    });*/
+                    console.log("insModel")
+                    dm.handle(msg, function(rep){
+                        console.log(rep)
+                        socket.emit("insModel",rep);
+                    });
                     break;
                 case 'create_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
@@ -98,6 +122,16 @@ function ioConfig(server){
                 operation_id: 'opt1',
                 name: '123@123'
             };
+            msg12 = {
+                operation: 'create_user',
+                operation_id: 'opt1',
+                name: 'user1@mail'
+            };
+            msg13 = {
+                operation: 'create_user',
+                operation_id: 'opt1',
+                name: 'user2@mail'
+            };
             msg2 = {
                 operation: 'create_project',
                 operation_id: 'opt2',
@@ -105,7 +139,7 @@ function ioConfig(server){
             };
             msg3 = {
                 operation: 'mcreate_node',
-                user_id : '123@132',
+                user_id : 'user1@mail.com',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 nodes :[
@@ -137,12 +171,30 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        value: '朋友',
+                        value: '血亲',
+                        roles:[
+                            {rolename : '血亲',
+                            node_id : 110},
+                            {rolename : '血亲',
+                            node_id : 110}
+                        ]
+                    }
+                ]
+            };
+            msg41 = {
+                operation: 'mcreate_relation',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        value: '性别',
                         roles:[
                             {rolename : '',
-                            node_id : 159},
-                            {rolename : '朋友',
-                            node_id : 159}
+                                node_id : 110},
+                            {rolename : '性别',
+                                node_id : 110}
                         ]
                     }
                 ]
@@ -174,14 +226,14 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 218, //用tagid表示
+                        tag: 4, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 219,
+                            node_id : 5,
                         },
                         {
                             rolename : '兄弟',
-                            node_id : 221,
+                            node_id : 7,
                         }
                         ]
                     }
@@ -215,16 +267,31 @@ function ioConfig(server){
             if(msg=="99"){
                 dm.handle(msg0, function(rep){
                     dm.handle(msg1, function(rep){
-                        dm.handle(msg2, function(rep){
-                            dm.handle(msg29, function(rep){
-                                dm.handle(msg3, function(rep){
+                        dm.handle(msg12, function(rep){
+                            dm.handle(msg13, function(rep){
+                                dm.handle(msg2, function(rep){
+                                dm.handle(msg29, function(rep){
+                                    var symbolId;
                                     for(let key in rep.migrate){
-                                        msg4.relations[0].roles[0].node_id = rep.migrate[key]
-                                        msg4.relations[0].roles[1].node_id = rep.migrate[key]
+                                        symbolId = rep.migrate[key];
                                     }
-                                    console.log(msg4);
-                                    dm.handle(msg4, function(rep){
+                                    dm.handle(msg3, function(rep){
+                                        var nodeId;
+                                        for(let key in rep.migrate){
+                                            nodeId = rep.migrate[key]
+                                            msg4.relations[0].roles[0].node_id = rep.migrate[key]
+                                            msg4.relations[0].roles[1].node_id = rep.migrate[key]
+                                        }
+                                        dm.handle(msg4, function(rep){
+                                            msg41.relations[0].roles[0].node_id = nodeId
+                                            msg41.relations[0].roles[1].node_id = symbolId
+                                            dm.handle(msg41, function(rep){
+                                                return callback;
+                                            });
+                                        });
+
                                     });
+                                });
                                 });
                             });
                         });
@@ -290,7 +357,7 @@ function io_create_insModel_node(rcvMsg,callback){
     //纯测试用
     let nodeId;
     for(nodeId in rcvMsg.nodes) break;
-    if(rcvMsg.nodes[nodeId].tags == undefined) rcvMsg.nodes[nodeId].tags = symbol;
+    //if(rcvMsg.nodes[nodeId].tags == undefined) rcvMsg.nodes[nodeId].tags = [symbol];
 
     let newMsg = formatExchange.web2Server(rcvMsg);
 
