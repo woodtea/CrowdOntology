@@ -818,7 +818,7 @@ DataManager.prototype.getTags = function(msg, callback){
  
 /*
 msg : {
-    operation: 'create_node',
+    operation: 'refer',
     user_id : 'u1',
     project_id : 'p1',
     operation_id : 'op2',
