@@ -268,9 +268,10 @@ function ioConfig(server){
                 user_id : '123@123',
                 project_id : '红楼梦',
                 operation_id : 'op2',
-                nodes: [
-                    250
-                ]
+                node: {
+                    value:''
+                }
+                
             };
             //initiate Set
             if(msg=="99"){

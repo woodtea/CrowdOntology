@@ -750,18 +750,27 @@ msg:{
     user_id : 'u1',
     project_id : 'p1',
     operation_id : 'op2',
-    nodes: [
-        'nodeId'
-    ]
+    node:{
+        id:'',
+        value:''
+    }
 }
 */
 DataManager.prototype.getTags = function(msg, callback){
     var session = ogmneo.Connection.session();
-    var cypher = 'MATCH (p:Project {name: {pname}})\n\
-    MATCH (i) WHERE id(i)={nodeId}\n\
-    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(c:Concept)<-[:has]-(p)\n\
+    var nodeCypher = 'MATCH (i {value:\'{value}\'})'.format({
+        value:msg.node.value
+    });
+    if (msg.node.id != undefined){
+        nodeCypher = 'MATCH (i) WHERE id(i)={nodeId}'.format({
+            nodeId:msg.node.id
+        })
+    }
+    var cypher = 'MATCH (p:Project {name: {pname}})\n'+
+    nodeCypher +
+    'MATCH (i)-[:from]->(iof:inst_of)-[:to]->(c:Concept)<-[:has]-(p)\n\
     MATCH (u)-[:refer]->(iof)\n\
-    RETURN  u.name AS user , c.value AS val\n';
+    RETURN  id(i) AS iid, u.name AS user , id(c) AS tagid\n';
 
     console.log('[CYPHER]');
     console.log(cypher);
@@ -772,33 +781,108 @@ DataManager.prototype.getTags = function(msg, callback){
     session
         .run(cypher, {
             pname: msg.project_id,
-            uname: msg.user_id,
-            nodeId: msg.nodes[0]
+            uname: msg.user_id
         })
         .then(function (res) {
             // var nodeId = res.records[0].get('relationId').toString(); //获取id
             // console.log(res);
             console.log('[TAGS]');
-            var taginfo = {};
+            var info = {};
             for (var i = 0; i < res.records.length; i++) {
                 var rec = res.records[i];
                 var user = rec.get('user').toString();
-                var val = rec.get('val').toString();
-                if (taginfo[val] == undefined){
-                    taginfo[val] = [user];
+                var tagid = rec.get('tagid').toString();
+                var iid = rec.get('iid').toString();
+                if (info[iid] == undefined){
+                    info[iid] = {};
                 }
-                else{
-                    taginfo[val].push(user);
+                if (info[iid][tagid] == undefined){
+                    info[iid][tagid] = [];
                 }
+                info[iid][tagid].push(user);
+                console.log(iid, tagid, user);
             }
-            console.log(taginfo);
-            resp.nodes = [];
-            resp.nodes.push({
-                node_id: msg.nodes[0],
-                taginfo: taginfo
-            });
+            console.log(info);
+            resp.info = info;
             resp.msg = 'Success';
             session.close();
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+ 
+/*
+msg : {
+    operation: 'create_node',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    nodes :[
+        {
+            front_id: '',
+            tags : [12, 3], //tag用id表示
+            value: 'xxx' //实体的value为空
+        }
+    ]
+}
+*/
+//先保证一个点的情况
+DataManager.prototype.refer = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var node = msg.nodes[0];
+    var tags = node.tags;
+
+    var tagCypher = '';
+    var startCypher = '';
+    for (var i = 0; i < tags.length; i++) {
+        startCypher += 'MATCH ({ci}) WHERE id({ci})={tagid}\n'.format({
+            ci: 'c' + i.toString(),
+            tagid: tags[i]
+        });
+        tagCypher += 'CREATE (i)-[:from]->({iofi}:inst_of)-[:to]->({ci})\n'.format({
+            ci: 'c' + i.toString(),
+            iofi: 'iof' + i.toString()
+        });
+        tagCypher += 'CREATE (u)-[:refer]->({iofi})\n'.format({
+            iofi: 'iof' + i.toString()
+        });
+        tagCypher += 'CREATE (p)-[:has]->({iofi})\n'.format({
+            iofi: 'iof' + i.toString()
+        });
+    }
+
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n' +
+        startCypher +
+        'CREATE (p)-[:has]->(i:Inst {value:{ivalue}})\n\
+        CREATE (u)-[:refer]->(i)\n' +
+        tagCypher +
+        'RETURN id(i) AS nodeId, i AS node';
+    console.log('[CYPHER]');
+    console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            ctag: msg.nodes[0].tag,
+            cvalue: msg.nodes[0].value,
+            uname: msg.user_id,
+            ivalue: node.value
+        })
+        .then(function (res) {
+            var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            resp.migrate[msg.nodes[0].front_id] = nodeId;
             callback(resp);
         })
         .catch(function (err) {
