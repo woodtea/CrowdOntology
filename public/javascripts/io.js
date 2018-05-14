@@ -56,7 +56,7 @@ socket.on('model', function(msg){
         //case 'get':
         case 'mget':
             if(Object.keys(msg.nodes).length == 0){
-                socket.emit("iotest", "99");
+                socketEmit("iotest", "99");
                 socket_mutex = false;
                 return;
             }
@@ -101,7 +101,7 @@ socket.on('insModel', function(msg){
 
 
 
-function socketEmit(type,msg){
+function socketEmitArray(type,msg){
     tagReformat.value2id(msg);
     //console.log(msg);
     //console.log(socket_mutex);
@@ -110,11 +110,15 @@ function socketEmit(type,msg){
     tmpMsg.type.push(type);
     //alert(socket_mutex);
     if(!socket_mutex){
-        console.log(type)
-        console.log(msg)
-        socket_mutex = true;
-        socket.emit(type, msg);
+        socketEmit(type, msg)
     }
+}
+
+function socketEmit(type, msg) {
+    console.log(type)
+    console.log(msg)
+    socket_mutex = true;
+    socket.emit(type, msg);
 }
 
 /* socket emit */
@@ -131,64 +135,64 @@ function emitMsgHeader(operation){
 /* model */
 function io_get_model(user_id,projectId){
     let msg = generate_msg_base(user_id,projectId,'get');
-    socketEmit('model',msg);
+    socketEmitArray('model',msg);
 }
 
 function io_save_model(user_id,projectId,model){
     let msg = generate_msg_base(user_id,projectId,'save');
     msg["nodes"] = model["nodes"];
     msg["relations"] = model["relations"];
-    socketEmit('model',msg);
+    socketEmitArray('model',msg);
 }
 
 /* insModel */
 function io_get_insModel(user_id,projectId){
     let msg = generate_msg_base(user_id,projectId,'get');
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_create_insModel_node(nodes){
     let msg = emitMsgHeader('create_node');
     msg["nodes"] = nodes;
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_remove_insModel_node(nodeId){
     let msg = emitMsgHeader('remove_node');
     msg["nodes"] = {};
     msg["nodes"][nodeId] = {}
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_create_insModel_relation(relations){
     let msg = emitMsgHeader('create_relation');
     msg["relations"] = relations;
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_remove_insModel_relation(relationId){
     let msg = emitMsgHeader('remove_relation');
     msg["relations"] = {};
     msg["relations"][relationId] = {}
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_revise_insModel_relation(user_id,projectId,relations){
     let msg = generate_msg_base(user_id,projectId,'revise_relation');
     msg["relations"] = relations;
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_recommend_insModel_node(user_id,projectId,nodes){
     let msg = generate_msg_base(user_id,projectId,'rcmd_node');
     msg["nodes"] = nodes;
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function io_recommend_insModel_relation(user_id,projectId,relations){
     let msg = generate_msg_base(user_id,projectId,'rcmd_relation');
     msg["relations"] = relations;
-    socketEmit('insModel',msg);
+    socketEmitArray('insModel',msg);
 }
 
 function generate_msg_base(user_id,projectId,operation){
@@ -347,12 +351,12 @@ function io_recommend_insModel_relation_done(msg){
 
 io_test = function(){
     msg = "hello";
-    socketEmit('iotest', msg);
+    socketEmitArray('iotest', msg);
 }
 
 socket.on('iotest_back', function(msg){
-    alert("123")
-    console.log(msg);
+    //alert("123")
+    //console.log(msg);
 });
 
 migrate = function(obj,model=instance_model){
@@ -461,7 +465,7 @@ tmpMsgPop= function(operationId){
     }
 
     if(tmpMsg.emit.length > 0) {    //为什么明明等于0还是等进入
-        socket.emit(tmpMsg.type[0],tmpMsg.emit[0]);
+        socketEmit(tmpMsg.type[0],tmpMsg.emit[0]);
     }else{
         socket_mutex = false
     }

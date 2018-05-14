@@ -104,20 +104,20 @@
             project_id : '红楼梦',
             operation_id : 'op1'
         };
-        //socketEmit("model",msg);
-        socket.emit("model",msg);
+        //socketEmitArray("model",msg);
+        socketEmit("model",msg);
         let msg2 = {
             operation: 'get',
             user_id : user,
             project_id : '红楼梦',
             operation_id : 'op2'
         }
-        //socketEmit("insModel",msg2);
-        socket.emit("insModel",msg2);
+        //socketEmitArray("insModel",msg2);
+        socketEmit("insModel",msg2);
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
         //user = user.replace(/(^\s*)/g, "")
-        socketEmit('save model',data={"instance_model":instance_model,"user":user})
+        socketEmitArray('save model',data={"instance_model":instance_model,"user":user})
     }
 </script>

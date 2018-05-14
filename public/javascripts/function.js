@@ -703,8 +703,8 @@ function attributeRemoveSubmit(item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    console.log(origNode)
-    console.log(origRelation)
+    //console.log(origNode)
+    //console.log(origRelation)
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
@@ -731,8 +731,8 @@ function relationReviseSubmit(item) {
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     */
-    console.log(origNode)
-    console.log(origRelation)
+    //console.log(origNode)
+    //console.log(origRelation)
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
@@ -977,13 +977,13 @@ let svgOperation = {
 
 let tagReformat = {
     value2id : function(msg) {
-        console.log("******value2id")
-        console.log(msg)
+        //console.log("******value2id")
+        //console.log("beforTrans"+msg)
         if(msg.nodes){
             //alert("nodes")
             for(let nodeId in msg.nodes){
+                if(msg.nodes[nodeId].tags == undefined) msg.nodes[nodeId].tags = ["String"];
                 let tmp = msg.nodes[nodeId].tags;
-                if(tmp == undefined) tmp = ["Symbol"];
                 for(let n in tmp){
                     tmp[n] = getValueId(tmp[n],model.nodes);
                 }
@@ -996,20 +996,27 @@ let tagReformat = {
                 msg.relations[relationId].type = getValueId(tmp,model.relations);
             }
         }
-        console.log(msg);
-        console.log("value2id******")
+        //console.log("afterTrans"+msg);
+        //console.log("value2id******")
     },
     id2value : function(msg) {
-        console.log("******")
-        console.log(msg)
+        //console.log("******")
+        //console.log(msg)
         if(msg.nodes){
             for(let nodeId in msg.nodes){
-                let tmpDatatype = msg.nodes[nodeId].dataType;
-                if(tmpDatatype == undefined) tmpDatatype = "姓名";
+
+                if(msg.nodes[nodeId].dataType == undefined) msg.nodes[nodeId].dataType = "姓名";
 
                 let tmp = msg.nodes[nodeId].tags;
+                let flag=0
                 for(let n in tmp){
-                    tmp[n] = [model.nodes[tmp[n]].value]
+                    if(model.nodes[tmp[n]].tag == "Entity"){
+                        flag++;
+                        tmp[n] = model.nodes[tmp[n]].value
+                    }
+                }
+                if(!flag) {
+                    delete msg.nodes[nodeId].tags;
                 }
             }
         }
