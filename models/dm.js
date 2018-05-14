@@ -86,6 +86,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'create_node_proxy':
                 this.createNodeProxy(msg, callback);
                 break;
+            case 'create_relation_proxy':
+                this.createRelationProxy(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -629,6 +632,132 @@ DataManager.prototype.createRelation = function (msg, callback) {
             resp.msg = err;
             callback(resp);
         });
+}
+
+/*
+msg : {
+    operation: 'create_relation',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    relations:[
+        {
+            front_id:'',
+            tag: 7, //用tagid表示
+            roles:[
+                {
+                rolename : 'r1',
+                node_id : 7,
+                }
+                ...
+            ]
+        }
+    ]
+}
+*/
+//先考虑一个关系，并且没有多元性多重性
+//特殊处理名字关系
+//默认名字关系建立时，对应的实例还没有建立其他关系
+//根据名字，找到其他实例，refer实例，并且删除原有的实例
+DataManager.prototype.createRelationProxy = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var relation = msg.relations[0];
+    var roles = relation.roles;
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    if(roles.length == 2){
+        var is_name = false;
+        var inst_id = -1;
+        var name_id = -1;
+        for (i in roles){
+            var r = roles[i];
+            if (r.rolename == '名字'){
+                is_name = true;
+                name_id = r.node_id;
+            }
+            else{
+                inst_id = r.node_id;
+            }
+        }
+        //如果是名字关系
+        if (is_name){
+            var cypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (name) WHERE id(name)={name_id}\n\
+            MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role {name:\'名字\'}]->(name)\n\
+            RETURN id(i) AS iid, id(rel) AS relid'.format({
+                name_id: name_id
+            });
+            var resp = extractBasic(msg);
+            resp.error = false;
+            session
+            .run(cypher, {
+                pname: msg.project_id,
+                uname: msg.user_id
+            })
+            .then(function (res) {
+                // var relationId = res.records[0].get('relationId').toString(); //获取id
+                //能找到其他实例
+                if (res.records.length != 0){
+                    var iid = res.records[0].get('iid').toString();
+                    var relid = res.records[0].get('relid').toString();
+                    var referMsg = extractBasic(msg);
+                    referMsg.error = false;
+                    referMsg.operation = 'refer';
+                    referMsg.operation_id += 'rf';
+                    referMsg.node = {
+                        front_id: inst_id,
+                        refer_id: iid
+                    }
+                    //引用其他实例
+                    DataManager.prototype.refer(referMsg, function(resp){
+                        referMsg.node = {
+                            front_id: relation.front_id,
+                            refer_id: relid
+                        };
+                        
+                        //还需要添加原来实例里面没有的tag
+            
+                        //引用实例-名字之间的关系
+                        DataManager.prototype.refer(referMsg, function(resp){
+                            var removeMsg = extractBasic(msg);
+                            removeMsg.operation = 'remove_node';
+                            removeMsg.operation_id += 'rn';
+                            removeMsg.nodes = [inst_id];
+                            //删除原来的实例
+                            DataManager.prototype.removeNode(removeMsg, function(resp){
+                                resp.migrate = {};
+                                resp.migrate[inst_id] = iid;
+                                callback(resp);
+                            });
+                        });
+                    });
+                }
+                else{
+                    DataManager.prototype.createRelation(msg, callback);
+                }
+                // resp.msg = 'Success';
+                // session.close();
+                // callback(resp);
+            })
+            .catch(function (err) {
+                resp.error = true;
+                resp.msg = err;
+                callback(resp);
+            });
+            
+        }
+        else{
+            DataManager.prototype.createRelation(msg, callback);
+        }
+    }
+    else{
+        DataManager.prototype.createRelation(msg, callback);
+    }
+    // session.close();
+
 }
 
 /*

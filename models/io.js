@@ -213,8 +213,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [4, 5], //tag用id表示
-                        value: '南瓜' //实体的value为空
+                        tags : [20], //tag用id表示
+                        value: '西瓜人' //实体的value为空
                     }
                 ]
             };
@@ -285,14 +285,35 @@ function ioConfig(server){
             };
             msg13 = {
                 operation: 'create_node_proxy',
-                user_id : 'user2@mail',
+                user_id : '123@123',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 nodes :[
                     {
                         front_id: '',
-                        tags : [4], //tag用id表示
-                        value: '南瓜' //实体的value为空
+                        tags : [20], //tag用id表示
+                        value: '西瓜人' //实体的value为空
+                    }
+                ]
+            };
+            msg14 = {
+                operation: 'create_relation_proxy',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        tag: 23, //用tagid表示
+                        roles:[{
+                            rolename : '',
+                            node_id : 30,
+                        },
+                        {
+                            rolename : '名字',
+                            node_id : 26,
+                        }
+                        ]
                     }
                 ]
             };
@@ -332,7 +353,7 @@ function ioConfig(server){
                 });
                 return;
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14];
 
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
