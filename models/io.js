@@ -213,8 +213,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [193, 192], //tag用id表示
-                        value: '' //实体的value为空
+                        tags : [4, 5], //tag用id表示
+                        value: '南瓜' //实体的value为空
                     }
                 ]
             };
@@ -226,14 +226,14 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 4, //用tagid表示
+                        tag: 6, //用tagid表示
                         roles:[{
-                            rolename : '',
-                            node_id : 5,
+                            rolename : '血亲',
+                            node_id : 8,
                         },
                         {
-                            rolename : '兄弟',
-                            node_id : 7,
+                            rolename : '血亲',
+                            node_id : 11,
                         }
                         ]
                     }
@@ -269,9 +269,32 @@ function ioConfig(server){
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 node: {
-                    value:''
+                    value:'冬瓜'
                 }
                 
+            };
+            msg12 = {
+                operation: 'refer',
+                user_id : 'user1@mail',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                node:{
+                    front_id: '',
+                    refer_id: 14
+                }
+            };
+            msg13 = {
+                operation: 'create_node_proxy',
+                user_id : 'user2@mail',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                nodes :[
+                    {
+                        front_id: '',
+                        tags : [4], //tag用id表示
+                        value: '南瓜' //实体的value为空
+                    }
+                ]
             };
             //initiate Set
             if(msg=="99"){
@@ -309,12 +332,12 @@ function ioConfig(server){
                 });
                 return;
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13];
 
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
-                    socket.emit('iotest_back', 'reply');
+                    socket.emit('iotest_back', rep);
                 });
             }
         })
