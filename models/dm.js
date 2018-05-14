@@ -1092,4 +1092,9 @@ DataManager.prototype.refer = function (msg, callback) {
         });
 }
 
+/*
+TODO:
+add/remove tags
+get context
+*/
 module.exports = DataManager;
