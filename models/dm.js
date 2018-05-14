@@ -77,6 +77,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'remove_relation':
                 this.removeRelation(msg, callback);
                 break;
+            case 'get_tags':
+                this.getTags(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -238,7 +241,7 @@ msg : {
             value: '',
             roles:[
                 {
-                role_name : 'r1',
+                rolename : 'r1',
                 node_id : 7,
                 }
                 ...
@@ -259,7 +262,7 @@ DataManager.prototype.mCreateRelation = function (msg, callback) {
         var role = roles[i];
         start_str += 'role' + i.toString() + '=node(' + role.node_id + ') ';
         if (i != roles.length - 1) start_str += ',';
-        role_str += 'CREATE (r)-[:has_role {name:\'' + role.role_name + '\'}]->(role' + i.toString() + ') ';
+        role_str += 'CREATE (r)-[:has_role {name:\'' + role.rolename + '\'}]->(role' + i.toString() + ') ';
     }
     var cypher = start_str + 'MATCH (p:Project {name: {pname}})\
     CREATE (p)-[:has]->(r:Relation {value: {rname}})' + role_str +
@@ -452,7 +455,7 @@ msg : {
             tag: 7, //用tagid表示
             roles:[
                 {
-                role_name : 'r1',
+                rolename : 'r1',
                 node_id : 7,
                 }
                 ...
@@ -475,14 +478,29 @@ DataManager.prototype.createRelation = function (msg, callback) {
             rolei: 'role' + i.toString(),
             node_id: role.node_id
         });
-        roleCypher += 'CREATE (r)-[:has_role {name:\'{role_name}\'}]->({rolei})\n'.format({
-            role_name: role.role_name,
+        roleCypher += 'CREATE (r)-[:has_role {name:\'{rolename}\'}]->({rolei})\n'.format({
+            rolename: role.rolename,
             rolei: 'role' + i.toString()
         });
     }
+    /*
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
         MATCH (u:User {name: {uname}})\n\
         MATCH (tag) WHERE id(tag)={tag}\n' +
+        startCypher +
+        'CREATE (p)-[:has]->(r:RelInst)\n\
+        CREATE (u)-[:refer]->(r)\n\
+        CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+        CREATE (u)-[:refer]->(iof)\n\
+        CREATE (p)-[:has]->(iof)' +
+        roleCypher +
+        'RETURN id(r) AS relationId, r AS relation';
+        */
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (u:User {name: {uname}})\n'+
+        'MATCH (tag) WHERE id(tag)={tag}\n'.format({
+            tag:relation.tag
+        }) +
         startCypher +
         'CREATE (p)-[:has]->(r:RelInst)\n\
         CREATE (u)-[:refer]->(r)\n\
@@ -715,6 +733,70 @@ DataManager.prototype.removeRelation = function (msg, callback) {
         .then(function (res) {
             // var nodeId = res.records[0].get('relationId').toString(); //获取id
             // console.log(res);
+            resp.msg = 'Success';
+            session.close();
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+/*
+msg:{
+    operation: 'get_tags',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    nodes: [
+        'nodeId'
+    ]
+}
+*/
+DataManager.prototype.getTags = function(msg, callback){
+    var session = ogmneo.Connection.session();
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (i) WHERE id(i)={nodeId}\n\
+    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(c:Concept)<-[:has]-(p)\n\
+    MATCH (u)-[:refer]->(iof)\n\
+    RETURN  u.name AS user , c.value AS val\n';
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id,
+            nodeId: msg.nodes[0]
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('relationId').toString(); //获取id
+            // console.log(res);
+            console.log('[TAGS]');
+            var taginfo = {};
+            for (var i = 0; i < res.records.length; i++) {
+                var rec = res.records[i];
+                var user = rec.get('user').toString();
+                var val = rec.get('val').toString();
+                if (taginfo[val] == undefined){
+                    taginfo[val] = [user];
+                }
+                else{
+                    taginfo[val].push(user);
+                }
+            }
+            console.log(taginfo);
+            resp.nodes = [];
+            resp.nodes.push({
+                node_id: msg.nodes[0],
+                taginfo: taginfo
+            });
             resp.msg = 'Success';
             session.close();
             callback(resp);

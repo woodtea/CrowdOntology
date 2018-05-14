@@ -3,41 +3,58 @@
  */
 
 var clicks = 0;
+var mutex = 0;
 $(function () {
+
+    //使得提示工具Tooltip生效
     $('[data-tooltip="tooltip"]').tooltip()
-    //点击导航
+
+    /*
+    * 主区域
+    * */
+    //点击索引
     $(document).on("click", '.index li', function () {
         let id = $(this).attr("nodeid");
-        drawEntity(id, instance_model);
-        $("#" + id).click();//这个不对哦
+        drawEntity(id, instance_model); //画出中心区域
+        $("#" + id).click();    //点击中心节点
     })
-    //点击节点
+
+    //单击节点
     $(document).on("click", 'g', function () {
         let item = this;
         if(d3.select(this).classed("isRecommendation") == true){
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
-                alert("显示推荐详细");
+                alert("显示推荐节点详情");
             });
         }else{
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
-                drawNodeDetails(id);
+                if(instance_model.nodes[id] == undefined){
+                    $(".properties-revise .button-left").click();
+                    $(property).children().remove();
+                    drawIndex();
+                    drawEntity(nodeId);
+                    $(graph).children().remove();
+                }else{
+                    drawNodeDetails(id);
+                }
             });
         }
     })
+
+    //双击节点
     $(document).on("dblclick", 'g', function () {
-        if (d3.select(this).classed("isRecommendation") == true) { //forTest
+        if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
             clickTimeout.clear();
-            //进行添加
+            //引用推荐节点
             let nodeID = $(this).attr("id");
             instance_model.nodes[nodeID] = {
                 "dataType": recommend_model[nodeID].dataType,
                 "value": recommend_model[nodeID].value
             }
             if(recommend_model[nodeID].tags) instance_model.nodes[nodeID].tags = recommend_model[nodeID].tags;
-
-            //生成关系
+            //引用推荐节点与当前节点间的关系
             let centerID = $(".graph .center").attr("id");
             for(let relation of recommend_model[nodeID].relations){
                 relationID = relation.id;
@@ -51,6 +68,7 @@ $(function () {
                 }
             }
             $("#"+centerID).click();
+            //更新索引信息
             drawIndex();
         } else {
             if (d3.select(this).classed("isCentralized") == false) {
@@ -58,17 +76,19 @@ $(function () {
             }
             clickTimeout.clear();
             let nodeID = $(this).attr("id");
-            recommend_model = shiftModel(recommend_model_whole,nodeID);
+            recommend_model = shiftModel(recommend_model_whole,nodeID); //获取推荐模型
             //console.log("recommend_model");
             //console.log(recommend_model);
-            drawRecommendation(recommend_model, instance_model);
+            drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
         }
     })
 
-    //点击关系
-    $(document).on("click", 'text', function () {
-        $(this).prev("path").click();
+    //点击关系文本
+    $(document).on("click", 'textPath', function () {
+        //$(this).prev("path").click();
+        $($(this).attr("href")).click();
     })
+
     //点击关系
     $(document).on("click", 'path', function () {
         let item = this;
@@ -76,19 +96,23 @@ $(function () {
         drawPathDetails(id);
     })
 
+    /*
+     * 右侧栏
+     * */
+    // 右划
     $(document).on("click", '.properties .button-right', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").hide();
         $(item).children(".properties-revise").show();
     })
-
+    // 左划
     $(document).on("click", '.properties-revise .button-left', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").show();
         $(item).children(".properties-revise").hide();
     })
 
-
+    // 点击添加
     $(document).on("click", '.fa-plus', function () {
 
         $(".properties .active").removeClass("active");
@@ -109,6 +133,7 @@ $(function () {
         }
     });
 
+    // 点击属性修改
     $(document).on("click", '#attribute .fa-edit', function () {
 
         let item = $(this).parent().parent();
@@ -125,6 +150,7 @@ $(function () {
         //给一个标志位吧
     });
 
+    // 点击关系修改
     $(document).on("click", '#relation .fa-edit', function () {
 
         let item = $(this).parent().parent();
@@ -140,6 +166,7 @@ $(function () {
 
     });
 
+    // 点击修改成功
     $(document).on("click", '.properties-revise .glyphicon-ok', function () {
         //alert("修改成功");
         let item = $(this).parent().parent();
@@ -156,6 +183,7 @@ $(function () {
         }
     });
 
+    // 点击修改取消
     $(document).on("click", '.properties-revise .glyphicon-ban-circle', function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
@@ -169,9 +197,27 @@ $(function () {
                 break;
         }
     });
+
+    // 点击修改删除
+    $(document).on("click", '.properties-revise .glyphicon-remove', function () {
+        let item = $(this).parent().parent().children(".list-group");
+        switch ($(item).attr("id")) {
+            case "class-revise":
+                break;
+            case "attribute-revise":
+                attributeRemoveSubmit(item);
+                break;
+            case "relation-revise":
+                //$(".properties-revise .button-left").click();
+                relationRemoveSubmit(item);
+                break;
+        }
+    });
 });
 
-/* draw detail */
+/*
+* 右侧区域的绘制
+* */
 function drawNodeDetails(id) {
     let isEntity = drawEntity(id, instance_model);
     if (isEntity) {
@@ -266,7 +312,7 @@ function drawRelations(id) {
     let relations = filterRelations(entity.neighbours);
     html = "";
     for (let relation of relations) {
-        html += generateContent(relation.type, relation.value);
+        html += generateContent(relation.type, relation.value, relation.nodeID, relation.relationID);
     }
     $(property).find("#relation").append(html);
 
@@ -331,7 +377,7 @@ function attributeRevise(item, type = "add") {
     $(".properties-revise").append(html);
 
 
-    html = generateTitle("属性", "attribute-revise");
+    html = generateXTitle("属性", "attribute-revise");
     $(".properties-revise").append(html);
 
     html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
@@ -362,7 +408,7 @@ function relationRevise(item, type = "add") {
     $(".properties-revise").append(html);
 
 
-    html = generateTitle("关系", "relation-revise");
+    html = generateXTitle("关系", "relation-revise");
     $(".properties-revise").append(html);
 
     html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
@@ -414,13 +460,29 @@ function generateTitle(title, type) {
     let html = '<div class="panel panel-default">' +
         '<div class="panel-heading">' +
         '<div class="panel-title stigmod-rcmd-title">' + title + '</div>' +
+        //'<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
+        //'<span class="glyphicon glyphicon-remove" type="remove" ></span>' +
         '</div>' +
         '<div class="list-group" id=' + type + '></div>' +
         '</div>';
     return html
+
+}
+
+function generateXTitle(title, type) {
+    let html = '<div class="panel panel-default">' +
+        '<div class="panel-heading">' +
+        '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
+        '<span class="glyphicon glyphicon-remove" type="remove" style="z-index: 2"></span>' +
+        '</div>' +
+        '<div class="list-group" id=' + type + '></div>' +
+        '</div>';
+    return html
+
 }
 
 function generateContent(type, value, nodeID = "", relationID = "") {
+    if(type == undefined) type="姓名";
     //alert(nodeID);
     //alert(relationID);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
@@ -444,7 +506,7 @@ function generateSubmitLogo() {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
         '<span class="glyphicon glyphicon-ok" type="ok"></span>' +
         '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
-        '<span class="glyphicon glyphicon-ban-circle" type="remove"></span>' +
+        '<span class="glyphicon glyphicon-ban-circle" type="cancel"></span>' +
         '</a>';
     return html;
 }
@@ -529,6 +591,40 @@ function generateFrontNodeID(val) {
     return nodeID;
 }
 
+var OperationCounter = 0;
+function generateFrontOperationID() {
+
+    OperationCounter = (OperationCounter+1)%100;
+    //let id = localStorage.mongoMachineId + new Date().valueOf() + OperationCounter;
+    let id = hash(user) + new Date().valueOf() + OperationCounter;
+    return id;
+}
+
+var I64BIT_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-'.split('');
+
+function hash(input){
+    var hash = 5381;
+    var i = input.length - 1;
+
+    if(typeof input == 'string'){
+        for (; i > -1; i--)
+            hash += (hash << 5) + input.charCodeAt(i);
+    }
+    else{
+        for (; i > -1; i--)
+            hash += (hash << 5) + input[i];
+    }
+    var value = hash & 0x7FFFFFFF;
+
+    var retValue = '';
+    do{
+        retValue += I64BIT_TABLE[value & 0x3F];
+    }
+    while(value >>= 6);
+
+    return retValue;
+}
+
 function generateFrontRelationID() {
     let n = getJsonLength(instance_model.relations);
     let relationID = "front_r" + n;
@@ -546,23 +642,14 @@ function classReviseSubmit(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    //生成值节点，理论上应该先检查
-    let nodeID = generateFrontNodeID(value);        //let n = getJsonLength(instance_model.nodes);
-    //let nodeID = "n" + n;
-    instance_model.nodes[nodeID] = {
+    let nodes = {}
+    nodes[generateFrontNodeID(value)] = {
         "tags":[type],
-        "dataType": "姓名",
+        "dataType": "姓名", //测试用
         "value": value
     }
 
-    drawIndex();
-    drawEntity(nodeID);
-    indexArray = getIndexArray();
-    setIndexTypeahead(indexArray);
-
-    $("#" + nodeID).click();
-    //$(".properties-revise").children().remove();
-
+    io_create_insModel_node(nodes)
     return;
 
 }
@@ -572,77 +659,130 @@ function attributeReviseSubmit(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    //生成值节点，理论上应该先检查
-    let nodeID = generateFrontNodeID(value);        //let n = getJsonLength(instance_model.nodes);
-    //let nodeID = "n" + n;
-    instance_model.nodes[nodeID] = {
-        "dataType": "String",
+    //删除旧的节点和关系
+    let origItem = $(".properties").find(".active");
+    let origNode = $(origItem).find(".nodeID").attr("value");
+    let origRelation = $(origItem).find(".relationID").attr("value");
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
+    }
+    if (!(origNode != "" || origRelation == undefined)) {
+        io_remove_insModel_node(origNode);
+    }
+    //else{//则当前节点为中心节点
+    //    io_remove_insModel_node($(".graph .center").attr("id"));
+    //}
+
+    //生成节点
+    let nodes = {};
+    let nodeId = generateFrontNodeID(value)
+    nodes[nodeId] = {
+        "dataType": type,
         "value": value
     }
-
+    io_create_insModel_node(nodes)
     //生成关系
-    let centerID = $(".graph .center").attr("id");
-    let relationID = generateFrontRelationID();
-    //let r = getJsonLength(instance_model.relations);
-    //let relationID = "r" + r;
-    instance_model.relations[relationID] = {
+    let centerId = $(".graph .center").attr("id");
+    let relationId = generateFrontRelationID();
+    let relations = {};
+    relations[relationId] = {
         "type": type,
         "roles": [
-            {"rolename": "", "node_id": centerID},
-            {"rolename": "", "node_id": nodeID}
+            {"rolename": "", "node_id": centerId},
+            {"rolename": "", "node_id": nodeId}
         ]
     }
+    io_create_insModel_relation(relations);
+    return;
+}
+
+function attributeRemoveSubmit(item) {
+    let centerID = $(".graph .center").attr("id");
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    if (origNode != undefined) {
-        delete instance_model.nodes[origNode];
+    console.log(origNode)
+    console.log(origRelation)
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
     }
-    if (origRelation != undefined) {
-        delete instance_model.relations[origRelation];
+    if (!(origNode != "" || origNode == undefined)) {
+        io_remove_insModel_node(origNode);
+    }else{//则当前节点为中心节点
+        io_remove_insModel_node($(".graph .center").attr("id"));
     }
     //更新页面
-    //$("#" + centerID).click();
-    transAnimation(centerID,nodeID,relationID,instance_model);
+    $("#" + centerID).click();  //这个在逻辑上有问题
+    //transAnimation(centerID,null,null,instance_model);
 }
 
 function relationReviseSubmit(item) {
 
+    //删除旧的节点和关系
+    let origItem = $(".properties").find(".active");
+    let origNode = $(origItem).find(".nodeID").attr("value");
+    let origRelation = $(origItem).find(".relationID").attr("value");
+    /* 好像是不需要产出实体的
+    if (origNode != "") {
+        io_remove_insModel_node(origNode);
+    }else{//则当前节点为中心节点
+        io_remove_insModel_node($(".graph .center").attr("id"));
+    }
+    */
+    console.log(origNode)
+    console.log(origRelation)
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
+    }
+
+
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
-    //关系的节点已经存在
-    let nodeID = getEntityIdByValue(value, instance_model);
-    if (nodeID == undefined) {
+
+    //判断关系两端的节点是否存在
+    let nodeId = getEntityIdByValue(value, instance_model);
+    if (nodeId == undefined) {
         alert("输入对象不存在");
         return;
     }
 
-    let centerID = $(".graph .center").attr("id");
-    let relationID = generateFrontRelationID();
-
-    instance_model.relations[relationID] = {
+    //生成关系
+    let centerId = $(".graph .center").attr("id");
+    let relationId = generateFrontRelationID();
+    let relations = {};
+    relations[relationId] = {
         "type": type,
         "roles": [
-            {"rolename": "", "node_id": centerID},
-            {"rolename": "", "node_id": nodeID}
+            {"rolename": "", "node_id": centerId},
+            {"rolename": "", "node_id": nodeId}
         ]
     }
+    io_create_insModel_relation(relations);
+    return;
+}
+
+function relationRemoveSubmit(item){
+    let centerID = $(".graph .center").attr("id");
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    if (origNode != undefined) {
-        delete instance_model.nodes[origNode];
+    /* 好像是不需要产出实体的
+    if (origNode != "") {
+        io_remove_insModel_node(origNode);
+    }else{//则当前节点为中心节点
+        io_remove_insModel_node($(".graph .center").attr("id"));
     }
-    if (origRelation != undefined) {
-        delete instance_model.relations[origRelation];
+    */
+    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+        io_remove_insModel_relation(origRelation);
     }
-
     //更新页面
-    $("#" + centerID).click();
+    $("#" + centerID).click();  //这个在逻辑上有问题
+    //transAnimation(centerID,null,null,instance_model);
 }
 
 let clickTimeout = {
@@ -748,26 +888,6 @@ function transAnimation(centerID,neighbourID,relationID,model) {
         $("#" + centerID).click();
         return;
     }
-    //如果是新的节点，则需要移动老的节点
-    /*
-    //获取坐标信息
-    let gList = $("g");
-    for (let n=0;n<gList.length;n++) {
-        let id = $(gList[n]).attr("id");
-        if(id == centerID) continue;    //如果是中心的话不操作
-
-        // 移动圆圈位置
-        let angle = 2 * Math.PI * getRank(id,entity) / neighbours + 0;
-        cx = width/2 + R * Math.cos(angle);
-        cy = height/2 + R * Math.sin(angle);
-        $(gList[n]).transition({x:cx,y:cy});
-
-    }
-    */
-    /*
-    $("path").next().remove();
-    $("path").remove();
-    */
 
     let n,tmpNodeID,tmpRelationID,tmpItem;
     let originPosition,rotateAngle;
@@ -784,28 +904,25 @@ function transAnimation(centerID,neighbourID,relationID,model) {
             originPosition = ""+width/2+"px "+height/2+"px";
             //rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours - (getRank(tmpNodeID,entity)-1) / (neighbours-1)))%360;
             rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours ))%360;
-            $(tmpItem).css({transformOrigin: originPosition}).transition({rotate: rotateAngle});
-            $(tmpItem).next()
+            $(tmpItem).transition({rotate: rotateAngle}).end(refreshText(entity));
+            //$(tmpItem).next()
+            //d3.select("#"+tmpRelationID).transition().style("rotate",rotateAngle).on( "start", function() {
+            d3.select("[id='" + tmpRelationID+"']").transition().style("rotate",rotateAngle).on( "start", function() {
+                mutex++;
+            }).on( "end", function() {
+                if( --mutex === 0 ) {
+                    refreshText(entity);   //更新pathText
+                }
+            });
         }
 
     }
-    /*
-    let paths = getPaths(width / 2, height / 2, R, r, 0, entity.neighbours);
-    console.log(paths);
-    for (let path of paths) {
-        drawPath(path);
-    }*/
+
     //画出新增节点
     let tmpNode = {};
     tmpNode[neighbourID] = entity.neighbours[neighbourID];
     drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * (getRank(neighbourID,entity)+1) / neighbours);//不知道为什么要+1
 
-    $(".textPath").remove();
-    let paths = getPathTexts(width / 2, height / 2, R, r, 0, entity.neighbours);
-    //console.log(paths);
-    for (let path of paths) {
-        drawPathText(path);
-    }
     //将圆圈更新到前面
     svgBringToFront($("#"+centerID));
 
@@ -822,6 +939,7 @@ function transAnimation(centerID,neighbourID,relationID,model) {
     return true;
 }
 
+
 function getRank(id,entity){
     let i = 0;
     for(let key in entity.neighbours){
@@ -835,4 +953,80 @@ function svgBringToFront(item) {
     var parent = $(item).parent();
     $(item).remove();
     $(parent).append(item);
+}
+
+function refreshText(entity){
+    $(".textPath").remove();
+    let paths = getPathTexts(width / 2, height / 2, R, r, 0, entity.neighbours);
+    //console.log(paths);
+    for (let path of paths) {
+        drawPathText(path);
+    }
+}
+
+let svgOperation = {
+    clickNode : function(nodeId,model=instance_model){
+        drawIndex();
+        drawEntity(nodeId);
+        indexArray = getIndexArray();
+        setIndexTypeahead(indexArray);
+
+        $("#" + nodeId).click();
+    }
+}
+
+let tagReformat = {
+    value2id : function(msg) {
+        console.log("******value2id")
+        console.log(msg)
+        if(msg.nodes){
+            //alert("nodes")
+            for(let nodeId in msg.nodes){
+                let tmp = msg.nodes[nodeId].tags;
+                if(tmp == undefined) tmp = ["Symbol"];
+                for(let n in tmp){
+                    tmp[n] = getValueId(tmp[n],model.nodes);
+                }
+            }
+        }
+        if(msg.relations){
+            //alert(relations)
+            for(let relationId in msg.relations){
+                let tmp = msg.relations[relationId].type; //前后不统一
+                msg.relations[relationId].type = getValueId(tmp,model.relations);
+            }
+        }
+        console.log(msg);
+        console.log("value2id******")
+    },
+    id2value : function(msg) {
+        console.log("******")
+        console.log(msg)
+        if(msg.nodes){
+            for(let nodeId in msg.nodes){
+                let tmpDatatype = msg.nodes[nodeId].dataType;
+                if(tmpDatatype == undefined) tmpDatatype = "姓名";
+
+                let tmp = msg.nodes[nodeId].tags;
+                for(let n in tmp){
+                    tmp[n] = [model.nodes[tmp[n]].value]
+                }
+            }
+        }
+        if(msg.relations){
+            for(let relationId in msg.relations){
+                let tmp = msg.relations[relationId].value; //这个就不对吧，应该是tag啊
+                if(tmp == undefined) tmp = msg.relations[relationId].type; //好乱啊这里
+                if(tmp == undefined) tmp = msg.relations[relationId].tag; //好乱啊这里
+                //alert(tmp);
+                msg.relations[relationId].type = model.relations[tmp].value;
+            }
+        }
+    }
+}
+
+getValueId = function(value,item){
+    for(let key in item){
+        if(item[key]["value"] == value) return key;
+    }
 }

@@ -19,33 +19,33 @@
         </div>
 
 
-<!--div class="btn-group">
-  <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+        <!--div class="btn-group">
+          <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
 
-</div>
-<button type="button" class="glyphicon glyphicon glyphicon-plus-sign  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+        </div>
+        <button type="button" class="glyphicon glyphicon glyphicon-plus-sign  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
 
-<!--div class="btn-group">
-  <button type="button" class="btn btn-default" style="width: 82px">索引</button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    <span class="caret"></span>
-    <span class="sr-only">Toggle Dropdown</span>
-  </button>
-  <ul class="dropdown-menu index">
-    <li><a href="#">贾宝玉</a></li>
-    <li><a href="#">林黛玉</a></li>
-    <li><a href="#">薛宝钗</a></li>
-  </ul>
-</div-->
+        <!--div class="btn-group">
+          <button type="button" class="btn btn-default" style="width: 82px">索引</button>
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu index">
+            <li><a href="#">贾宝玉</a></li>
+            <li><a href="#">林黛玉</a></li>
+            <li><a href="#">薛宝钗</a></li>
+          </ul>
+        </div-->
       </div>
-      <div class="col-xs-6" style="text-align: center"><h4>红楼梦</h4></div>
+      <div class="col-xs-6 title" style="text-align: center"><h4>红楼梦</h4></div>
       <div class="col-xs-3">
-          <div class="input-group" style="margin:auto;">
-            <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
-            <span class="input-group-btn">
+        <div class="input-group" style="margin:auto;">
+          <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
+          <span class="input-group-btn">
               <button class="btn btn-default" type="button" id="stigmod-search-left-btn"><span class="glyphicon glyphicon-search"></span></button>
             </span>
-          </div>
+        </div>
       </div>
     </div>
     <hr style='margin:8px'>
@@ -93,8 +93,27 @@
 
 <script language="javascript">
     window.onload = function() {
-        user = $(".glyphicon-user").parent().text();
-        user = user.replace(/(^\s*)/g, "");
+        user = $(".glyphicon-user").parent().text().slice(1);
+        //user = user.replace(/(^\s*)/g, "");
+        project = "红楼梦";
+        //forTest
+        //判断是否存在图谱，如果不存在就初始化图谱
+        let msg = {
+            operation: 'mget',  //先这么用着再说吧
+            user_id : user,
+            project_id : '红楼梦',
+            operation_id : 'op1'
+        };
+        //socketEmit("model",msg);
+        socket.emit("model",msg);
+        let msg2 = {
+            operation: 'get',
+            user_id : user,
+            project_id : '红楼梦',
+            operation_id : 'op2'
+        }
+        //socketEmit("insModel",msg2);
+        socket.emit("insModel",msg2);
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
