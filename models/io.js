@@ -126,12 +126,12 @@ function ioConfig(server){
                 operation_id: 'opt1',
                 name: '123@123'
             };
-            msg12 = {
+            msg1_2 = {
                 operation: 'create_user',
                 operation_id: 'opt1',
                 name: 'user1@mail'
             };
-            msg13 = {
+            msg1_3 = {
                 operation: 'create_user',
                 operation_id: 'opt1',
                 name: 'user2@mail'
@@ -154,7 +154,7 @@ function ioConfig(server){
                     }
                 ]
             };
-            msg29 = {
+            msg2_9 = {
                 operation: 'mcreate_node',
                 user_id : '123@132',
                 project_id : '红楼梦',
@@ -185,7 +185,7 @@ function ioConfig(server){
                     }
                 ]
             };
-            msg41 = {
+            msg4_1 = {
                 operation: 'mcreate_relation',
                 user_id : '123@123',
                 project_id : '红楼梦',
@@ -198,6 +198,24 @@ function ioConfig(server){
                             {rolename : '',
                                 node_id : 110},
                             {rolename : '性别',
+                                node_id : 110}
+                        ]
+                    }
+                ]
+            };
+            msg4_2 = {
+                operation: 'mcreate_relation',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        value: '姓名',
+                        roles:[
+                            {rolename : '',
+                                node_id : 110},
+                            {rolename : '姓名',
                                 node_id : 110}
                         ]
                     }
@@ -217,7 +235,7 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [20], //tag用id表示
+                        tags : [110], //tag用id表示
                         value: '西瓜人' //实体的value为空
                     }
                 ]
@@ -230,14 +248,14 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 4, //用tagid表示
+                        tag: 112, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 5,
+                            node_id : 252,
                         },
                         {
                             rolename : '兄弟',
-                            node_id : 7,
+                            node_id : 114,
                         }
                         ]
                     }
@@ -294,9 +312,9 @@ function ioConfig(server){
                 operation_id : 'op2',
                 nodes :[
                     {
-                        front_id: '',
-                        tags : [20], //tag用id表示
-                        value: '西瓜人' //实体的value为空
+                        front_id: 'front_n贾宝玉',
+                        tags : ["280"], //tag用id表示
+                        value: '贾宝玉' //实体的value为空
                     }
                 ]
             };
@@ -308,14 +326,14 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 23, //用tagid表示
+                        tag: 112, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 30,
+                            node_id : 252,
                         },
                         {
                             rolename : '名字',
-                            node_id : 26,
+                            node_id : 114,
                         }
                         ]
                     }
@@ -325,10 +343,10 @@ function ioConfig(server){
             if(msg=="99"){
                 dm.handle(msg0, function(rep){
                     dm.handle(msg1, function(rep){
-                        dm.handle(msg12, function(rep){
-                            dm.handle(msg13, function(rep){
+                        dm.handle(msg1_2, function(rep){
+                            dm.handle(msg1_3, function(rep){
                                 dm.handle(msg2, function(rep){
-                                dm.handle(msg29, function(rep){
+                                dm.handle(msg2_9, function(rep){
                                     var symbolId;
                                     for(let key in rep.migrate){
                                         symbolId = rep.migrate[key];
@@ -341,10 +359,15 @@ function ioConfig(server){
                                             msg4.relations[0].roles[1].node_id = rep.migrate[key]
                                         }
                                         dm.handle(msg4, function(rep){
-                                            msg41.relations[0].roles[0].node_id = nodeId
-                                            msg41.relations[0].roles[1].node_id = symbolId
-                                            dm.handle(msg41, function(rep){
-                                                return callback;
+                                            msg4_1.relations[0].roles[0].node_id = nodeId
+                                            msg4_1.relations[0].roles[1].node_id = symbolId
+                                            dm.handle(msg4_1, function(rep){
+                                                return;
+                                            });
+                                            msg4_2.relations[0].roles[0].node_id = nodeId
+                                            msg4_2.relations[0].roles[1].node_id = symbolId
+                                            dm.handle(msg4_2, function(rep){
+                                                return;
                                             });
                                         });
 
@@ -414,6 +437,10 @@ function emitMsgHeader(rcvMsg,err,msg){
 function io_create_insModel_node(rcvMsg,callback){
 
     let newMsg = formatExchange.web2Server(rcvMsg);
+
+    console.log("\n******")
+    console.log(newMsg)
+    console.log("******\n")
 
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
