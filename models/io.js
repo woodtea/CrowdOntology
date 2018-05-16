@@ -99,8 +99,6 @@ function ioConfig(server){
                     emitMsg = io_recommend_insModel_relation(msg);
                     break;
             }
-
-
             //console.log(emitMsg);
             //socket.emit('insModel',emitMsg);
         });
@@ -219,8 +217,8 @@ function ioConfig(server){
                 nodes :[
                     {
                         front_id: '',
-                        tags : [160], //tag用id表示
-                        value: '冬瓜人' //实体的value为空
+                        tags : [20], //tag用id表示
+                        value: '西瓜人' //实体的value为空
                     }
                 ]
             };
@@ -269,6 +267,60 @@ function ioConfig(server){
                     164
                 ]
             };
+            msg11 = {
+                operation: 'get_tags',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                node: {
+                    value:'冬瓜'
+                }
+                
+            };
+            msg12 = {
+                operation: 'refer',
+                user_id : 'user1@mail',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                node:{
+                    front_id: '',
+                    refer_id: 14
+                }
+            };
+            msg13 = {
+                operation: 'create_node_proxy',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                nodes :[
+                    {
+                        front_id: '',
+                        tags : [20], //tag用id表示
+                        value: '西瓜人' //实体的value为空
+                    }
+                ]
+            };
+            msg14 = {
+                operation: 'create_relation_proxy',
+                user_id : '123@123',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                relations:[
+                    {
+                        front_id:'',
+                        tag: 23, //用tagid表示
+                        roles:[{
+                            rolename : '',
+                            node_id : 30,
+                        },
+                        {
+                            rolename : '名字',
+                            node_id : 26,
+                        }
+                        ]
+                    }
+                ]
+            };
             //initiate Set
             if(msg=="99"){
                 dm.handle(msg0, function(rep){
@@ -305,14 +357,14 @@ function ioConfig(server){
                 });
                 return;
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14];
 
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
+                    socket.emit('iotest_back', rep);
                 });
             }
-            socket.emit('iotest_back', 'reply');
         })
     });
 }

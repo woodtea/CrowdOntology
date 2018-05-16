@@ -77,6 +77,18 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'remove_relation':
                 this.removeRelation(msg, callback);
                 break;
+            case 'get_tags':
+                this.getTags(msg, callback);
+                break;
+            case 'refer':
+                this.refer(msg, callback);
+                break;
+            case 'create_node_proxy':
+                this.createNodeProxy(msg, callback);
+                break;
+            case 'create_relation_proxy':
+                this.createRelationProxy(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -364,6 +376,93 @@ DataManager.prototype.mGet = function (msg, callback) {
         });
 }
 
+function is_eq(l1, l2){
+    if(l1.length != l2.length)
+        return false;
+    l1.sort();
+    l2.sort();
+    //var is_eq = true;
+    for (var i = 0; i < l1.length; ++i){
+        if (l1[i] != l2[i])
+            return false;
+    }
+    return true;
+}
+
+/*
+msg : {
+    operation: 'create_node',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    nodes :[
+        {
+            front_id: '',
+            tags : [12, 3], //tag用id表示
+            value: 'xxx' //实体的value为空
+        }
+    ]
+}
+*/
+//先保证一个点的情况
+//创建带有value的点时，先判断同样tag同样value的点是否已经存在，如果已经存在，则直接refer
+DataManager.prototype.createNodeProxy = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var node = msg.nodes[0];
+    var tags = node.tags;
+
+    var is_value = (node.value != '' && node.value != undefined);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    if (is_value){
+        var tagMsg = extractBasic(msg);
+        tagMsg.error = false;
+        tagMsg.operation = 'get_tags';
+        tagMsg.operation_id += 'gt';
+        tagMsg.node = {
+            value: node.value
+        };
+        DataManager.prototype.getTags(tagMsg, function(rep){
+            var info = rep.info;
+
+            var sameNode=-1;
+            for (k in info){
+                var ik = info[k];
+                var tmpTags = [];
+                for (t in ik){
+                    tmpTags.push(t);
+                }
+                var eq = is_eq(tmpTags, tags);
+                if(eq){
+                    sameNode = k;
+                    break;
+                }
+            }
+            if (sameNode == -1){
+                DataManager.prototype.createNode(msg, callback);
+            }
+            else{
+                var referMsg = extractBasic(msg);
+                referMsg.error = false;
+                referMsg.operation = 'refer';
+                referMsg.operation_id += 'rf';
+                referMsg.node = {
+                    front_id: node.front_id,
+                    refer_id: sameNode
+                }
+                DataManager.prototype.refer(referMsg, callback);
+            }
+        });
+    }
+    else{
+        DataManager.prototype.createNode(msg, callback);
+    }
+}
+
+
+
 /*
 msg : {
     operation: 'create_node',
@@ -533,6 +632,132 @@ DataManager.prototype.createRelation = function (msg, callback) {
             resp.msg = err;
             callback(resp);
         });
+}
+
+/*
+msg : {
+    operation: 'create_relation',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    relations:[
+        {
+            front_id:'',
+            tag: 7, //用tagid表示
+            roles:[
+                {
+                rolename : 'r1',
+                node_id : 7,
+                }
+                ...
+            ]
+        }
+    ]
+}
+*/
+//先考虑一个关系，并且没有多元性多重性
+//特殊处理名字关系
+//默认名字关系建立时，对应的实例还没有建立其他关系
+//根据名字，找到其他实例，refer实例，并且删除原有的实例
+DataManager.prototype.createRelationProxy = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var relation = msg.relations[0];
+    var roles = relation.roles;
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    if(roles.length == 2){
+        var is_name = false;
+        var inst_id = -1;
+        var name_id = -1;
+        for (i in roles){
+            var r = roles[i];
+            if (r.rolename == '名字'){
+                is_name = true;
+                name_id = r.node_id;
+            }
+            else{
+                inst_id = r.node_id;
+            }
+        }
+        //如果是名字关系
+        if (is_name){
+            var cypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (name) WHERE id(name)={name_id}\n\
+            MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role {name:\'名字\'}]->(name)\n\
+            RETURN id(i) AS iid, id(rel) AS relid'.format({
+                name_id: name_id
+            });
+            var resp = extractBasic(msg);
+            resp.error = false;
+            session
+            .run(cypher, {
+                pname: msg.project_id,
+                uname: msg.user_id
+            })
+            .then(function (res) {
+                // var relationId = res.records[0].get('relationId').toString(); //获取id
+                //能找到其他实例
+                if (res.records.length != 0){
+                    var iid = res.records[0].get('iid').toString();
+                    var relid = res.records[0].get('relid').toString();
+                    var referMsg = extractBasic(msg);
+                    referMsg.error = false;
+                    referMsg.operation = 'refer';
+                    referMsg.operation_id += 'rf';
+                    referMsg.node = {
+                        front_id: inst_id,
+                        refer_id: iid
+                    }
+                    //引用其他实例
+                    DataManager.prototype.refer(referMsg, function(resp){
+                        referMsg.node = {
+                            front_id: relation.front_id,
+                            refer_id: relid
+                        };
+                        
+                        //还需要添加原来实例里面没有的tag
+            
+                        //引用实例-名字之间的关系
+                        DataManager.prototype.refer(referMsg, function(resp){
+                            var removeMsg = extractBasic(msg);
+                            removeMsg.operation = 'remove_node';
+                            removeMsg.operation_id += 'rn';
+                            removeMsg.nodes = [inst_id];
+                            //删除原来的实例
+                            DataManager.prototype.removeNode(removeMsg, function(resp){
+                                resp.migrate = {};
+                                resp.migrate[inst_id] = iid;
+                                callback(resp);
+                            });
+                        });
+                    });
+                }
+                else{
+                    DataManager.prototype.createRelation(msg, callback);
+                }
+                // resp.msg = 'Success';
+                // session.close();
+                // callback(resp);
+            })
+            .catch(function (err) {
+                resp.error = true;
+                resp.msg = err;
+                callback(resp);
+            });
+            
+        }
+        else{
+            DataManager.prototype.createRelation(msg, callback);
+        }
+    }
+    else{
+        DataManager.prototype.createRelation(msg, callback);
+    }
+    // session.close();
+
 }
 
 /*
@@ -741,4 +966,135 @@ DataManager.prototype.removeRelation = function (msg, callback) {
         });
 }
 
+/*
+msg:{
+    operation: 'get_tags',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    node:{
+        id:'',
+        value:''
+    }
+}
+*/
+DataManager.prototype.getTags = function(msg, callback){
+    var session = ogmneo.Connection.session();
+    var nodeCypher = 'MATCH (i {value:\'{value}\'})'.format({
+        value:msg.node.value
+    });
+    if (msg.node.id != undefined){
+        nodeCypher = 'MATCH (i) WHERE id(i)={nodeId}'.format({
+            nodeId:msg.node.id
+        })
+    }
+    var cypher = 'MATCH (p:Project {name: {pname}})\n'+
+    nodeCypher +
+    'MATCH (i)-[:from]->(iof:inst_of)-[:to]->(c:Concept)<-[:has]-(p)\n\
+    MATCH (u)-[:refer]->(iof)\n\
+    RETURN  id(i) AS iid, u.name AS user , id(c) AS tagid\n';
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('relationId').toString(); //获取id
+            // console.log(res);
+            console.log('[TAGS]');
+            var info = {};
+            for (var i = 0; i < res.records.length; i++) {
+                var rec = res.records[i];
+                var user = rec.get('user').toString();
+                var tagid = rec.get('tagid').toString();
+                var iid = rec.get('iid').toString();
+                if (info[iid] == undefined){
+                    info[iid] = {};
+                }
+                if (info[iid][tagid] == undefined){
+                    info[iid][tagid] = [];
+                }
+                info[iid][tagid].push(user);
+                console.log(iid, tagid, user);
+            }
+            console.log(info);
+            resp.info = info;
+            resp.msg = 'Success';
+            session.close();
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+ 
+/*
+msg : {
+    operation: 'refer',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    node:{
+        front_id: 11,
+        refer_id: 7
+    }
+}
+*/
+//引用当前点，以及当前点的所有tag
+//如果引用一个关系，不会自动引用关系的其他角色
+DataManager.prototype.refer = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (i) WHERE id(i)={refer_id}\n\
+    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+    MERGE (u)-[:refer]->(iof)\n\
+    MERGE (u)-[:refer]->(i)'.format(
+        {
+            refer_id: msg.node.refer_id
+        }
+    );
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+            
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+/*
+TODO:
+add/remove tags
+get context
+*/
 module.exports = DataManager;

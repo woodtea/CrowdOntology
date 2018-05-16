@@ -354,6 +354,10 @@ io_test = function(){
     socketEmitArray('iotest', msg);
 }
 
+io_test2 = function(msg = "hello"){
+    socket.emit('iotest', msg);
+}
+
 socket.on('iotest_back', function(msg){
     //alert("123")
     //console.log(msg);
