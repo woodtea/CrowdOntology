@@ -238,7 +238,7 @@ function io_get_insModel_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        drawIndex();
+        prepareNewEntity();
     }
 }
 
@@ -259,7 +259,7 @@ function io_create_insModel_node_done(msg){
         }
         if(msg.migrate[nodeId]) nodeId = msg.migrate[nodeId];
         migrate(msg.migrate);
-        svgOperation.clickNode(nodeId)
+        //svgOperation.clickNode(nodeId)
         return;
     }
 }
@@ -299,8 +299,9 @@ function io_create_insModel_relation_done(msg){
             nodeId = instance_model.relations[relationId].roles[n].node_id;
             if(nodeId != centerId) break;
         }
-
-        transAnimation(centerId,nodeId,relationId,instance_model);
+        if(!prepareNewEntity()){
+            transAnimation(centerId,nodeId,relationId,instance_model);
+        }
         return;
     }
 }
@@ -396,9 +397,12 @@ migrateEmitMsg = function(obj){
             for(let emitMsgOrder in tmpMsg.emit){
                 let tmpMsp = tmpMsg.emit[emitMsgOrder];
                 if(tmpMsp["nodes"]){
-                    if(tmpMsp["nodes"][obj[key]] == undefined) tmpMsp["nodes"][obj[key]]={};
-                    copyObj(tmpMsp["nodes"][obj[key]],tmpMsp["nodes"][key])
-                    delete tmpMsp["nodes"][key];
+                    if(!tmpMsp["nodes"][key]) continue; //EmitArray可能不存在当前节点
+                    else{
+                        if(tmpMsp["nodes"][obj[key]] == undefined) tmpMsp["nodes"][obj[key]]={};
+                        copyObj(tmpMsp["nodes"][obj[key]],tmpMsp["nodes"][key])
+                        delete tmpMsp["nodes"][key];
+                    }
                 }
                 if(tmpMsp["relations"]){
                     for(let rel in tmpMsp["relations"]){
@@ -417,20 +421,19 @@ migrateEmitMsg = function(obj){
             for(let emitMsgOrder in tmpMsg.emit) {
                 let tmpMsp = tmpMsg.emit[emitMsgOrder];
                 if(tmpMsp["relations"]){
-                    if (tmpMsp["relations"][obj[key]] == undefined) tmpMsp["relations"][obj[key]] = {};
-                    copyObj(tmpMsp["relations"][obj[key]], tmpMsp["relations"][key])
-                    delete tmpMsp["relations"][key];
+                    if(!tmpMsp["relations"][key]) continue; //EmitArray可能不存在当前节点
+                    else{
+                        if (tmpMsp["relations"][obj[key]] == undefined) tmpMsp["relations"][obj[key]] = {};
+                        copyObj(tmpMsp["relations"][obj[key]], tmpMsp["relations"][key])
+                        delete tmpMsp["relations"][key];
+                    }
                 }
             }
         }
     }
-    //console.log("******")
-    //console.log(obj);
-    //console.log(tmpMsg.emit)
-    //console.log("******")
 
     return;
-    }
+}
 
 
 copyObj = function(obj1,obj2){

@@ -578,14 +578,14 @@ function getRoles(relation) {
  }
  */
 
-function generateFrontNodeID(val) {
+function generateFrontNodeID(val,type="e") {
     let n = getJsonLength(instance_model.nodes);
     if(val) n=val;
-    let nodeID = "front_n" + n;
+    let nodeID = "front_n" + type + n;
 
     while (instance_model.nodes[nodeID] != undefined) {
         n++;
-        nodeID = "front_n" + n;
+        nodeID = "front_n" + type + n;
     }
 
     return nodeID;
@@ -641,7 +641,7 @@ function classReviseSubmit(item) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
-
+    /*
     let nodes = {}
     nodes[generateFrontNodeID(value)] = {
         "tags":[type],
@@ -650,6 +650,34 @@ function classReviseSubmit(item) {
     }
 
     io_create_insModel_node(nodes)
+    */
+    //生成Entity节点
+    let entityNode = {};
+    let entityNodeId = generateFrontNodeID(value,"e")
+    entityNode[entityNodeId] = {
+        "tags":[type],
+        "value": ""
+    }
+    io_create_insModel_node(entityNode);
+    //生成Value节点
+    let valueNode = {};
+    let valueNodeId = generateFrontNodeID(value,"v");
+    valueNode[valueNodeId] = {
+        "tags": ["String"], //默认
+        "value": value
+    }
+    io_create_insModel_node(valueNode)
+    //生成关系
+    let relationId = generateFrontRelationID();
+    let relations = {};
+    relations[relationId] = {
+        "type": "姓名",
+        "roles": [
+            {"rolename": "", "node_id": entityNodeId},
+            {"rolename": "", "node_id": valueNodeId}
+        ]
+    }
+    io_create_insModel_relation(relations);
     return;
 
 }
@@ -703,7 +731,6 @@ function attributeRemoveSubmit(item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
-    alert(origNode)
     //console.log(origNode)
     //console.log(origRelation)
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
@@ -1040,4 +1067,58 @@ getValueId = function(value,item){
     for(let key in item){
         if(item[key]["value"] == value) return key;
     }
+}
+
+function prepareNewEntity(){
+
+    let hasCenterNode = false, centerNode;
+
+    for(let rId in instance_model["relations"]){
+        let r = instance_model["relations"][rId];
+        if(r.type != "姓名") continue;
+
+        let nId1,nId2,tmpNode;
+        nId1 = r.roles[0].node_id;
+        nId2 = r.roles[1].node_id;
+
+        let tags1 = instance_model["nodes"][nId1]["tags"];
+        let tags2 = instance_model["nodes"][nId2]["tags"];
+
+        if(tags1 != undefined){
+            if(tags1[0] != "String"){   //说明是Entity节点
+                instance_model["nodes"][nId1]["value"] = instance_model["nodes"][nId2]["value"];
+                delete instance_model["nodes"][nId2];
+                tmpNode = nId1;
+            }else{
+                instance_model["nodes"][nId2]["value"] = instance_model["nodes"][nId1]["value"];
+                delete instance_model["nodes"][nId1];
+                tmpNode = nId2;
+            }
+        }else{
+            if(tags2[0] != "String"){   //说明是Entity节点
+                instance_model["nodes"][nId2]["value"] = instance_model["nodes"][nId1]["value"];
+                delete instance_model["nodes"][nId1];
+                tmpNode = nId2;
+            }else{
+                instance_model["nodes"][nId1]["value"] = instance_model["nodes"][nId2]["value"];
+                delete instance_model["nodes"][nId2];
+                tmpNode = nId1;
+            }
+        }
+        delete instance_model["relations"][rId];
+        if(!hasCenterNode) {
+            hasCenterNode = true;
+            centerNode = tmpNode;
+        }
+    }
+    if(hasCenterNode){
+        drawIndex();
+        drawIndex();
+        drawEntity(centerNode);
+        indexArray = getIndexArray();
+        setIndexTypeahead(indexArray);
+        $("#" + centerNode).click();
+        return true;
+    }
+    return false;
 }
