@@ -91,6 +91,8 @@ format_create_insModel_node = function (msg) {
     for(frontId in msg["nodes"]) break;
 
     newMsg = format_basic(msg,0);
+    newMsg.operation = newMsg.operation+"_proxy";   //临时
+
     newMsg["nodes"]=[{
         "front_id" : frontId,
         "tags" : msg["nodes"][frontId].tags,
@@ -118,6 +120,8 @@ format_create_insModel_relation = function (msg) {
     for(frontId in msg["relations"]) break;
 
     newMsg = format_basic(msg,0);
+    newMsg.operation = newMsg.operation+"_proxy";   //临时
+
     newMsg["relations"]=[{
         "front_id" : frontId,
         "tag" : msg["relations"][frontId].type,
