@@ -656,9 +656,9 @@ msg : {
 }
 */
 //先考虑一个关系，并且没有多元性多重性
-//特殊处理名字关系
-//默认名字关系建立时，对应的实例还没有建立其他关系
-//根据名字，找到其他实例，refer实例，并且删除原有的实例
+//特殊处理姓名关系
+//默认姓名关系建立时，对应的实例还没有建立其他关系
+//根据姓名，找到其他实例，refer实例，并且删除原有的实例
 DataManager.prototype.createRelationProxy = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var relation = msg.relations[0];
@@ -673,7 +673,7 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
         var name_id = -1;
         for (i in roles){
             var r = roles[i];
-            if (r.rolename == '名字'){
+            if (r.rolename == '姓名'){
                 is_name = true;
                 name_id = r.node_id;
             }
@@ -681,12 +681,12 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                 inst_id = r.node_id;
             }
         }
-        //如果是名字关系
+        //如果是姓名关系
         if (is_name){
             var cypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
             MATCH (name) WHERE id(name)={name_id}\n\
-            MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role {name:\'名字\'}]->(name)\n\
+            MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role {name:\'姓名\'}]->(name)\n\
             RETURN id(i) AS iid, id(rel) AS relid'.format({
                 name_id: name_id
             });
@@ -720,7 +720,7 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                         
                         //还需要添加原来实例里面没有的tag
             
-                        //引用实例-名字之间的关系
+                        //引用实例-姓名之间的关系
                         DataManager.prototype.refer(referMsg, function(resp){
                             var removeMsg = extractBasic(msg);
                             removeMsg.operation = 'remove_node';
