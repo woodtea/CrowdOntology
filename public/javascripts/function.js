@@ -703,14 +703,18 @@ function attributeRemoveSubmit(item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
     let origRelation = $(origItem).find(".relationID").attr("value");
+    alert(origNode)
     //console.log(origNode)
     //console.log(origRelation)
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+        alert("remove relation!")
         io_remove_insModel_relation(origRelation);
     }
-    if (!(origNode != "" || origNode == undefined)) {
+    if (!(origNode == "" || origNode == undefined)) {
+        alert("remove node!")
         io_remove_insModel_node(origNode);
     }else{//则当前节点为中心节点
+        alert("remove center node!")
         io_remove_insModel_node($(".graph .center").attr("id"));
     }
     //更新页面

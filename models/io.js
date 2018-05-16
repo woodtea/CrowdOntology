@@ -72,7 +72,10 @@ function ioConfig(server){
                     });
                     break;
                 case 'remove_node':
-                    emitMsg = io_remove_insModel_node(msg);
+                    emitMsg = io_remove_insModel_node(msg,function(emitMsg){
+                        //console.log(emitMsg);
+                        socket.emit('insModel',emitMsg);
+                    });
                     break;
                 case 'create_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
@@ -81,7 +84,10 @@ function ioConfig(server){
                     });
                     break;
                 case 'remove_relation':
-                    emitMsg = io_remove_insModel_relation(msg);
+                    emitMsg = io_remove_insModel_relation(msg,function(emitMsg){
+                        //console.log(emitMsg);
+                        socket.emit('insModel',emitMsg);
+                    });
                     break;
                 case 'revise_relation':
                     emitMsg = io_revise_insModel_relation(msg);
@@ -354,10 +360,6 @@ function emitMsgHeader(rcvMsg,err,msg){
 }
 
 function io_create_insModel_node(rcvMsg,callback){
-    //纯测试用
-    let nodeId;
-    for(nodeId in rcvMsg.nodes) break;
-    //if(rcvMsg.nodes[nodeId].tags == undefined) rcvMsg.nodes[nodeId].tags = [symbol];
 
     let newMsg = formatExchange.web2Server(rcvMsg);
 
@@ -381,9 +383,18 @@ function io_create_insModel_node(rcvMsg,callback){
     */
 }
 
-function io_remove_insModel_node(rcvMsg){
-    let emitMsg = emitMsgHeader(rcvMsg,null,null);
-    return emitMsg;
+function io_remove_insModel_node(rcvMsg,callback){
+    let newMsg = formatExchange.web2Server(rcvMsg);
+
+    dm.handle(newMsg, function(rep){
+        let emitMsg = emitMsgHeader(rcvMsg,null,null);
+        emitMsg.migrate = rep.migrate;
+        console.log('[CALLBACK]')
+        console.log(rep);
+        callback(emitMsg);
+    });
+
+    return;
 }
 
 function io_create_insModel_relation(rcvMsg,callback){
@@ -401,9 +412,19 @@ function io_create_insModel_relation(rcvMsg,callback){
     return;
 }
 
-function io_remove_insModel_relation(rcvMsg){
-    let emitMsg = emitMsgHeader(rcvMsg,null,null);
-    return emitMsg;
+function io_remove_insModel_relation(rcvMsg,callback){
+
+    let newMsg = formatExchange.web2Server(rcvMsg);
+
+    dm.handle(newMsg, function(rep){
+        let emitMsg = emitMsgHeader(rcvMsg,null,null);
+        emitMsg.migrate = rep.migrate;
+        console.log('[CALLBACK]')
+        console.log(rep);
+        callback(emitMsg);
+    });
+
+    return;
 }
 
 

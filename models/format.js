@@ -100,6 +100,16 @@ format_create_insModel_node = function (msg) {
     return newMsg;
 }
 
+format_remove_insModel_node = function (msg) {
+    let newMsg ;
+    let frontId;
+    for(frontId in msg["nodes"]) break;
+
+    newMsg = format_basic(msg,0);
+    newMsg["nodes"]=[frontId];
+    return newMsg;
+}
+
 format_create_insModel_relation = function (msg) {
     //丢失了节点类型,节点类型一般是数组
     //nodes前台用的是对象不用数据
@@ -115,6 +125,19 @@ format_create_insModel_relation = function (msg) {
     }];
     console.log(newMsg)
     console.log(newMsg["relations"][0])
+    return newMsg;
+}
+
+format_remove_insModel_relation = function (msg){
+    //丢失了节点类型,节点类型一般是数组
+    //nodes前台用的是对象不用数据
+    let newMsg ;
+    let frontId;
+    for(frontId in msg["relations"]) break;
+
+    newMsg = format_basic(msg,0);
+    newMsg["relations"]=[frontId];
+    console.log(newMsg)
     return newMsg;
 }
 
