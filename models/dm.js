@@ -422,8 +422,8 @@ DataManager.prototype.createNodeProxy = function (msg, callback) {
     if (is_value){
         var tagMsg = extractBasic(msg);
         tagMsg.error = false;
-        tagMsg.operation = 'get_tags';
-        tagMsg.operation_id += 'gt';
+        tagMsg.operation += '/get_tags';
+        // tagMsg.operation_id += 'gt';
         tagMsg.node = {
             value: node.value
         };
@@ -444,13 +444,14 @@ DataManager.prototype.createNodeProxy = function (msg, callback) {
                 }
             }
             if (sameNode == -1){
+                msg.operation += "/create_node";
                 DataManager.prototype.createNode(msg, callback);
             }
             else{
                 var referMsg = extractBasic(msg);
                 referMsg.error = false;
-                referMsg.operation = 'refer';
-                referMsg.operation_id += 'rf';
+                referMsg.operation += '/refer';
+                // referMsg.operation_id += 'rf';
                 referMsg.node = {
                     front_id: node.front_id,
                     refer_id: sameNode
@@ -460,6 +461,7 @@ DataManager.prototype.createNodeProxy = function (msg, callback) {
         });
     }
     else{
+        msg.operation += "/create_node";
         DataManager.prototype.createNode(msg, callback);
     }
 }
@@ -708,8 +710,8 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                     var relid = res.records[0].get('relid').toString();
                     var referMsg = extractBasic(msg);
                     referMsg.error = false;
-                    referMsg.operation = 'refer';
-                    referMsg.operation_id += 'rf';
+                    referMsg.operation += '/refer';
+                    // referMsg.operation_id += 'rf';
                     referMsg.node = {
                         front_id: inst_id,
                         refer_id: iid
@@ -726,8 +728,8 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                         //引用实例-姓名之间的关系
                         DataManager.prototype.refer(referMsg, function(resp){
                             var removeMsg = extractBasic(msg);
-                            removeMsg.operation = 'remove_node';
-                            removeMsg.operation_id += 'rn';
+                            removeMsg.operation += '/remove_node';
+                            // removeMsg.operation_id += 'rn';
                             removeMsg.nodes = [inst_id];
                             //删除原来的实例
                             DataManager.prototype.removeNode(removeMsg, function(resp){
@@ -739,6 +741,7 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                     });
                 }
                 else{
+                    msg.operation += '/create_relation';
                     DataManager.prototype.createRelation(msg, callback);
                 }
                 // resp.msg = 'Success';
@@ -753,6 +756,7 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
             
         }
         else{
+            msg.operation += '/create_relation';
             DataManager.prototype.createRelation(msg, callback);
         }
     }
@@ -1231,6 +1235,7 @@ DataManager.prototype.recommend = function(msg, callback){
 
                 relations[r1].roles.push(i2id);
                 relations[r1].refer_u.push(otheru1);
+                relations[r2].roles.push(i2id);
                 relations[r2].roles.push(i3id);
                 relations[r2].refer_u.push(otheru2);
 

@@ -307,33 +307,33 @@ function ioConfig(server){
             };
             msg13 = {
                 operation: 'create_node_proxy',
-                user_id : '123@123',
+                user_id : 'user2@mail',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 nodes :[
                     {
                         front_id: 'front_n人',
-                        tags : ["37"], //tag用id表示
-                        value: 'longongago' //实体的value为空
+                        tags : ["136"], //tag用id表示
+                        value: '' //实体的value为空
                     }
                 ]
             };
             msg14 = {
                 operation: 'create_relation_proxy',
-                user_id : '123@123',
+                user_id : 'user2@mail',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 relations:[
                     {
                         front_id:'',
-                        tag: 39, //用tagid表示
+                        tag: 138, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 42,
+                            node_id : 148,
                         },
                         {
-                            rolename : 'lla',
-                            node_id : 54,
+                            rolename : '姓名',
+                            node_id : 142,
                         }
                         ]
                     }
