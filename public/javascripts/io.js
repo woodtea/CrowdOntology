@@ -361,7 +361,7 @@ io_test2 = function(msg = "hello"){
 
 socket.on('iotest_back', function(msg){
     //alert("123")
-    //console.log(msg);
+    console.log(msg);
 });
 
 migrate = function(obj,model=instance_model){

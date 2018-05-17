@@ -89,6 +89,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'create_relation_proxy':
                 this.createRelationProxy(msg, callback);
                 break;
+            case 'rcmd':
+                this.recommend(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -800,6 +803,7 @@ DataManager.prototype.get = function (msg, callback) {
         })
         .then(function (res) {
             var nodes = {};
+            console.log("[Node]");
             for (var i = 0; i < res.records.length; i++) {
                 var rec = res.records[i];
                 var nodeId = rec.get('nodeId').toString();
@@ -808,7 +812,7 @@ DataManager.prototype.get = function (msg, callback) {
                 prop['tags'] = [];
                 nodes[nodeId] = prop;
 
-                // console.log(prop);
+                console.log(nodeId);
             }
             session.run(relationCypher, {
                     pname: msg.project_id,
@@ -846,7 +850,7 @@ DataManager.prototype.get = function (msg, callback) {
                                 if (nodes[iId] != undefined) {
                                     nodes[iId].tags.push(jId);
                                 } else if (relations[iId] != undefined) {
-                                    relations[iId].value = jId;
+                                    relations[iId].tag = jId;
                                 } else {
                                     throw 'fatal error: no such iId';
                                 }
@@ -931,6 +935,7 @@ msg : {
 }
 */
 //实际也是解除引用
+//这个函数目前有bug，应该写成和removeNode类似才对
 DataManager.prototype.removeRelation = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
@@ -1097,4 +1102,164 @@ TODO:
 add/remove tags
 get context
 */
+
+
+function unique(arr){
+    if (arr.length == 0 || arr.length == 1)
+        return arr;
+    arr.sort();
+    var res = [];
+    res.push(arr[0]);
+    var last = arr[0];
+    for (var i = 0; i < arr.length; i++){
+        if (arr[i] != last){
+            res.push(arr[i]);
+            last = arr[i];
+        } 
+    }
+    return res;
+}
+
+/*
+msg : {
+    operation: 'rcmd',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    nodes:{
+        '7':{//内部信息目前都用不着
+            tags: [],
+            value: 
+        }
+    }
+}
+*/
+/*
+匹配距离为1和2的关系
+并统计关系的引用情况
+
+先保证一个点的情况可用，并且这个点使一个概念的实例
+*/
+/*
+目前返回{
+    nodes:{
+        '7': {value:'xx'}
+    },
+    relations:{
+        '17'：{
+            roles: [1, 2, 3]，
+            tag: 17，
+            refer_u: 18
+        }
+    }，
+    rcmd_relations:[17]
+}
+relations包含所有的一级关系和二级关系
+rcmd_relations是所有的一级关系
+*/
+DataManager.prototype.recommend = function(msg, callback){
+    var session = ogmneo.Connection.session();
+    var nodes = [];
+    for (k in msg.nodes){
+        nodes.push(k);
+    }
+    
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (i) WHERE id(i)={rcmd_id}\n\
+    MATCH (i)<-[r1r1:has_role]-(r1)-[r1r2:has_role]->(i2)\n\
+    MATCH (otheru1)-[:refer]->(r1)-[:from]->(iof1:inst_of)-[:to]->(tag1)\n\
+    OPTIONAL MATCH (i2)<-[r2r1:has_role]-(r2)-[r2r2:has_role]->(i3)\n\
+    OPTIONAL MATCH (otheru2)-[:refer]->(r2)-[:from]->(iof2:inst_of)-[:to]->(tag2)\n\
+    RETURN id(r1) AS r1, id(tag1) AS tag1, id(otheru1) AS otheru1, i2, id(r2) AS r2, id(tag2) AS tag2, id(otheru2) AS otheru2, i3'.format({
+        rcmd_id: nodes[0]
+    })
+    
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            var records = res.records;
+            resp.records = [];
+            var nodes = {};
+            var relations = {};
+            var rcmd_relations = [];
+            for (var i in records){
+                var r = records[i];
+                var r1 = r.get('r1').toString();
+                var r2 = r.get('r2').toString();
+                var tag1 = r.get('tag1').toString();
+                var tag2 = r.get('tag2').toString();
+                var otheru1 = r.get('otheru1').toString();
+                var otheru2 = r.get('otheru1').toString();
+                var i2 = r.get('i2');
+                var i2id = i2.identity.toString();
+                var i3 = r.get('i3');
+                var i3id = i3.identity.toString();
+
+                // resp.records.push([r1, i2, r2, i3]);
+                rcmd_relations.push(r1);
+                if (relations[r1] == undefined){
+                    relations[r1] = {
+                        roles:[],
+                        refer_u: [],
+                        tag: tag1
+                    };
+                }
+                if (relations[r2] == undefined){
+                    relations[r2] = {
+                        roles: [],
+                        refer_u: [],
+                        tag: tag2
+                    };
+                }
+                var ids = [i2id, i3id];
+                for (var j in ids){
+                    if (nodes[ids[j]] == undefined){
+                        nodes[ids[j]] = {};
+                    }
+                }
+
+                relations[r1].roles.push(i2id);
+                relations[r1].refer_u.push(otheru1);
+                relations[r2].roles.push(i3id);
+                relations[r2].refer_u.push(otheru2);
+
+                nodes[i2id] = i2.properties;
+                nodes[i3id] = i3.properties;
+            }
+            
+            for(var i in relations){
+                var rel = relations[i];
+                relations[i].roles = unique(relations[i].roles);
+                relations[i].refer_u = (unique(relations[i].refer_u)).length;
+                
+            }
+
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            resp.relations = relations;
+            resp.rcmd_relations = unique(rcmd_relations);
+            resp.nodes = nodes;
+            // resp.res = res;
+            // resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+
+}
 module.exports = DataManager;

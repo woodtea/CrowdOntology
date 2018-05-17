@@ -263,7 +263,7 @@ function ioConfig(server){
             };
             msg8 = {
                 operation: 'get',
-                user_id : '123@123',
+                user_id : 'user2@mail',
                 project_id : '红楼梦',
                 operation_id : 'op2'
             };
@@ -312,9 +312,9 @@ function ioConfig(server){
                 operation_id : 'op2',
                 nodes :[
                     {
-                        front_id: 'front_n贾宝玉',
-                        tags : ["280"], //tag用id表示
-                        value: '贾宝玉' //实体的value为空
+                        front_id: 'front_n人',
+                        tags : ["37"], //tag用id表示
+                        value: 'longongago' //实体的value为空
                     }
                 ]
             };
@@ -326,18 +326,30 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        tag: 112, //用tagid表示
+                        tag: 39, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 252,
+                            node_id : 42,
                         },
                         {
-                            rolename : '名字',
-                            node_id : 114,
+                            rolename : 'lla',
+                            node_id : 54,
                         }
                         ]
                     }
                 ]
+            };
+            msg15 = {
+                operation: 'rcmd',
+                user_id : 'user2@mail',
+                project_id : '红楼梦',
+                operation_id : 'op2',
+                nodes:{
+                    42:{//内部信息目前都用不着
+                        tags: [],
+                        value: ""
+                    }
+                }
             };
             //initiate Set
             if(msg=="99"){
@@ -380,7 +392,7 @@ function ioConfig(server){
                 });
                 return;
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14, msg15];
 
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
