@@ -1031,11 +1031,14 @@ let tagReformat = {
         //console.log("value2id******")
     },
     id2value : function(msg) {
-        //console.log("******")
-        //console.log(msg)
         if(msg.nodes){
             for(let nodeId in msg.nodes){
 
+                let tmp = msg.nodes[nodeId].tags;
+                for(let n in tmp){
+                    tmp[n] = model.nodes[tmp[n]].value
+                }
+                /*
                 if(msg.nodes[nodeId].dataType == undefined) msg.nodes[nodeId].dataType = "姓名";
 
                 let tmp = msg.nodes[nodeId].tags;
@@ -1049,6 +1052,7 @@ let tagReformat = {
                 if(!flag) {
                     delete msg.nodes[nodeId].tags;
                 }
+                */
             }
         }
         if(msg.relations){
@@ -1085,7 +1089,7 @@ function prepareNewEntity(){
         let tags2 = instance_model["nodes"][nId2]["tags"];
 
         if(tags1 != undefined){
-            if(tags1[0] != "String"){   //说明是Entity节点
+            if(symbolArray.indexOf(tags1[0]) == -1){   //说明是Entity节点
                 instance_model["nodes"][nId1]["value"] = instance_model["nodes"][nId2]["value"];
                 delete instance_model["nodes"][nId2];
                 tmpNode = nId1;
@@ -1095,7 +1099,7 @@ function prepareNewEntity(){
                 tmpNode = nId2;
             }
         }else{
-            if(tags2[0] != "String"){   //说明是Entity节点
+            if(symbolArray.indexOf(tags2[0]) == -1){   //说明是Entity节点
                 instance_model["nodes"][nId2]["value"] = instance_model["nodes"][nId1]["value"];
                 delete instance_model["nodes"][nId1];
                 tmpNode = nId2;
@@ -1112,7 +1116,6 @@ function prepareNewEntity(){
         }
     }
     if(hasCenterNode){
-        drawIndex();
         drawIndex();
         drawEntity(centerNode);
         indexArray = getIndexArray();

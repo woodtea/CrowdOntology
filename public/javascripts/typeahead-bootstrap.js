@@ -8,7 +8,7 @@ function setSource(array){
 function getIndexArray(model = instance_model){
     let indexArray = [];
     for (let id in model.nodes) {
-        if (model.nodes[id].tags != undefined) {
+        if (isEntity(id)) {
             indexArray.push(model.nodes[id].value);
         }
     }

@@ -200,7 +200,7 @@ function drawIndex(model = instance_model) {
     $(index).find("li").remove();
     var html = "";
     for (let id in model.nodes) {
-        if (model.nodes[id].tags != undefined) {
+        if (isEntity(id)) {
             html += generateIndex(model.nodes[id].value, id);
         }
     }

@@ -1,5 +1,6 @@
 var user;
 var project;
+var symbolArray  = ["String"];
 
 /*
   * 其实可以改模型为类
@@ -18,7 +19,7 @@ function updateModel() {
 function getIndex(model = instance_model) {
     let index = {};
     for (let id in model.nodes) {
-        if (model.nodes[id].tags != undefined) {
+        if (isEntity(id)) {
             index[id] = model.nodes[id].value;
         }
     }
@@ -28,7 +29,7 @@ function getIndex(model = instance_model) {
 
 function getEntity(id, model = instance_model) {
     //判断是否是实体
-    if (model.nodes[id].tags == undefined) return;
+    if (!isEntity(id)) return;
     //包括自己和邻接信息
     let entity = {
         centerNode: {},
@@ -69,6 +70,19 @@ function getEntity(id, model = instance_model) {
         }
     }
     return entity;
+}
+
+function isEntity(id,model=instance_model){
+    if (model.nodes[id].tags == undefined) return; //数据结构异常
+
+    let tags = model.nodes[id].tags;
+    for(let n in tags){
+        if(symbolArray.indexOf(tags[n]) == -1){
+            return true; //isEntity
+        }
+    }
+
+    return false;
 }
 
 

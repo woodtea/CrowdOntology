@@ -4,7 +4,7 @@ let indexArray;
 function getIndexArray(model = instance_model){
     let indexArray = [];
     for (let id in model.nodes) {
-        if (model.nodes[id].tags != undefined) {
+        if (isEntity(id)) {
             indexArray.push(instance_model.nodes[id].value);
         }
     }
