@@ -50,6 +50,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'create_user':
                 this.createUser(msg, callback);
                 break;
+            case 'get_user':
+                this.getUser(msg, callback);
+                break;
             case 'create_project':
                 this.createProject(msg, callback);
                 break;
@@ -157,6 +160,42 @@ DataManager.prototype.createUser = function (msg, callback) {
         .then(function (res) {
             session.close();
             resp.msg = 'Success';
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+
+}
+
+/*
+msg : {
+    operation: 'get_user',
+    operation_id: 'opt1',
+    name: 'wahaha'
+}
+*/
+// 返回该user是否存在
+DataManager.prototype.getUser = function (msg, callback) {
+    var session = ogmneo.Connection.session();
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run('MATCH (u:User {name : {nameParam}}) \
+            RETURN id(u) AS uid', {
+            nameParam: msg.name
+        })
+        .then(function (res) {
+            var records = res.records;
+            var uid = -1;
+            if (records.length != 0)
+                uid = records[0].get('uid').toString();
+            session.close();
+            resp.msg = 'Success';
+            resp.user_id = uid;
             callback(resp);
         })
         .catch(function (err) {
