@@ -374,6 +374,7 @@ function io_recommend_insModel_node_done(msg){
         prepareNewEntity(recommend_model,false);
 
         let centerId = $("g.center.isCentralized").attr("id");
+        alert(centerId)
         let entity = getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
@@ -408,9 +409,10 @@ socket.on('iotest_back', function(msg){
 });
 
 migrate = function(obj,model=instance_model){
+    alert(obj)
     if(obj == undefined) return;
     for(let key in obj){
-        if(key.indexOf("front_n")!=-1){
+        if(model["nodes"][key] != undefined){
             if(model["nodes"][obj[key]] == undefined) model["nodes"][obj[key]]={};
             copyObj(model["nodes"][obj[key]],model["nodes"][key])
             delete model["nodes"][key];
@@ -422,7 +424,7 @@ migrate = function(obj,model=instance_model){
                 }
             }
         }
-        if(key.indexOf("front_r")!=-1){
+        if(model["relations"][key] != undefined){
             if(model["relations"][obj[key]] == undefined) model["relations"][obj[key]]={};
             copyObj(model["relations"][obj[key]],model["relations"][key])
             delete model["relations"][key];

@@ -1078,15 +1078,8 @@ let tagReformat = {
         }
         if(msg.relations){
             for(let relationId in msg.relations){
-                /*
-                let tmp = msg.relations[relationId].value; //这个前台返回就不对吧，应该是tag啊 //备忘
-                if(tmp == undefined) {alert("xx");tmp = msg.relations[relationId].type;} //好乱啊这里}
-                if(tmp == undefined) {alert("yy");tmp = msg.relations[relationId].tag; //好乱啊这里}
-                //alert(tmp);
-                */
-                alert(msg.relations[relationId].value)
-                alert(msg.relations[relationId].type)
-                alert(msg.relations[relationId].tag)
+                //alert(msg.relations[relationId].type)//创建操作，因为数据都是前台的所以都是给的type
+                //alert(msg.relations[relationId].tag)//get操作，因为数据是前台的所以是tag
                 let tmp = msg.relations[relationId].tag;    //前台获得情况
                 if(tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
                 msg.relations[relationId].type = model.relations[tmp].value;
