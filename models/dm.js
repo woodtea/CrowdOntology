@@ -41,6 +41,7 @@ String.prototype.format = function (args) {
 }
 
 DataManager.prototype.handle = function (msg, callback) {
+    console.log("DataManager.prototype.handle");
     console.log(msg);
     try {
         switch (msg.operation) {
@@ -1231,6 +1232,7 @@ DataManager.prototype.recommend = function(msg, callback){
 
                 relations[r1].roles.push(i2id);
                 relations[r1].refer_u.push(otheru1);
+                relations[r2].roles.push(i2id);
                 relations[r2].roles.push(i3id);
                 relations[r2].refer_u.push(otheru2);
 

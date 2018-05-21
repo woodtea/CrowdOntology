@@ -251,20 +251,15 @@ function drawRelation(id1, id2, model = instance_model) {
 }
 
 
-function drawRecommendation(recommend, model = instance_model) {
+function drawRecommendation(rcmdNeighbours, model = instance_model) {
 
-    //recommend=checkRecommendation(recommend,instance_model);
     let id = $("g.center.isCentralized").attr("id");
+    if(!isEntity(id)) return false;
     let entity = getEntity(id, model);
-    if (entity == undefined) return false;  //如果不是实体的话
-    //fortest
-    //if (entity.centerNode["n0"] == undefined) return false;  //如果不是实体的话
 
-    //$(graph).children().remove();
     drawModal(width / 2, height / 2, R+2*r);
     drawCircle(width / 2, height / 2, 5/3*R);
-    //console.log(width / 2 +" "+ height / 2 +" "+ r +" "+ 5/3*R)
-    drawRecommendNeighbours(width / 2, height / 2, r, 5/3*R, entity.neighbours, recommend);
+    drawRecommendNeighbours(width / 2, height / 2, r, 5/3*R, entity.neighbours, rcmdNeighbours);
     $("g.center.isCentralized").remove();
     drawNode(width / 2, height / 2, r, entity.centerNode, true);
     return true;
@@ -283,13 +278,12 @@ function drawNeighbours(centX, centY, r, R, neighbours, startAngle = 0) {
     }
 }
 
-function drawRecommendNeighbours(centX, centY, r, R, neighbours, recommend, startAngle = 0) {
-    let paths = getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend);
-    //alert(paths.length);
+function drawRecommendNeighbours(centX, centY, r, R, neighbours, rcmdNeighbours, startAngle = 0) {   //drawNeighbours的变种
+    let paths = getRecommendPaths(centX, centY, R, r, startAngle, neighbours, rcmdNeighbours);
     for (let path of paths) {
-        drawPath(path);
+        drawPath(path);//
     }
-    let nodes = getRecommendNodes(centX, centY, R, startAngle, neighbours, recommend);
+    let nodes = getRecommendNodes(centX, centY, R, startAngle, neighbours, rcmdNeighbours);
     for (let node of nodes) {
         drawNode(node.cx, node.cy, r, node.data,false,false,true);
     }
@@ -318,17 +312,17 @@ function getNodes(centX, centY, R, startAngle, neighbours) {
 }
 
 
-function getRecommendNodes(centX, centY, R, startAngle, neighbours,recommend) {
+function getRecommendNodes(centX, centY, R, startAngle, neighbours,rcmdNeighbours) {
     let N = getJsonLength(neighbours);
-    let RN = getJsonLength(recommend);
+    let RN = getJsonLength(rcmdNeighbours);
     let pRN = Math.ceil(RN/N);
 
     let nodes = [];
     let i = 0, cx, cy, angle;
 
-    for (let key in recommend) {
+    for (let key in rcmdNeighbours) {
         let data = {};
-        data[key] = recommend[key]
+        data[key] = rcmdNeighbours[key]
         if ($("#" + key)[0]) {
             i++;
             continue;

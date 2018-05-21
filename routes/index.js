@@ -86,7 +86,7 @@ function checkSignIn(req,res){
     if(req.session.user) return true;
     else{
         req.session.user = {
-            mail: "123@123"
+            mail: "user1@mail"
         }
         return true;
         res.redirect('/signin');

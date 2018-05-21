@@ -49,37 +49,47 @@ $(function () {
             clickTimeout.clear();
             //引用推荐节点
             let nodeID = $(this).attr("id");
-            instance_model.nodes[nodeID] = {
-                "dataType": recommend_model[nodeID].dataType,
-                "value": recommend_model[nodeID].value
-            }
-            if(recommend_model[nodeID].tags) instance_model.nodes[nodeID].tags = recommend_model[nodeID].tags;
-            //引用推荐节点与当前节点间的关系
-            let centerID = $(".graph .center").attr("id");
-            for(let relation of recommend_model[nodeID].relations){
-                relationID = relation.id;
-                value = relation.value;
-                instance_model.relations[relationID] = {
-                    "type": value,
-                    "roles": [
-                        {"rolename": "", "node_id": centerID},
-                        {"rolename": "", "node_id": nodeID}
-                    ]
+
+            if(instance_model["nodes"][nodeID] == undefined){   //不存在的话创建
+
+                if(isEntity(nodeID,recommend_model)){//是实体节点，需要创建3重信息
+
+                    let value = recommend_model["nodes"][nodeID].value
+                    let entity = {
+                        tags: recommend_model["nodes"][nodeID].tags,
+                        value: value,
+                        nodeId: nodeID,
+                        valueId: generateFrontNodeID(value,"v"),
+                        relationId: generateFrontRelationID()
+                    }
+
+                    io_create_insModel_entity(entity);
+
+                }else{//不是实体节点，需要创建节点信息
+                    alert("引用属性，未处理")
                 }
             }
-            $("#"+centerID).click();
-            //更新索引信息
-            drawIndex();
+
+            //创建关系
+            let centerId = $("g.center").attr("id");
+            let relationsArray = getRelations(centerId,nodeID,recommend_model);
+
+            let relations;
+            for(let n in relationsArray){
+                relations = {};
+                relations[relationsArray[n]] = recommend_model["relations"][relationsArray[n]];
+                io_create_insModel_relation(relations);
+            }
         } else {
             if (d3.select(this).classed("isCentralized") == false) {
                 return;
             }
             clickTimeout.clear();
+
             let nodeID = $(this).attr("id");
-            recommend_model = shiftModel(recommend_model_whole,nodeID); //获取推荐模型
-            //console.log("recommend_model");
-            //console.log(recommend_model);
-            drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
+            let node = {}
+            node[nodeID] = instance_model.nodes[nodeID];
+            io_recommend_insModel_node(node);
         }
     })
 
@@ -234,6 +244,9 @@ function drawNodeDetails(id) {
 
 function drawPathDetails(id) {
     let nodeIDs = getEntityIdByRelation(id, instance_model);
+
+    if(nodeIDs == undefined) return;
+
     if (nodeIDs.length > 2) {
         alert("多元关系");
         return;
@@ -526,7 +539,7 @@ function filterAttributes(neighbours) {
 
     let attributes = []
     for (let id in neighbours) {
-        if (neighbours[id].tags == undefined) {
+        if (!isEntity(id)) {
             //此时属于attribute
             for (let relation of neighbours[id].relations) {
                 attributes.push({
@@ -545,7 +558,7 @@ function filterRelations(neighbours) {
 
     let relations = []
     for (let id in neighbours) {
-        if (neighbours[id].tags != undefined) {
+        if (isEntity(id)) {
             //此时属于relation
             for (let relation of neighbours[id].relations) {
                 relations.push({
@@ -641,6 +654,16 @@ function classReviseSubmit(item) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
+
+    let entity = {
+        tags: [type],
+        value: value,
+        nodeId: generateFrontNodeID(value,"e"),
+        valueId: generateFrontNodeID(value,"v"),
+        relationId: generateFrontRelationID()
+    }
+
+    io_create_insModel_entity(entity);
     /*
     let nodes = {}
     nodes[generateFrontNodeID(value)] = {
@@ -651,6 +674,7 @@ function classReviseSubmit(item) {
 
     io_create_insModel_node(nodes)
     */
+/*
     //生成Entity节点
     let entityNode = {};
     let entityNodeId = generateFrontNodeID(value,"e")
@@ -674,11 +698,12 @@ function classReviseSubmit(item) {
         "type": "姓名",
         "roles": [
             {"rolename": "", "node_id": entityNodeId},
-            {"rolename": "", "node_id": valueNodeId}
+            {"rolename": "姓名", "node_id": valueNodeId}
         ]
     }
     io_create_insModel_relation(relations);
     return;
+    */
 
 }
 
@@ -1016,6 +1041,7 @@ let tagReformat = {
                 if(msg.nodes[nodeId].tags == undefined) msg.nodes[nodeId].tags = ["String"];
                 let tmp = msg.nodes[nodeId].tags;
                 for(let n in tmp){
+                    //if(tmp[n]) alert(getValueId(tmp[n],model.nodes))
                     tmp[n] = getValueId(tmp[n],model.nodes);
                 }
             }
@@ -1035,33 +1061,46 @@ let tagReformat = {
             for(let nodeId in msg.nodes){
 
                 let tmp = msg.nodes[nodeId].tags;
+                //临时处理recommend没有tags的问题 - 开始
+                if(tmp == undefined){
+                    if(msg.nodes[nodeId]["value"] == "") {
+                        msg.nodes[nodeId].tags = ["人"]
+                    }else{
+                        msg.nodes[nodeId].tags = ["String"]
+                    }
+                    continue;
+                }
+                ////临时处理recommend没有tags的问题 - 结束
                 for(let n in tmp){
                     tmp[n] = model.nodes[tmp[n]].value
                 }
-                /*
-                if(msg.nodes[nodeId].dataType == undefined) msg.nodes[nodeId].dataType = "姓名";
-
-                let tmp = msg.nodes[nodeId].tags;
-                let flag=0
-                for(let n in tmp){
-                    if(model.nodes[tmp[n]].tag == "Entity"){
-                        flag++;
-                        tmp[n] = model.nodes[tmp[n]].value
-                    }
-                }
-                if(!flag) {
-                    delete msg.nodes[nodeId].tags;
-                }
-                */
             }
         }
         if(msg.relations){
             for(let relationId in msg.relations){
-                let tmp = msg.relations[relationId].value; //这个就不对吧，应该是tag啊
-                if(tmp == undefined) tmp = msg.relations[relationId].type; //好乱啊这里
-                if(tmp == undefined) tmp = msg.relations[relationId].tag; //好乱啊这里
+                /*
+                let tmp = msg.relations[relationId].value; //这个前台返回就不对吧，应该是tag啊 //备忘
+                if(tmp == undefined) {alert("xx");tmp = msg.relations[relationId].type;} //好乱啊这里}
+                if(tmp == undefined) {alert("yy");tmp = msg.relations[relationId].tag; //好乱啊这里}
                 //alert(tmp);
+                */
+                alert(msg.relations[relationId].value)
+                alert(msg.relations[relationId].type)
+                alert(msg.relations[relationId].tag)
+                let tmp = msg.relations[relationId].tag;    //前台获得情况
+                if(tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
                 msg.relations[relationId].type = model.relations[tmp].value;
+
+                //临时处理recommend没有tags的问题 - 开始
+                let roles = msg.relations[relationId].roles;
+
+                if(roles[0]["node_id"] == undefined){
+                    msg.relations[relationId].roles = [
+                        {rolename:"",node_id:roles[0]},
+                        {rolename:"",node_id:roles[1]}
+                    ]
+                }
+                ////临时处理recommend没有tags的问题 - 结束
             }
         }
     }
@@ -1073,49 +1112,50 @@ getValueId = function(value,item){
     }
 }
 
-function prepareNewEntity(){
+function prepareNewEntity(model=instance_model,refreshSvg = true){
 
     let hasCenterNode = false, centerNode;
 
-    for(let rId in instance_model["relations"]){
-        let r = instance_model["relations"][rId];
+    for(let rId in model["relations"]){
+        let r = model["relations"][rId];
         if(r.type != "姓名") continue;
 
         let nId1,nId2,tmpNode;
         nId1 = r.roles[0].node_id;
         nId2 = r.roles[1].node_id;
 
-        let tags1 = instance_model["nodes"][nId1]["tags"];
-        let tags2 = instance_model["nodes"][nId2]["tags"];
+
+        let tags1 = model["nodes"][nId1]["tags"];
+        let tags2 = model["nodes"][nId2]["tags"];
 
         if(tags1 != undefined){
             if(symbolArray.indexOf(tags1[0]) == -1){   //说明是Entity节点
-                instance_model["nodes"][nId1]["value"] = instance_model["nodes"][nId2]["value"];
-                delete instance_model["nodes"][nId2];
+                model["nodes"][nId1]["value"] = model["nodes"][nId2]["value"];
+                delete model["nodes"][nId2];
                 tmpNode = nId1;
             }else{
-                instance_model["nodes"][nId2]["value"] = instance_model["nodes"][nId1]["value"];
-                delete instance_model["nodes"][nId1];
+                model["nodes"][nId2]["value"] = model["nodes"][nId1]["value"];
+                delete model["nodes"][nId1];
                 tmpNode = nId2;
             }
         }else{
             if(symbolArray.indexOf(tags2[0]) == -1){   //说明是Entity节点
-                instance_model["nodes"][nId2]["value"] = instance_model["nodes"][nId1]["value"];
-                delete instance_model["nodes"][nId1];
+                model["nodes"][nId2]["value"] = model["nodes"][nId1]["value"];
+                delete model["nodes"][nId1];
                 tmpNode = nId2;
             }else{
-                instance_model["nodes"][nId1]["value"] = instance_model["nodes"][nId2]["value"];
-                delete instance_model["nodes"][nId2];
+                model["nodes"][nId1]["value"] = model["nodes"][nId2]["value"];
+                delete model["nodes"][nId2];
                 tmpNode = nId1;
             }
         }
-        delete instance_model["relations"][rId];
+        delete model["relations"][rId];
         if(!hasCenterNode) {
             hasCenterNode = true;
             centerNode = tmpNode;
         }
     }
-    if(hasCenterNode){
+    if(hasCenterNode && refreshSvg){
         drawIndex();
         drawEntity(centerNode);
         indexArray = getIndexArray();
@@ -1124,4 +1164,19 @@ function prepareNewEntity(){
         return true;
     }
     return false;
+}
+
+function getRelations(id1,id2,model=instance_model){
+    let relation,roles,relationArray=[];
+    for(relation in model["relations"]){
+        roles = model["relations"][relation]["roles"];
+        if(roles[0].node_id == id1){
+            if(roles[1].node_id == id2)  relationArray.push(relation);
+        }
+        else if(roles[1].node_id == id1){
+            if(roles[0].node_id == id2)  relationArray.push(relation);
+        }
+    }
+
+    return relationArray;
 }

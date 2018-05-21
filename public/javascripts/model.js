@@ -2,6 +2,7 @@ var user;
 var project;
 var symbolArray  = ["String"];
 
+var recommend_model = {}
 /*
   * 其实可以改模型为类
   * class model {
@@ -93,6 +94,9 @@ function getRelation(id1, id2, model = instance_model) {
 }
 
 function getEntityIdByRelation(relationId, model = instance_model) {
+
+    if(model.relations[relationId] == undefined) return;    //rcmd中比较常见
+
     let roles = model.relations[relationId].roles;
     let nodeIDs = [];
     for (let role of roles) {

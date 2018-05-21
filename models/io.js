@@ -98,6 +98,11 @@ function ioConfig(server){
                 case 'rcmd_relation':
                     emitMsg = io_recommend_insModel_relation(msg);
                     break;
+                case 'rcmd':
+                    emitMsg = io_recommend_insModel(msg,function(emitMsg){
+                        socket.emit('insModel',emitMsg);
+                    });
+                    break;
             }
             //console.log(emitMsg);
             //socket.emit('insModel',emitMsg);
@@ -175,11 +180,11 @@ function ioConfig(server){
                 relations:[
                     {
                         front_id:'',
-                        value: '血亲',
+                        value: '亲友',
                         roles:[
-                            {rolename : '血亲',
+                            {rolename : '亲友',
                             node_id : 110},
-                            {rolename : '血亲',
+                            {rolename : '亲友',
                             node_id : 110}
                         ]
                     }
@@ -307,33 +312,33 @@ function ioConfig(server){
             };
             msg13 = {
                 operation: 'create_node_proxy',
-                user_id : '123@123',
+                user_id : 'user2@mail',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 nodes :[
                     {
                         front_id: 'front_n人',
-                        tags : ["37"], //tag用id表示
-                        value: 'longongago' //实体的value为空
+                        tags : ["167"], //tag用id表示
+                        value: "贾宝玉" //实体的value为空
                     }
                 ]
             };
             msg14 = {
                 operation: 'create_relation_proxy',
-                user_id : '123@123',
+                user_id : 'user2@mail',
                 project_id : '红楼梦',
                 operation_id : 'op2',
                 relations:[
                     {
                         front_id:'',
-                        tag: 39, //用tagid表示
+                        tag: 171, //用tagid表示
                         roles:[{
                             rolename : '',
-                            node_id : 42,
+                            node_id : 174,
                         },
                         {
-                            rolename : 'lla',
-                            node_id : 54,
+                            rolename : '姓名',
+                            node_id : 176,
                         }
                         ]
                     }
@@ -351,6 +356,7 @@ function ioConfig(server){
                     }
                 }
             };
+
             //initiate Set
             if(msg=="99"){
                 dm.handle(msg0, function(rep){
@@ -518,5 +524,22 @@ function io_remove_insModel_relation(rcvMsg,callback){
     return;
 }
 
+
+function io_recommend_insModel(rcvMsg,callback){
+    let newMsg = formatExchange.web2Server(rcvMsg);
+
+    dm.handle(newMsg, function(rep){
+        let emitMsg = emitMsgHeader(rcvMsg,null,null);
+        emitMsg.nodes = rep.nodes;
+        emitMsg.relations = rep.relations;
+        emitMsg.rcmd_relations = rep.rcmd_relations;
+        emitMsg.migrate = rep.migrate;
+        console.log('[CALLBACK]')
+        console.log(rep);
+        callback(emitMsg);
+    });
+
+    return;
+}
 
 module.exports = ioConfig;

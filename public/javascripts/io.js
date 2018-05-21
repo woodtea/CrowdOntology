@@ -96,6 +96,9 @@ socket.on('insModel', function(msg){
         case 'rcmd_relation':
             io_recommend_insModel_relation_done(msg);
             break;
+        case 'rcmd':
+            io_recommend_insModel_node_done(msg);
+            break;
     }
 });
 
@@ -151,6 +154,36 @@ function io_get_insModel(user_id,projectId){
     socketEmitArray('insModel',msg);
 }
 
+function io_create_insModel_entity(entity){
+
+    //生成Entity节点
+    let entityNode = {};
+    entityNode[entity.nodeId] = {
+        "tags":entity.tags,
+        "value": ""
+    }
+    io_create_insModel_node(entityNode);
+
+    //生成Value节点
+    let valueNode = {};
+    valueNode[entity.valueId] = {
+        "tags": ["String"], //默认
+        "value": entity.value
+    }
+    io_create_insModel_node(valueNode)
+
+    //生成关系
+    let relations = {};
+    relations[entity.relationId] = {
+        "type": "姓名",
+        "roles": [
+            {"rolename": "", "node_id": entity.nodeId},
+            {"rolename": "姓名", "node_id": entity.valueId}
+        ]
+    }
+    io_create_insModel_relation(relations);
+}
+
 function io_create_insModel_node(nodes){
     let msg = emitMsgHeader('create_node');
     msg["nodes"] = nodes;
@@ -183,8 +216,8 @@ function io_revise_insModel_relation(user_id,projectId,relations){
     socketEmitArray('insModel',msg);
 }
 
-function io_recommend_insModel_node(user_id,projectId,nodes){
-    let msg = generate_msg_base(user_id,projectId,'rcmd_node');
+function io_recommend_insModel_node(nodes){
+    let msg = emitMsgHeader('rcmd'); //'rcmd_node');
     msg["nodes"] = nodes;
     socketEmitArray('insModel',msg);
 }
@@ -283,6 +316,8 @@ function io_create_insModel_relation_done(msg){
         migrateEmitMsg(msg.migrate);
         let curMsg = tmpMsgPop(msg.operationId);
         let relation = curMsg.relations;
+        console.log("curMsg")
+        console.log(curMsg)
         tagReformat.id2value(curMsg);
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
@@ -330,10 +365,18 @@ function io_recommend_insModel_node_done(msg){
     if(msg.error){
         return;
     }else{
-        recommend_model={
-            "nodes":msg.nodes,
-            "relations":msg.relations
+        tmpMsgPop(msg.operationId);
+
+        recommend_model = {
+            "nodes": msg.nodes,
+            "relations": msg.relations
         }
+        prepareNewEntity(recommend_model,false);
+
+        let centerId = $("g.center.isCentralized").attr("id");
+        let entity = getEntity(centerId,recommend_model);
+        drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
+        //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
         return;
     }
 }

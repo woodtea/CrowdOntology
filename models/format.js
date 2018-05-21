@@ -30,6 +30,9 @@ formatExchange.prototype.web2Server = function(msg,type=""){
         case 'rcmd_relation':
             newMsg = format_recommend_insModel_relation(msg);
             break;
+        case 'rcmd':
+            newMsg = format_recommend_insModel(msg);
+            break;
     }
 
     return newMsg;
@@ -142,6 +145,12 @@ format_remove_insModel_relation = function (msg){
     newMsg = format_basic(msg,0);
     newMsg["relations"]=[frontId];
     console.log(newMsg)
+    return newMsg;
+}
+
+format_recommend_insModel = function (msg){
+    let newMsg = format_basic(msg,0);
+    newMsg["nodes"]= msg["nodes"]
     return newMsg;
 }
 
