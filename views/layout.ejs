@@ -49,6 +49,18 @@
 <!-- 主容器 -->
 <div class="container">
   <!-- 信息通知栏 -->
+  <% if (locals.success) { %>
+    <div class="alert alert-success alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+      <%= locals.success %>
+    </div>
+  <% } %>
+  <% if (locals.error) { %>
+    <div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <%= locals.error %>
+    </div>
+  <% } %>
   <!-- 内容 -->
     <%- body %>
   <hr class="stigmod-hr-narrow stigmod-hide-when-full-screen" />
