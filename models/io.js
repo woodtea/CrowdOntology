@@ -357,6 +357,12 @@ function ioConfig(server){
                 }
             };
 
+            msg16 = {
+                operation: 'get_user',
+                operation_id: 'opt1',
+                name: '123@12'
+            };
+
             //initiate Set
             if(msg=="99"){
                 dm.handle(msg0, function(rep){
@@ -398,7 +404,7 @@ function ioConfig(server){
                 });
                 return;
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14, msg15];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16];
 
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
