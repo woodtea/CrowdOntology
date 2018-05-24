@@ -2,9 +2,10 @@
  * 中心区域的绘制
  */
 
-const width = 700, height = 550;//, height = 600;
+const width = 870, height = 550;//, height = 600;
 const r = 30;
 const R = 5 * r;
+const zoomR = 0.75
 
 /* atomic functions */
 /*
@@ -204,8 +205,8 @@ function drawIndex(model = instance_model) {
             html += generateIndex(model.nodes[id].value, id);
         }
     }
-    //console.log(html);
     $(index).append(html);
+    setIndexTypeahead(getIndexArray());
 }
 
 /* compound functions */
@@ -229,25 +230,17 @@ function drawRelation(id1, id2, model = instance_model) {
 
     let [startAngle1,startAngle2] = getStartAngle(entity1,entity2);
 
-    drawCircle(width * 1 / 4, height * 1 / 2, R * 3 / 4);
-    drawNode(width * 1 / 4, height * 1 / 2, r * 3 / 4, entity1.centerNode);
+    drawCircle(width/2 - R, height/2, R * zoomR);
+    drawNode(width/2 - R, height/2, r * zoomR, entity1.centerNode);
 
+    drawCircle(width/2 + R, height/2, R * zoomR);
+    drawNode(width/2 + R, height/2, r * zoomR, entity2.centerNode);
 
-    //let entity2 = getEntity(id2, model);
-    drawCircle(width * 3 / 4, height * 1 / 2, R * 3 / 4);
-    drawNode(width * 3 / 4, height * 1 / 2, r * 3 / 4, entity2.centerNode);
-
-    drawNeighbours(width * 1 / 4, height * 1 / 2, r * 3 / 4, R * 3 / 4, entity1.neighbours, startAngle1);
-    drawNeighbours(width * 3 / 4, height * 1 / 2, r * 3 / 4, R * 3 / 4, entity2.neighbours, startAngle2 +Math.PI);
+    drawNeighbours(width/2 - R, height * 1 / 2, r * zoomR, R * zoomR, entity1.neighbours, startAngle1);
+    drawNeighbours(width/2 + R, height * 1 / 2, r * zoomR, R * zoomR, entity2.neighbours, startAngle2 +Math.PI);
 
     svgBringToFront($("#"+id1));
     svgBringToFront($("#"+id2));
-/*
-    $("#" + id1).remove();
-    $("#" + id2).remove();
-    drawNode(width * 1 / 4, height * 1 / 2, r * 3 / 4, entity1.centerNode, true);
-    drawNode(width * 3 / 4, height * 1 / 2, r * 3 / 4, entity2.centerNode, true);
-*/
 }
 
 
@@ -402,7 +395,7 @@ function getPath(centX, centY, R, r, angle, node) {
 
     if ($("#" + node.id)[0]) {    //isRelation则变大
         r = 3 * r;
-        R = 3 * R + R / 12;
+        R = 2 * R / zoomR;
     }
 
     //sx/y起始点、ex/y终止点
@@ -572,38 +565,6 @@ function refillNode(data) {
         .attr("text-anchor", "middle")
         .attr("dy", "0.4em");
 }
-
-
-/*
- function relationUnfolding(x,y){
- let centerNode = {
- "id":"rn1",
- "value":"知己",
- "tags":"关系"
- };
- drawCircle(x,y,R*3/8);
- drawNode(x,y,r*3/8,centerNode);
-
- let neighboursx = [
- {
- "id":"rn2",
- "value":"1600-1620",
- "tags":"String",
- "relations":[{
- "id":"nr1",
- "value":"起止时间"
- }]
- }
- ]
- //drawNeighbours2(x,y,r*3/4,R*3/4,neighboursx)
- centerNode = {
- "id":"rn2",
- "value":"1600-1620",
- "tags":"String"
- };
- drawNode(x,y-R*3/8,r*3/8,centerNode);
- }
- */
 
 
 
