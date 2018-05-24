@@ -11,8 +11,7 @@ socket.on('chat message', function(msg){
     alert(msg);
 });
 
-
-
+/*
 socket.on('data', function(msg){
 
     instance_model = {nodes:{},relations:{}};
@@ -26,25 +25,17 @@ socket.on('data', function(msg){
     }
 
     drawIndex();
-
-    let indexArray = getIndexArray({});
-    setIndexTypeahead(indexArray);
-
     return;
 
     instance_model = msg.instance_model;
     recommend_model = msg.recommend_model;
 
     model = msg.model;
-    indexArray = getIndexArray(instance_model);
 
     drawIndex();
     drawRelation("n0", "n2", instance_model);
-
-    indexArray = getIndexArray();
-    setIndexTypeahead(indexArray);
 });
-
+*/
 
 
 socket.on('iotest', function(msg){
@@ -374,7 +365,6 @@ function io_recommend_insModel_node_done(msg){
         prepareNewEntity(recommend_model,false);
 
         let centerId = $("g.center.isCentralized").attr("id");
-        alert(centerId)
         let entity = getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型

@@ -1,6 +1,4 @@
 
-let indexArray;
-
 function getIndexArray(model = instance_model){
     let indexArray = [];
     for (let id in model.nodes) {
@@ -21,7 +19,10 @@ function setSource(array){
     return newArray;
 }
 
-$('#stigmod-search-left-input').typeahead({
+
+
+function setIndexTypeahead(array){
+    $('#stigmod-search-left-input').typeahead({
         hint: true,
         highlight: true,
         minLength: 0
@@ -30,6 +31,7 @@ $('#stigmod-search-left-input').typeahead({
         name: 'IndexNames',
         source: setSource(indexArray)
     });
+}
 
 function setAttributeTypeTypeahead(array){
     $('#attribute-revise .type-input').typeahead({

@@ -11,8 +11,7 @@ router.get('/', function(req, res, next) {
     if(checkSignIn(req,res)) {
         res.redirect('/user');
     }
-    //res.redirect('/signin');
-    //res.render('login',{title:"login"});
+    res.redirect('/signin');
 });
 
 /* GET Signin page. */
@@ -25,21 +24,25 @@ router.get('/signin', function(req, res, next) {
 });
 
 router.post('/signin', function(req, res, next) {
-    //console.log(req.body.mail)
-    req.session.user = {
-        mail:req.body.mail  //for test
-    }
-
-    let user = User.get(req.body.mail);
-
-    if (!user) {
-        var newUser = new User({
-            password: req.body.password,
-            mail: req.body.mail
-        });
-        newUser.save();
-    }
-    res.redirect('/user');
+    console.log(req.body)
+    let msg = {
+        operation: 'get_user',
+        operation_id: '',
+        name: req.body.mail
+    };
+    dm.handle(msg, function(rep){
+        console.log(rep)
+        if(rep.user_id != -1){
+            req.session.user = {
+                mail:req.body.mail  //for test
+            }
+            req.session['success'] = 'SignUp Success';
+            res.redirect('/user');
+        }else{
+            req.session['error'] = 'User not found';
+            res.redirect('/signin');
+        }
+    });
 });
 
 router.get('/signout', function(req, res, next) {
@@ -68,10 +71,6 @@ router.get('/signup', function(req, res, next) {
 
 router.post('/signup', function(req, res, next) {
 
-    console.log("POST DATA: Sign up");
-    console.log(req.session.user);
-
-    console.log(req.body)
     // 检查密码
     if (req.body['password-repeat'] != req.body['password']) {
         req.session['error'] = 'The two passwords you entered do not match';
@@ -137,6 +136,11 @@ module.exports = router;
 function checkSignIn(req,res){
     if(req.session.user) return true;
     else{
+        //for test
+        req.session.user = {
+            mail:"user1@mail"
+        }
+        return true;
         req.session['error'] = 'User is not signed in ';
         res.redirect('/signin');
         return false;

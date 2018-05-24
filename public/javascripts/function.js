@@ -9,6 +9,11 @@ $(function () {
     //使得提示工具Tooltip生效
     $('[data-tooltip="tooltip"]').tooltip()
 
+    $(document).on("click", '#stigmod-search-left-btn', function () {
+        let value = $(this).parent().parent().children("input[type=text]").val();
+
+    })
+
     /*
     * 主区域
     * */
@@ -264,6 +269,8 @@ function drawPathDetails(id) {
     drawPropertyTitle();
     drawTypes(id);
     drawRoles(id);
+
+    $("#"+id).css("stroke-width",2.5);
 }
 
 function drawRecommendDetail(){
@@ -275,13 +282,13 @@ function drawPropertyTitle() {
     $(property).append('<div class="row">' +
         '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>' +
         '<div class="col-xs-8"><h4>详情</h4></div>' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-right button-right"></span></div>' +
+        '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>' +
         '</div>' +
         '<hr class="stigmod-hr-narrow">');
 }
 
 function drawTypes(id) {
-    let html = generateTitle("数据类型", "type");
+    let html = generateTitle("类型", "type");
     $(property).append(html);
 
     let type, value;
@@ -293,8 +300,9 @@ function drawTypes(id) {
         type = "关系";
         value = instance_model.relations[id].type
     }
-    html = generateContent(type, value);
+    html = generateContent(type, value, 1);
     $(property).find("#type").append(html);
+    $(property).find("#type").children().last().find(".stigmod-hovershow-cont").hide();
 }
 
 function drawAttributes(id) {
@@ -340,11 +348,9 @@ function drawRoles(id) {
     let roles = getRoles(instance_model.relations[id]);
     html = "";
     for (let role of roles) {
-        html += generateContent(role.type, role.value);
+        html = generateContent(role.type, role.value);
+        $(property).find("#role").append(html);
     }
-    $(property).find("#role").append(html);
-
-    $(property).find("#role").append(generatePlusLogo("role"));
 }
 
 function classRevise(item, type = "add") {
@@ -373,7 +379,7 @@ function classRevise(item, type = "add") {
     html = generateSubmitLogo();
     $(".properties-revise").find("#class-revise").append(html);
 
-    let array = ["人", "住址"];
+    let array = getEntityTypes();
     setClassTypeTypeahead(array);
 }
 
@@ -403,7 +409,8 @@ function attributeRevise(item, type = "add") {
     html = generateSubmitLogo();
     $(".properties-revise").find("#attribute-revise").append(html);
 
-    let array = ["身高", "性别"]
+    let centerId = $("g.center.isCentralized").attr("id");
+    let array = getAttributeTypes(centerId);
     setAttributeTypeTypeahead(array);
 }
 
@@ -434,11 +441,18 @@ function relationRevise(item, type = "add") {
     html = generateSubmitLogo();
     $(".properties-revise").find("#relation-revise").append(html);
 
-    let array = ["兄妹", "排行"]
+    /*
+        let array = ["兄妹", "排行"]
+        setRelationTypeTypeahead(array);
+        array = ["贾宝玉", "林黛玉"]
+        setRelationValueTypeahead(array);
+    */
+    let centerId = $("g.center.isCentralized").attr("id");
+    let array = getRelationTypes(centerId);
     setRelationTypeTypeahead(array);
-    array = ["贾宝玉", "林黛玉"]
-    setRelationValueTypeahead(array);
 
+    array = getRelationValues(centerId)
+    setRelationValueTypeahead(array);
 }
 
 function rolseRevise(item, type = "add") {
@@ -655,6 +669,12 @@ function classReviseSubmit(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
+    let err = isCreationIllegal("class",type,value)
+    if(err != ""){
+        alert(err)
+        return;
+    }
+
     let entity = {
         tags: [type],
         value: value,
@@ -711,6 +731,12 @@ function attributeReviseSubmit(item) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
+
+    let err = isCreationIllegal("attribute",type,value);
+    if(err != ""){
+        alert(err);
+        return;
+    }
 
     //删除旧的节点和关系
     let origItem = $(".properties").find(".active");
@@ -776,6 +802,15 @@ function attributeRemoveSubmit(item) {
 
 function relationReviseSubmit(item) {
 
+    let type = $(item).find(".type-input").val();
+    let value = $(item).find(".value-input").val();
+
+    let err = isCreationIllegal("relation",type,value);
+    if(err != ""){
+        alert(err);
+        return;
+    }
+
     //删除旧的节点和关系
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeID").attr("value");
@@ -792,10 +827,6 @@ function relationReviseSubmit(item) {
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
-
-
-    let type = $(item).find(".type-input").val();
-    let value = $(item).find(".value-input").val();
 
     //判断关系两端的节点是否存在
     let nodeId = getEntityIdByValue(value, instance_model);
@@ -1024,9 +1055,6 @@ let svgOperation = {
     clickNode : function(nodeId,model=instance_model){
         drawIndex();
         drawEntity(nodeId);
-        indexArray = getIndexArray();
-        setIndexTypeahead(indexArray);
-
         $("#" + nodeId).click();
     }
 }
@@ -1151,8 +1179,6 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
     if(hasCenterNode && refreshSvg){
         drawIndex();
         drawEntity(centerNode);
-        indexArray = getIndexArray();
-        setIndexTypeahead(indexArray);
         $("#" + centerNode).click();
         return true;
     }
@@ -1172,4 +1198,97 @@ function getRelations(id1,id2,model=instance_model){
     }
 
     return relationArray;
+}
+
+function isCreationIllegal(type,tag,value){
+    let hasError;
+    let err="";
+    switch (type){
+        case "class":
+            hasError = true;
+            for(let key in model.nodes){
+                if(model.nodes[key].value == tag) hasError = false;
+            }
+            if(tag == "String") hasError = true;
+            if(hasError) err += "创建类型不合法\n";
+
+            hasError = false;
+            for(let key in instance_model.nodes){
+                if(isEntity(key) && instance_model.nodes[key].value == value) {hasError = true;break;}
+            }
+            if(hasError) err +="创建实体已存在\n";
+            break;
+        case "attribute":
+            hasError = true;
+            for(let key in model.relations){
+                if(model.relations[key].value == tag){
+                    let roles = model.relations[key].roles;
+                    for(let n in roles){
+                        if(model.nodes[roles[n].node_id].tag == "Symbol"){
+                            hasError = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(hasError) err += "创建类型不合法\n";
+
+            hasError = false;
+            for(let key in instance_model.relations){
+                if(instance_model.relations[key].type == tag) {
+                    let centerId = $("g.center").attr("id");
+                    let roles = instance_model.relations[key].roles;
+                    for(let n in roles){
+                        if(roles[n].node_id == centerId){
+                            hasError = true
+                            break;
+                        }
+                    }
+                    if(hasError) break;
+                }
+            }
+            if(hasError) err += "创建属性已存在\n";
+            break;
+        case "relation":
+            let entityId;
+
+            hasError = true;
+            for(let key in model.relations){
+                if(model.relations[key].value == tag){
+                    hasError = false;
+                    let roles = model.relations[key].roles;
+                    for(let n in roles){
+                        if(model.nodes[roles[n].node_id].tag == "Symbol"){
+                            hasError = true;
+                            break;
+                        }
+                    }
+                    if(!hasError) break;
+                }
+            }
+            if(hasError) err += "创建类型不合法\n";
+
+
+            hasError = true;
+            for(let key in instance_model.nodes){
+                if(isEntity(key) && instance_model.nodes[key].value == value) {entityId = key;hasError = false;break;}
+            }
+            if(hasError) err +="实体尚未建立\n";
+            if(hasError!="") break;
+
+            hasError = false;
+            for(let key in instance_model.relations){
+                let roles = instance_model.relations[key].roles;
+                for(let n in roles){
+                    if(roles[n].node_id == entityId){
+                        hasError = true
+                        break;
+                    }
+                }
+                if(hasError) break;
+            }
+            if(hasError) err += "创建关系已存在\n";
+            break;
+    }
+    return err;
 }
