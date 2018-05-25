@@ -1145,7 +1145,8 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         nId1 = r.roles[0].node_id;
         nId2 = r.roles[1].node_id;
 
-
+        //如果是推荐，好像就会出现id不存在的情况
+        
         let tags1 = model["nodes"][nId1]["tags"];
         let tags2 = model["nodes"][nId2]["tags"];
 
@@ -1277,10 +1278,11 @@ function isCreationIllegal(type,tag,value){
             if(hasError!="") break;
 
             hasError = false;
+            let centerId = $("g.center").attr("id");
             for(let key in instance_model.relations){
                 let roles = instance_model.relations[key].roles;
                 for(let n in roles){
-                    if(roles[n].node_id == entityId){
+                    if((roles[n].node_id == entityId)&&(roles[1-n].node_id == centerId)){
                         hasError = true
                         break;
                     }
