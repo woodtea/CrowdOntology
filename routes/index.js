@@ -136,14 +136,20 @@ module.exports = router;
 function checkSignIn(req,res){
     if(req.session.user) return true;
     else{
-        //for test
-        req.session.user = {
-            mail:"user1@mail"
+        var os=require('os');
+        var platform=os.platform();
+        if(platform == 'darwin'){
+            //for test
+            req.session.user = {
+                mail:"user1@mail"
+            }
+            return true;
         }
-        return true;
-        req.session['error'] = 'User is not signed in ';
-        res.redirect('/signin');
-        return false;
+        else{
+            req.session['error'] = 'User is not signed in ';
+            res.redirect('/signin');
+            return false;
+        }
     }
 }
 
