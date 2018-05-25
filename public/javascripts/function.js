@@ -55,7 +55,7 @@ $(function () {
             //引用推荐节点
             let nodeID = $(this).attr("id");
 
-            if(instance_model["nodes"][nodeID] == undefined){   //不存在的话创建
+            if(instance_model["nodes"][nodeID] == undefined){   //不存在节点的话创建
 
                 if(isEntity(nodeID,recommend_model)){//是实体节点，需要创建3重信息
 
@@ -67,14 +67,19 @@ $(function () {
                         valueId: generateFrontNodeID(value,"v"),
                         relationId: generateFrontRelationID()
                     }
-
                     io_create_insModel_entity(entity);
 
                 }else{//不是实体节点，需要创建节点信息
-                    alert("引用属性，未处理")
+                    let value = recommend_model["nodes"][nodeID].value
+                    let nodes = {};
+                    let nodeId = generateFrontNodeID(value)
+                    nodes[nodeId] = {
+                        "dataType": recommend_model["nodes"][nodeID].tags,
+                        "value": value
+                    }
+                    io_create_insModel_node(nodes)
                 }
             }
-
             //创建关系
             let centerId = $("g.center").attr("id");
             let relationsArray = getRelations(centerId,nodeID,recommend_model);
@@ -1146,7 +1151,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         nId2 = r.roles[1].node_id;
 
         //如果是推荐，好像就会出现id不存在的情况
-        
+
         let tags1 = model["nodes"][nId1]["tags"];
         let tags2 = model["nodes"][nId2]["tags"];
 

@@ -426,7 +426,7 @@ migrate = function(obj,model=instance_model){
 migrateEmitMsg = function(obj){
     if(obj == undefined) return;
     for(let key in obj){
-        if(key.indexOf("front_n")!=-1){
+        //if(key.indexOf("front_n")!=-1){
             //更新emit里面的id
             for(let emitMsgOrder in tmpMsg.emit){
                 let tmpMsp = tmpMsg.emit[emitMsgOrder];
@@ -449,8 +449,8 @@ migrateEmitMsg = function(obj){
                     }
                 }
             }
-        }
-        if(key.indexOf("front_r")!=-1){
+        //}
+        //if(key.indexOf("front_r")!=-1){
             //更新emit里面的id
             for(let emitMsgOrder in tmpMsg.emit) {
                 let tmpMsp = tmpMsg.emit[emitMsgOrder];
@@ -463,7 +463,7 @@ migrateEmitMsg = function(obj){
                     }
                 }
             }
-        }
+        //}
     }
 
     return;
