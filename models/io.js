@@ -379,6 +379,31 @@ function ioConfig(server){
                                         var nodeId;
                                         for(let key in rep.migrate){
                                             nodeId = rep.migrate[key]
+                                        }
+                                        //创建属性
+                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("出生日期",rolename1="",rolename2="出生日期",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
+                                        //创建关系
+                                        dm.handle(mcreate_relation("父子",rolename1="父亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("母子",rolename1="母亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("父女",rolename1="父亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("母女",rolename1="母亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+
+                                        dm.handle(mcreate_relation("夫妻",rolename1="丈夫",rolename2="妻子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+
+                                        dm.handle(mcreate_relation("公媳",rolename1="公公",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("婆媳",rolename1="婆婆",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+
+                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        /*
+                                        for(let key in rep.migrate){
+                                            nodeId = rep.migrate[key]
                                             msg4.relations[0].roles[0].node_id = rep.migrate[key]
                                             msg4.relations[0].roles[1].node_id = rep.migrate[key]
                                         }
@@ -394,7 +419,7 @@ function ioConfig(server){
                                                 return;
                                             });
                                         });
-
+                                        */
                                     });
                                 });
                                 });
@@ -548,4 +573,25 @@ function io_recommend_insModel(rcvMsg,callback){
     return;
 }
 
+function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_id="红楼梦"){
+    let msg = {
+        operation: 'mcreate_relation',
+        user_id : '123@123',
+        project_id : project_id,
+        operation_id : 'op0',
+        relations:[
+            {
+                front_id:'frontr_1',
+                value: value,
+                roles:[
+                    {rolename : rolename1,
+                        node_id : id1},
+                    {rolename : rolename2,
+                        node_id : id2}
+                ]
+            }
+        ]
+    };
+    return msg;
+}
 module.exports = ioConfig;

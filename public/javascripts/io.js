@@ -399,7 +399,6 @@ socket.on('iotest_back', function(msg){
 });
 
 migrate = function(obj,model=instance_model){
-    alert(obj)
     if(obj == undefined) return;
     for(let key in obj){
         if(model["nodes"][key] != undefined){
