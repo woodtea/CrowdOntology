@@ -1285,6 +1285,7 @@ function isCreationIllegal(type,tag,value){
             hasError = false;
             let centerId = $("g.center").attr("id");
             for(let key in instance_model.relations){
+                if(instance_model.relations[key].type != tag) continue;
                 let roles = instance_model.relations[key].roles;
                 for(let n in roles){
                     if((roles[n].node_id == entityId)&&(roles[1-n].node_id == centerId)){
