@@ -227,20 +227,45 @@ function drawRelation(id1, id2, model = instance_model) {
     $(graph).children().remove();
     let entity1 = getEntity(id1, model);
     let entity2 = getEntity(id2, model);
-
-    let [startAngle1,startAngle2] = getStartAngle(entity1,entity2);
-
+    //节点
     drawCircle(width/2 - R, height/2, R * zoomR);
     drawNode(width/2 - R, height/2, r * zoomR, entity1.centerNode);
 
     drawCircle(width/2 + R, height/2, R * zoomR);
     drawNode(width/2 + R, height/2, r * zoomR, entity2.centerNode);
 
+    //两个节点的连线
+    let relations = {};
+    relations[id2] = entity1.neighbours[id2];
+    drawNeighbours(width/2 - R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
+
+    svgBringToFront($("#"+id1));
+    svgBringToFront($("#"+id2));
+
+/*
+    //共享部分
+    let shareIds = [];
+    for(let key in entity1){
+        if(entity2[key] != undefined)
+            shareIds.push(key);
+    }
+
+
+
+    //独立部分
+
+
+    /*
+    let [startAngle1,startAngle2] = getStartAngle(entity1,entity2);
+
+
+
     drawNeighbours(width/2 - R, height * 1 / 2, r * zoomR, R * zoomR, entity1.neighbours, startAngle1);
     drawNeighbours(width/2 + R, height * 1 / 2, r * zoomR, R * zoomR, entity2.neighbours, startAngle2 +Math.PI);
 
     svgBringToFront($("#"+id1));
     svgBringToFront($("#"+id2));
+    */
 }
 
 
@@ -419,14 +444,17 @@ function getPath(centX, centY, R, r, angle, node) {
     let n = node.relations.length;
     let m = n - n % 2;
     let shiftX = 0, shiftY = 0;
-    if (m != 0) {
+
+    if (m != 0) { //计算平移空间
         shiftX = r * Math.cos(verAnglue) / m;
         shiftY = r * Math.sin(verAnglue) / m;
     }
 
+    if(m == n) m = m-1;
+
     for (let i = 0; i < n; i++) {
-        if ($("#" + node.relations[i].id)[0]) {
-            i++;
+        if ($("#" + node.relations[i].id)[0]) { //如果已存在就不画了
+            //i++;
             continue;
         }
 
@@ -448,7 +476,7 @@ function getPath(centX, centY, R, r, angle, node) {
         oy2 = ey - 0.4 * r * Math.sin(angle);
 
 
-        if ((i - m / 2) == -1 && m == n) m = m - 2;
+        //if ((i - m / 2) == -1 && m == n) m = m - 2; //避免双数情况下的中心边
         path.push({
             sx,
             sy,
