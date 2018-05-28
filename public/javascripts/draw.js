@@ -245,10 +245,14 @@ function drawRelation(id1, id2, model = instance_model) {
 
 
 function drawRecommendation(rcmdNeighbours, model = instance_model) {
-
     let id = $("g.center.isCentralized").attr("id");
     if(!isEntity(id)) return false;
     let entity = getEntity(id, model);
+
+    //一个问题是当前rcmdNeighbours包含自身的，所以覆盖了entity.neighbours
+    for(let key in entity.neighbours){
+        delete rcmdNeighbours[key];
+    }
 
     drawModal(width / 2, height / 2, R+2*r);
     drawCircle(width / 2, height / 2, 5/3*R);
@@ -272,6 +276,7 @@ function drawNeighbours(centX, centY, r, R, neighbours, startAngle = 0) {
 }
 
 function drawRecommendNeighbours(centX, centY, r, R, neighbours, rcmdNeighbours, startAngle = 0) {   //drawNeighbours的变种
+
     let paths = getRecommendPaths(centX, centY, R, r, startAngle, neighbours, rcmdNeighbours);
     for (let path of paths) {
         drawPath(path);//
