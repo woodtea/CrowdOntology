@@ -313,17 +313,11 @@ function io_create_insModel_relation_done(msg){
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
         for(relationId in relation){
-            alert(relationId);
             instance_model.relations[relationId] = relation[relationId];
             break;
         }
-        alert(relationId);
         if(msg.migrate[relationId]) relationId = msg.migrate[relationId];
         migrate(msg.migrate);
-
-        alert("关键位置");
-        alert(relationId);
-        console.log(instance_model.relations[relationId]);
 
         let centerId = $("g.center").attr("id");
         let nodeId;
@@ -332,7 +326,13 @@ function io_create_insModel_relation_done(msg){
             if(nodeId != centerId) break;
         }
         if(!prepareNewEntity()){
-            transAnimation(centerId,nodeId,relationId,instance_model);
+            let notRecommendation = $("g.center.isCentralized").attr("id");
+            if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
+                $("#"+centerId).click();
+                return;
+            }else{
+                transAnimation(centerId,nodeId,relationId,instance_model);
+            }
         }
         return;
     }
