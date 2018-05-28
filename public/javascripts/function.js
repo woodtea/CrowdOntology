@@ -98,7 +98,7 @@ $(function () {
 
             let nodeID = $(this).attr("id");
             let node = {}
-            node[nodeID] = instance_model.nodes[nodeID];
+            node[nodeID] = eval('(' + JSON.stringify(instance_model.nodes[nodeID]) + ')');
             io_recommend_insModel_node(node);
         }
     })
@@ -414,7 +414,7 @@ function attributeRevise(item, type = "add") {
     html = generateSubmitLogo();
     $(".properties-revise").find("#attribute-revise").append(html);
 
-    let centerId = $("g.center.isCentralized").attr("id");
+    let centerId = $("g.center").attr("id");
     let array = getAttributeTypes(centerId);
     setAttributeTypeTypeahead(array);
 }
@@ -452,7 +452,7 @@ function relationRevise(item, type = "add") {
         array = ["贾宝玉", "林黛玉"]
         setRelationValueTypeahead(array);
     */
-    let centerId = $("g.center.isCentralized").attr("id");
+    let centerId = $("g.center").attr("id");
     let array = getRelationTypes(centerId);
     setRelationTypeTypeahead(array);
 

@@ -319,9 +319,10 @@ function io_create_insModel_relation_done(msg){
         if(msg.migrate[relationId]) relationId = msg.migrate[relationId];
         migrate(msg.migrate);
 
-        let centerId = $("g.center.isCentralized").attr("id");
+        let centerId = $("g.center").attr("id");
         let nodeId;
         for(let n in instance_model.relations[relationId].roles){
+            alert("kkk");
             nodeId = instance_model.relations[relationId].roles[n].node_id;
             if(nodeId != centerId) break;
         }
@@ -364,7 +365,7 @@ function io_recommend_insModel_node_done(msg){
         }
         prepareNewEntity(recommend_model,false);
 
-        let centerId = $("g.center.isCentralized").attr("id");
+        let centerId = $("g.center").attr("id");
         let entity = getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
