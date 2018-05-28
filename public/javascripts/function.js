@@ -981,6 +981,11 @@ function transAnimation(centerID,neighbourID,relationID,model) {
         return;
     }
 
+    //画出新增节点
+    let tmpNode = {};
+    tmpNode[neighbourID] = entity.neighbours[neighbourID];
+    drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * getRank(neighbourID,entity)/neighbours);//不知道为什么要+1
+
     let n,tmpNodeID,tmpRelationID,tmpItem;
     let originPosition,rotateAngle;
     for(tmpNodeID in entity.neighbours){
@@ -1009,11 +1014,6 @@ function transAnimation(centerID,neighbourID,relationID,model) {
         }
 
     }
-
-    //画出新增节点
-    let tmpNode = {};
-    tmpNode[neighbourID] = entity.neighbours[neighbourID];
-    drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * (getRank(neighbourID,entity)+1) / neighbours);//不知道为什么要+1
 
     //将圆圈更新到前面
     svgBringToFront($("#"+centerID));
