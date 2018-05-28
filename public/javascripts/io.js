@@ -313,16 +313,21 @@ function io_create_insModel_relation_done(msg){
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
         for(relationId in relation){
+            alert(relationId);
             instance_model.relations[relationId] = relation[relationId];
             break;
         }
+        alert(relationId);
         if(msg.migrate[relationId]) relationId = msg.migrate[relationId];
         migrate(msg.migrate);
+
+        alert("关键位置");
+        alert(relationId);
+        console.log(instance_model.relations[relationId]);
 
         let centerId = $("g.center").attr("id");
         let nodeId;
         for(let n in instance_model.relations[relationId].roles){
-            alert("kkk");
             nodeId = instance_model.relations[relationId].roles[n].node_id;
             if(nodeId != centerId) break;
         }
@@ -402,6 +407,8 @@ socket.on('iotest_back', function(msg){
 migrate = function(obj,model=instance_model){
     if(obj == undefined) return;
     for(let key in obj){
+        if(key == obj[key]) continue;//对应推荐的情况；
+
         if(model["nodes"][key] != undefined){
             if(model["nodes"][obj[key]] == undefined) model["nodes"][obj[key]]={};
             copyObj(model["nodes"][obj[key]],model["nodes"][key])
@@ -427,6 +434,7 @@ migrate = function(obj,model=instance_model){
 migrateEmitMsg = function(obj){
     if(obj == undefined) return;
     for(let key in obj){
+        if(key == obj[key]) continue; //实际上没有发生改变
         //if(key.indexOf("front_n")!=-1){
             //更新emit里面的id
             for(let emitMsgOrder in tmpMsg.emit){
