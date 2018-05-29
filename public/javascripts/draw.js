@@ -6,7 +6,8 @@ const width = 870, height = 550;//, height = 600;
 const r = 30;
 const R = 5 * r;
 const zoomR = 0.75
-
+const zoomW = 1.25;
+const zoomH = 1.75;
 /* atomic functions */
 /*
 const svg = d3
@@ -228,32 +229,23 @@ function drawRelation(id1, id2, model = instance_model) {
     let entity1 = getEntity(id1, model);
     let entity2 = getEntity(id2, model);
     //节点
-    drawCircle(width/2 - R, height/2, R * zoomR);
-    drawNode(width/2 - R, height/2, r * zoomR, entity1.centerNode);
-
-    drawCircle(width/2 + R, height/2, R * zoomR);
-    drawNode(width/2 + R, height/2, r * zoomR, entity2.centerNode);
-
+    drawCircle(width/2 - zoomW*R, height/2, R * zoomR);
+    drawNode(width/2 - zoomW*R, height/2, r * zoomR, entity1.centerNode);
+    drawCircle(width/2 + zoomW*R, height/2, R * zoomR);
+    drawNode(width/2 + zoomW*R, height/2, r * zoomR, entity2.centerNode);
     //两个节点的连线
     let relations = {};
     relations[id2] = entity1.neighbours[id2];
-    drawNeighbours(width/2 - R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
+    drawNeighbours(width/2 - zoomW*R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
+    //共有节点
+    drawCommons(id1,id2)
+    //独立节点
 
+    //将两端节点放到前排
     svgBringToFront($("#"+id1));
     svgBringToFront($("#"+id2));
 
-/*
-    //共享部分
-    let shareIds = [];
-    for(let key in entity1){
-        if(entity2[key] != undefined)
-            shareIds.push(key);
-    }
-
-
-
-    //独立部分
-
+    /*
 
     /*
     let [startAngle1,startAngle2] = getStartAngle(entity1,entity2);
@@ -425,7 +417,7 @@ function getPath(centX, centY, R, r, angle, node) {
 
     if ($("#" + node.id)[0]) {    //isRelation则变大
         r = 3 * r;
-        R = 2 * R / zoomR;
+        R = zoomW * 2 * R / zoomR;
     }
 
     //sx/y起始点、ex/y终止点
@@ -599,5 +591,94 @@ function refillNode(data) {
         .attr("dy", "0.4em");
 }
 
+
+function drawCommons(id1,id2){
+
+    let entity1 = getEntity(id1);
+    let entity2 = getEntity(id2);
+
+    let commonIds = [];
+    for(let key in entity1.neighbours){
+        if(entity2.neighbours[key] != undefined){
+            commonIds.push(key);
+        }
+    }
+    let offset = - 2;//-2、2、-3、3 ...
+    for(let n=0;n<commonIds.length;n++){
+        let node = {};
+        node[commonIds[n]] = entity1.neighbours[commonIds[n]];
+        let paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]]);
+        drawPath(paths[0],width/2 - zoomW*R, height/2);//暂时这么处理吧，不太好看
+        drawNode(width/2, height/2 + zoomH * r * offset, r * zoomR, node);
+        offset = offset - Math.pow(-1,n+3)*(n+4);
+    }
+}
+
+function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
+
+    angle = 0;
+    let rotate = angle;
+
+    let verAnglue = angle + Math.PI / 2; //angle的垂直方向
+    let path = [];
+
+    r = 3 * r;
+    R = zoomW * 2 * R / zoomR;
+
+
+    //sx/y起始点、ex/y终止点
+    sx = centX;
+    sy = centY;
+    ex = centX + R * Math.cos(angle);
+    ey = centY + R * Math.sin(angle);
+
+    //mx/y1文本起始点，mx/y2文本起终止
+    mx1 = sx + 1.3 * r * Math.cos(angle);
+    mx2 = ex - 1.3 * r * Math.cos(angle);
+    my1 = sy + 1.3 * r * Math.sin(angle);
+    my2 = ey - 1.3 * r * Math.sin(angle);
+
+
+    //算是偏移后 cx/y1文本起始点，cx/y2文本起终止
+    cx1 = mx1 + shiftX ;
+    cx2 = mx2 + shiftX ;
+    cy1 = my1 + shiftY ;
+    cy2 = my2 + shiftY ;
+
+    //nx/y1,ox/y1起始点三次贝塞尔曲线
+    nx1 = cx1 - 0.4 * r * Math.cos(angle);
+    ny1 = cy1 - 0.4 * r * Math.sin(angle);
+    ox1 = sx + 0.4 * r * Math.cos(angle);
+    oy1 = sy + 0.4 * r * Math.sin(angle);
+    //nx/y2,ox/y2起始点三次贝塞尔曲线
+    nx2 = cx2 + 0.4 * r * Math.cos(angle);
+    ny2 = cy2 + 0.4 * r * Math.sin(angle);
+    ox2 = ex - 0.4 * r * Math.cos(angle);
+    oy2 = ey - 0.4 * r * Math.sin(angle);
+
+    console.log("xxx")
+    console.log(node);
+    path.push({
+        sx,
+        sy,
+        ex,
+        ey,
+        cx1,
+        cy1,
+        cx2,
+        cy2,
+        nx1,
+        ny1,
+        nx2,
+        ny2,
+        ox1,
+        oy1,
+        ox2,
+        oy2,
+        data: node.relations[0]
+        ,rotate
+    });
+    return path;
+}
 
 
