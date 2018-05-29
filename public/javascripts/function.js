@@ -922,30 +922,6 @@ function getAngle(N, RN, pRN, i) {
     return angle;
 }
 
-function getStartAngle(entity1,entity2){
-    let id1,id2;
-    let i=0,j=0;
-    let offset1,offset2;
-    for(id1 in entity1.centerNode){}
-    for(id2 in entity2.centerNode){}
-
-    for(let tmp in entity1.neighbours){
-        if(tmp == id2){
-            offset1 = i;
-        }
-        i++;
-    }
-    for(let tmp in entity2.neighbours){
-        if(tmp == id1){
-            offset2 = j;
-        }
-        j++;
-    }
-
-    return [-(2 * Math.PI * offset1 / i),-(2 * Math.PI * offset2 / j)];
-
-}
-
 function shiftModel(recommend_model_whole,nodeID) {
 
     //console.log("recommend_model_whole");

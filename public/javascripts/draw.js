@@ -223,8 +223,6 @@ function drawEntity(id, model = instance_model) {
 }
 
 function drawRelation(id1, id2, model = instance_model) {
-    //有一个bug，对共享节点未作处理
-    //对于偏移的处理
     $(graph).children().remove();
     let entity1 = getEntity(id1, model);
     let entity2 = getEntity(id2, model);
@@ -233,31 +231,17 @@ function drawRelation(id1, id2, model = instance_model) {
     drawNode(width/2 - zoomW*R, height/2, r * zoomR, entity1.centerNode);
     drawCircle(width/2 + zoomW*R, height/2, R * zoomR);
     drawNode(width/2 + zoomW*R, height/2, r * zoomR, entity2.centerNode);
-    //两个节点的连线
+    //节点间连线绘制
     let relations = {};
     relations[id2] = entity1.neighbours[id2];
     drawNeighbours(width/2 - zoomW*R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
-    //共有节点
-    drawCommons(id1,id2)
-    //独立节点
-
+    //共有节点绘制
+    drawCommons(id1,id2);
+    //独有节点绘制
+    drawUnique(id1,id2);
     //将两端节点放到前排
     svgBringToFront($("#"+id1));
     svgBringToFront($("#"+id2));
-
-    /*
-
-    /*
-    let [startAngle1,startAngle2] = getStartAngle(entity1,entity2);
-
-
-
-    drawNeighbours(width/2 - R, height * 1 / 2, r * zoomR, R * zoomR, entity1.neighbours, startAngle1);
-    drawNeighbours(width/2 + R, height * 1 / 2, r * zoomR, R * zoomR, entity2.neighbours, startAngle2 +Math.PI);
-
-    svgBringToFront($("#"+id1));
-    svgBringToFront($("#"+id2));
-    */
 }
 
 
@@ -682,3 +666,80 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
 }
 
 
+
+function drawUnique(id1,id2){
+
+    let entity1 = getEntity(id1);
+    let entity2 = getEntity(id2);
+
+    let commonIds = [];
+    let key;
+    for(let key in entity1.neighbours){
+        if(entity2.neighbours[key] != undefined){
+            commonIds.push(key);
+        }
+    }
+
+    let commonLength = commonIds.length+1;
+
+    let allLength1 = getJsonLength(entity1.neighbours);
+    let startAngle1 = Math.PI * (commonLength+1) / allLength1;
+    drawUniqueNeighbours(width/2-zoomW*R, height/2, r*zoomR, R*zoomR, entity1.neighbours, [...commonIds,id2], startAngle1);
+
+    let allLength2 = getJsonLength(entity2.neighbours);
+    let startAngle2 = Math.PI * (commonLength+1) / allLength2;//+Math.PI
+    drawUniqueNeighbours(width/2+zoomW*R, height/2, r*zoomR, R*zoomR, entity2.neighbours, [...commonIds,id1], startAngle2+Math.PI);
+
+    return;
+}
+
+function drawUniqueNeighbours(centX, centY, r, R, neighbours, filterArray, startAngle = 0) {
+    let paths = getUniquePaths(centX, centY, R, r, startAngle, neighbours,filterArray);
+    for (let path of paths) {
+        drawPath(path,centX, centY);
+    }
+    let nodes = getUniqueNodes(centX, centY, R, startAngle, neighbours,filterArray);
+    for (let node of nodes) {
+        drawNode(node.cx, node.cy, r, node.data);
+    }
+}
+
+function getUniquePaths(centX, centY, R, r, startAngle=0, neighbours,filterArray) {
+    let N = getJsonLength(neighbours);
+    let paths = [];
+    let i = 0;
+    for (let key in neighbours) {
+        if(filterArray.indexOf(key) != -1) continue;
+        neighbours[key].id = key;
+        angle = 2 * Math.PI * i / N + startAngle;
+        let path = getPath(centX, centY, R, r, angle, neighbours[key]);
+        //console.log(path);
+        paths.push(...path);
+        i++;
+    }
+    //console.log(i);
+    return paths;
+}
+
+
+function getUniqueNodes(centX, centY, R, startAngle, neighbours,filterArray) {
+    let N = getJsonLength(neighbours);
+    let nodes = [];
+    let i = 0, cx, cy, angle;
+
+    for (let key in neighbours) {
+        if(filterArray.indexOf(key) != -1) continue;
+        let data = {};
+        data[key] = neighbours[key]
+        if ($("#" + key)[0]) {
+            i++;
+            continue;
+        }      //如果已经存在就不画
+        angle = 2 * Math.PI * i / N + startAngle;
+        cx = centX + R * Math.cos(angle);
+        cy = centY + R * Math.sin(angle);
+        nodes.push({cx, cy, "data": data});
+        i++;
+    }
+    return nodes;
+}
