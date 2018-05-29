@@ -397,7 +397,7 @@ function ioConfig(server){
                                         dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
                                         dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
 
-                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("兄弟",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
                                         dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
                                         dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
                                         dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
