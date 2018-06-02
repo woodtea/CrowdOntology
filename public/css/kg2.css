@@ -44,3 +44,15 @@ g.center text {
     padding-bottom: 0;
     margin-right: -30px;
 }
+
+#relation-revise table{
+    padding: 12px;
+}
+
+#relation-revise thead th{
+    font-weight: bold;
+}
+
+#relation-revise tbody th{
+    font-weight: normal;
+}
