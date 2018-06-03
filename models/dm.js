@@ -96,6 +96,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'rcmd':
                 this.recommend(msg, callback);
                 break;
+            case 'rcmd_entity':
+                this.recommendEntity(msg, callback);
+                break;
             case 'rcmdIndex':
                 this.recommendIndex(msg, callback);
                 break;
@@ -1382,6 +1385,127 @@ DataManager.prototype.recommend = function (msg, callback) {
             callback(resp);
         });
 
+}
+
+
+/*
+msg : {
+    operation: 'rcmd_entity',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    topk: 7
+}
+*/
+/*
+返回项目中建的最多并且没有被当前用户引用的几个实体，
+value为空的才认为是实体，带value的认为是值，不会返回
+*/
+
+DataManager.prototype.recommendEntity = function(msg, callback){
+    var session = ogmneo.Connection.session();
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (p)-[:has]->(i:Inst {value:""})<-[:refer]-(ou) WHERE NOT (i)<-[:refer]-(u)\n\
+    MATCH (i)-[:from]->(:inst_of)-[:to]->(tag) \n\
+    RETURN id(i) AS iid, count(ou) AS refer_u, collect(distinct id(tag)) AS tags\n\
+    order by refer_u DESC\n\
+    limit {topk}'.format({
+        topk:msg.topk
+    });
+    console.log('CYPHER');
+    console.log(cypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res){
+            var nodes = {};
+            var rcmd_list = [];
+            for (var i = 0; i < res.records.length; i++){
+                var rec = res.records[i];
+                var iid = rec.get('iid').toString();
+                var refer_u = rec.get('refer_u').toString();
+                var tags = rec.get('tags');
+                var tmp = [];
+                for (t in tags){
+                    tmp.push(tags[t].toString());
+                }
+                nodes[iid] = {
+                    refer_u : refer_u,
+                    tags: tmp
+                };
+                rcmd_list.push(iid);
+            }
+
+
+            var id_list_str = '[' + rcmd_list.toString() + ']';
+
+            var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (i) WHERE id(i) in {id_list} \n\
+            MATCH (i)<-[:has_role]-(rel)\n\
+            MATCH (rel)-[hr:has_role]->(role)\n\
+            MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
+            RETURN rel, collect(distinct [hr.name, role]) AS role_info,  collect(distinct id(tag)) AS tags'.format({
+                id_list: id_list_str
+            }); 
+            session
+                .run(relationCypher, {
+                    pname: msg.project_id,
+                    uname: msg.user_id
+                })
+                .then(function(res){
+                    var relations = {};
+                    for (var i = 0; i < res.records.length; i++){
+                        var rec = res.records[i];
+                        var rid = rec.get('rel').identity.toString();
+                        var role_info = rec.get('role_info');
+                        var role_tmp = [];
+                        for (var j in role_info){
+                            var rname = role_info[j][0];
+                            var rnode = role_info[j][1];
+                            var roleid = rnode.identity.toString();
+                            if (nodes[roleid] == undefined)
+                                nodes[roleid] = {};
+                            for (k in rnode.properties){
+                                nodes[roleid][k] = rnode.properties[k];
+                            }
+                            // nodes[roleid] = rnode.properties;
+                            role_tmp.push({
+                                role_name: rname,
+                                node_id: roleid
+                            });
+                        }
+                        relations[rid] = rec.get('rel').properties;
+                        relations[rid]['role_info'] = role_tmp;
+                        relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
+                    }
+                    
+                    session.close();
+                    resp.msg = 'Success';
+                    resp.nodes = nodes;
+                    resp.rcmd_list = rcmd_list;
+                    resp.relations = relations;
+                    callback(resp);
+                })
+                .catch(function (err) {
+                    resp.error = true;
+                    resp.msg = err;
+                    callback(resp);
+                });
+            
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
 }
 
 
