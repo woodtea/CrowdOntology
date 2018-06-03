@@ -1221,40 +1221,45 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         let r = model["relations"][rId];
         if(r.type != "姓名") continue;
 
-        let nId1,nId2,tmpNode;
-        nId1 = r.roles[0].node_id;
-        nId2 = r.roles[1].node_id;
+        let nId0,nId1,tmpNode;
+        nId0 = r.roles[0].node_id;
+        nId1 = r.roles[1].node_id;
 
         //如果是推荐，好像就会出现id不存在的情况
 
+        let tags0 = model["nodes"][nId0]["tags"];
         let tags1 = model["nodes"][nId1]["tags"];
-        let tags2 = model["nodes"][nId2]["tags"];
 
-        if(tags1 != undefined){
-            if(symbolArray.indexOf(tags1[0]) == -1){   //说明是Entity节点
-                model["nodes"][nId1]["value"] = model["nodes"][nId2]["value"];
-                delete model["nodes"][nId2];
-                tmpNode = nId1;
+        let entityId,valueId;
+        if(tags0 != undefined){
+            if(symbolArray.indexOf(tags0[0]) == -1){   //说明是Entity节点
+                entityId = nId0;
+                valueId = nId1;
             }else{
-                model["nodes"][nId2]["value"] = model["nodes"][nId1]["value"];
-                delete model["nodes"][nId1];
-                tmpNode = nId2;
+                entityId = nId1;
+                valueId = nId0;
             }
         }else{
-            if(symbolArray.indexOf(tags2[0]) == -1){   //说明是Entity节点
-                model["nodes"][nId2]["value"] = model["nodes"][nId1]["value"];
-                delete model["nodes"][nId1];
-                tmpNode = nId2;
+            if(symbolArray.indexOf(tags1[0]) == -1){   //说明是Entity节点
+                entityId = nId1;
+                valueId = nId0;
             }else{
-                model["nodes"][nId1]["value"] = model["nodes"][nId2]["value"];
-                delete model["nodes"][nId2];
-                tmpNode = nId1;
+                entityId = nId0;
+                valueId = nId1;
             }
         }
+
+        model["nodes"][entityId]["value"] = model["nodes"][valueId]["value"];
+
+        let order = recommend_index.indexOf(model["nodes"][valueId]["value"]);
+        if(order != -1) recommend_index.splice(order,1);
+
+        delete model["nodes"][valueId];
         delete model["relations"][rId];
-        if(!hasCenterNode) {
+
+        if(!hasCenterNode) {//第一个Entity节点作为center节点
             hasCenterNode = true;
-            centerNode = tmpNode;
+            centerNode = entityId;
         }
     }
     if(hasCenterNode && refreshSvg){

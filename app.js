@@ -4,6 +4,8 @@ var partials = require('express-partials'); //可以使用layout
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var fs = require('fs');
+var FileStreamRotator = require('file-stream-rotator');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -22,6 +24,15 @@ app.use(partials());
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
+//var accessLogStream = fs.createWriteStream(__dirname+'/access.log',{flags:'a'});//创建一个写入流
+var logDirectory=__dirname+'/access_logs'; //每日创建一个日志文件
+fs.existsSync(logDirectory)||fs.mkdirSync(logDirectory);
+var accessLogStream=FileStreamRotator.getStream({
+    filename:logDirectory+'/accss-%DATE%.log',
+    frequency:'daily',
+    verbose:false
+})
+app.use(logger('combined',{stream:accessLogStream}));//将链接日志写入文件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
