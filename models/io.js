@@ -5,6 +5,7 @@ var db = require('./db');
 var server_config = require('../server_config.json');
 var format = require('./format');
 var formatExchange = new format();
+const logger = require("../logger_config");
 
 var DataManager = require('./dm');
 var dm = new DataManager(server_config);
@@ -32,6 +33,7 @@ function ioConfig(server){
             console.log(db);
         })
         socket.on('model', function(msg){
+            logger.info(JSON.stringify(msg))
             console.log(msg);
             let emitMsg;
             switch (msg.operation){
@@ -43,6 +45,7 @@ function ioConfig(server){
                     dm.handle(msg, function(rep){
                         console.log("model")
                         console.log(rep)
+                        logger.trace(JSON.stringify(rep))
                         socket.emit("model",rep);
                     });
                     break;
@@ -50,6 +53,7 @@ function ioConfig(server){
         })
 
         socket.on('insModel', function(msg){
+            logger.info(JSON.stringify(msg))
             console.log(msg);
             let emitMsg;
 
@@ -62,30 +66,35 @@ function ioConfig(server){
                     console.log("insModel")
                     dm.handle(msg, function(rep){
                         console.log(rep)
+                        logger.trace(JSON.stringify(rep))
                         socket.emit("insModel",rep);
                     });
                     break;
                 case 'create_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);
+                        logger.info(JSON.stringify(emitMsg))
                         socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'remove_node':
                     emitMsg = io_remove_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);
+                        logger.info(JSON.stringify(emitMsg))
                         socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'create_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
                         //console.log(emitMsg);
+                        logger.info(JSON.stringify(emitMsg))
                         socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'remove_relation':
                     emitMsg = io_remove_insModel_relation(msg,function(emitMsg){
                         //console.log(emitMsg);
+                        logger.info(JSON.stringify(emitMsg))
                         socket.emit('insModel',emitMsg);
                     });
                     break;
@@ -100,16 +109,19 @@ function ioConfig(server){
                     break;
                 case 'rcmd':
                     emitMsg = io_recommend_insModel(msg,function(emitMsg){
+                        logger.info(JSON.stringify(emitMsg))
                         socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'rcmdIndex':
                     dm.handle(msg, function(rep){
+                        logger.trace(JSON.stringify(rep))
                         socket.emit("insModel",rep);
                     });
                     break;
                 case 'rcmd_entity':
                     dm.handle(msg, function(rep){
+                        logger.trace(JSON.stringify(rep))
                         socket.emit("insModel",rep);
                     });
                     break;

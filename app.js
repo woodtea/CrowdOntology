@@ -1,18 +1,18 @@
-var express = require('express');
+const express = require('express');
 //var engine = require('ejs-locals'); //新加
-var partials = require('express-partials'); //可以使用layout
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var fs = require('fs');
-var FileStreamRotator = require('file-stream-rotator');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const partials = require('express-partials'); //可以使用layout
+const path = require('path');
+const favicon = require('serve-favicon');
+const loggerAccess = require('morgan');
+const fs = require('fs');
+const FileStreamRotator = require('file-stream-rotator');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var session = require('express-session');
+const index = require('./routes/index');
+const session = require('express-session');
 
-var app = express();
+const app = express();
 
 //app.engine('ejs', engine); //新加
 
@@ -23,16 +23,16 @@ app.use(partials());
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(loggerAccess('dev'));
 //var accessLogStream = fs.createWriteStream(__dirname+'/access.log',{flags:'a'});//创建一个写入流
-var logDirectory=__dirname+'/access_logs'; //每日创建一个日志文件
-fs.existsSync(logDirectory)||fs.mkdirSync(logDirectory);
+var accessLogDirectory=__dirname+'/logs/access'; //每日创建一个日志文件
+fs.existsSync(accessLogDirectory)||fs.mkdirSync(accessLogDirectory);
 var accessLogStream=FileStreamRotator.getStream({
-    filename:logDirectory+'/accss-%DATE%.log',
+    filename:accessLogDirectory+'/access-%DATE%.log',
     frequency:'daily',
     verbose:false
 })
-app.use(logger('combined',{stream:accessLogStream}));//将链接日志写入文件
+app.use(loggerAccess('combined',{stream:accessLogStream}));//将链接日志写入文件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
