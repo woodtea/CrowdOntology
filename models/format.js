@@ -33,6 +33,9 @@ formatExchange.prototype.web2Server = function(msg,type=""){
         case 'rcmd':
             newMsg = format_recommend_insModel(msg);
             break;
+        case 'rcmdIndex':
+            newMsg = format_recommend_insModel(msg);
+            break;
     }
 
     return newMsg;
@@ -150,7 +153,6 @@ format_remove_insModel_relation = function (msg){
 
 format_recommend_insModel = function (msg){
     let newMsg = format_basic(msg,0);
-    newMsg["nodes"]= msg["nodes"]
     return newMsg;
 }
 

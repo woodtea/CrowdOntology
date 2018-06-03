@@ -52,6 +52,14 @@ function setClassTypeTypeahead(array){
     });
 }
 
+function setClassValueTypeahead(){
+    $('#class-revise .value-input').typeahead({
+        source: recommend_index,
+        minLength: 0,
+        showHintOnFocus: true,
+        autoSelect: true
+    });
+}
 //
 function getAttributeTypes(nodeId){
     let tmpAtrrArray = ["姓名"];

@@ -96,6 +96,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'rcmd':
                 this.recommend(msg, callback);
                 break;
+            case 'rcmdIndex':
+                this.recommendIndex(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -1379,5 +1382,105 @@ DataManager.prototype.recommend = function (msg, callback) {
             callback(resp);
         });
 
+}
+
+
+DataManager.prototype.recommendIndex = function (msg, callback) {
+    //问题1 没有给引用数
+    //问题2 没有排除当前user
+    var session = ogmneo.Connection.session();
+    var nodeCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (p)-[:has]->(i:Inst)<-[:refer]-(u)\n\
+        RETURN id(i) AS nodeId, i AS node';
+    var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (p)-[:has]->(r:RelInst)<-[:refer]-(u)\n\
+        MATCH (r)-[hr:has_role]->(tgt)\n\
+        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId';
+    var instCypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)\n\
+        MATCH (i)-[:from]->(iof)-[:to]->(j)\n\
+        RETURN id(i) AS iId, id(j) AS jId';
+
+    console.log('[CYPHER]');
+    console.log(nodeCypher);
+    console.log(relationCypher);
+    console.log(instCypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(nodeCypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res) {
+            var nodes = {};
+            console.log("[Node]");
+            for (var i = 0; i < res.records.length; i++) {
+                var rec = res.records[i];
+                var nodeId = rec.get('nodeId').toString();
+                var prop = rec.get('node').properties;
+                // prop.id = nodeId;
+                prop['tags'] = [];
+                nodes[nodeId] = prop;
+
+                console.log(nodeId);
+            }
+            session.run(relationCypher, {
+                pname: msg.project_id,
+                uname: msg.user_id
+            })
+                .then(function (res) {
+                    var relations = {};
+
+                    for (var i = 0; i < res.records.length; i++) {
+                        var rec = res.records[i];
+                        var relationId = rec.get('relationId').toString();
+                        var roleName = rec.get('roleName');
+                        var roleId = rec.get('roleId').toString();
+
+                        if (relations[relationId] == undefined) {
+                            relations[relationId] = {
+                                roles: []
+                            };
+                        }
+                        relations[relationId].roles.push({
+                            rolename: roleName,
+                            node_id: roleId
+                        });
+                    }
+                    session.run(instCypher, {
+                        pname: msg.project_id,
+                        uname: msg.user_id
+                    })
+                        .then(function (res) {
+                            for (var i = 0; i < res.records.length; i++) {
+                                var rec = res.records[i];
+                                var iId = rec.get('iId').toString();
+                                var jId = rec.get('jId').toString();
+                                console.log(iId, jId);
+                                if (nodes[iId] != undefined) {
+                                    nodes[iId].tags.push(jId);
+                                } else if (relations[iId] != undefined) {
+                                    relations[iId].tag = jId;
+                                } else {
+                                    throw 'fatal error: no such iId';
+                                }
+                            }
+                            session.close();
+                            resp.msg = 'Success';
+                            resp.nodes = nodes;
+                            resp.relations = relations;
+                            callback(resp);
+                        });
+                });
+            // session.close();
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
 }
 module.exports = DataManager;

@@ -103,6 +103,11 @@ function ioConfig(server){
                         socket.emit('insModel',emitMsg);
                     });
                     break;
+                case 'rcmdIndex':
+                    dm.handle(msg, function(rep){
+                        socket.emit("insModel",rep);
+                    });
+                    break;
             }
             //console.log(emitMsg);
             //socket.emit('insModel',emitMsg);

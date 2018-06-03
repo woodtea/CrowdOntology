@@ -4,6 +4,8 @@
 
 var clicks = 0;
 var mutex = 0;
+var faEditClicked = false; //很不好
+var isRevise = false; //很不好
 $(function () {
 
     //使得提示工具Tooltip生效
@@ -139,6 +141,11 @@ $(function () {
 
         $(".properties .active").removeClass("active");
 
+        if(faEditClicked) isRevise = true;
+        else isRevise = false;
+
+        faEditClicked = false;
+
         let type = $(this).attr("type");
         switch (type) {
             case "class":
@@ -158,6 +165,8 @@ $(function () {
     // 点击属性修改
     $(document).on("click", '#attribute .fa-edit', function () {
 
+        faEditClicked = true;
+
         let item = $(this).parent().parent();
 
         let type = $(item).find(".type").attr("value");
@@ -174,6 +183,8 @@ $(function () {
 
     // 点击关系修改
     $(document).on("click", '#relation .fa-edit', function () {
+
+        faEditClicked = true;
 
         let item = $(this).parent().parent();
 
@@ -449,6 +460,7 @@ function classRevise(item, type = "add") {
 
     let array = getEntityTypes();
     setClassTypeTypeahead(array);
+    setClassValueTypeahead();
 }
 
 function attributeRevise(item, type = "add") {
@@ -474,7 +486,7 @@ function attributeRevise(item, type = "add") {
         '</div></a>';
     $(".properties-revise").find("#attribute-revise").append(html);
 
-    html = generateSubmitLogo();
+    html = generateSubmitLogo(isRevise);
     $(".properties-revise").find("#attribute-revise").append(html);
 
     let centerId = $("g.center").attr("id");
@@ -557,7 +569,7 @@ function relationRevise(item, type = "add") {
     $(".properties-revise").find("#relation-revise").append(html);
     $('#relation-revise [data-tooltip="tooltip"]').tooltip();
     //提交按钮
-    html = generateSubmitLogo();
+    html = generateSubmitLogo(isRevise);
     $(".properties-revise").find("#relation-revise").append(html);
 
     //自动填充
@@ -643,14 +655,16 @@ function generatePlusLogo(type) {
     return html;
 }
 
-function generateSubmitLogo() {
+function generateSubmitLogo(hasRemove=false) {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
         '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >确认</button></span>' +
-        '<span>&nbsp;</span>' +
+        '<span>&nbsp;</span>'+
         '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >取消</button></span>' +
-        '<span>&nbsp;</span>' +
-        '<span class="button-remove" type="remove"><button class="btn btn-default btn-sm" type="button" >删除</button></span>' +
-        '</a>';
+        '<span>&nbsp;</span>';
+    if(hasRemove){
+        html += '<span class="button-remove" type="remove"><button class="btn btn-default btn-sm" type="button" >删除</button></span>' +
+            '</a>';
+    }
     return html;
 }
 

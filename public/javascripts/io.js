@@ -7,37 +7,6 @@ var tmpMsg = {
 
 var socket_mutex = false;
 
-socket.on('chat message', function(msg){
-    alert(msg);
-});
-
-/*
-socket.on('data', function(msg){
-
-    instance_model = {nodes:{},relations:{}};
-    recommend_model_whole = {nodes:{},relations:{}};
-    model = {nodes:{},relations:{}};
-
-    if(msg.instance_model[user]) instance_model =  msg.instance_model[user];
-    if(msg.model) model = msg.model;
-    for(let tmpUser in msg.instance_model){
-        if(user != tmpUser) recommend_model_whole = msg.instance_model[tmpUser]
-    }
-
-    drawIndex();
-    return;
-
-    instance_model = msg.instance_model;
-    recommend_model = msg.recommend_model;
-
-    model = msg.model;
-
-    drawIndex();
-    drawRelation("n0", "n2", instance_model);
-});
-*/
-
-
 socket.on('iotest', function(msg){
     alert(msg);
 });
@@ -46,7 +15,7 @@ socket.on('model', function(msg){
     switch (msg.operation){
         //case 'get':
         case 'mget':
-            if(Object.keys(msg.nodes).length == 0){
+            if(Object.keys(msg.nodes).length == 0){//forTest
                 socketEmit("iotest", "99");
                 socket_mutex = false;
                 return;
@@ -89,6 +58,9 @@ socket.on('insModel', function(msg){
             break;
         case 'rcmd':
             io_recommend_insModel_node_done(msg);
+            break;
+        case 'rcmdIndex':
+            io_recommend_insModel_index_done(msg);
             break;
     }
 });
@@ -208,7 +180,8 @@ function io_revise_insModel_relation(user_id,projectId,relations){
 }
 
 function io_recommend_insModel_node(nodes){
-    let msg = emitMsgHeader('rcmd'); //'rcmd_node');
+    //let msg = emitMsgHeader('rcmd'); //'rcmd_node');
+    let msg = emitMsgHeader('rcmdIndex'); //'rcmd_node');
     msg["nodes"] = nodes;
     socketEmitArray('insModel',msg);
 }
@@ -374,6 +347,30 @@ function io_recommend_insModel_node_done(msg){
         let entity = getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
+        return;
+    }
+}
+
+function io_recommend_insModel_index_done(msg){
+    if(msg.error){
+        return;
+    }else{
+        tmpMsgPop(msg.operationId);
+
+        let tmpModel = {
+            "nodes": msg.nodes,
+            "relations": msg.relations
+        }
+        prepareNewEntity(tmpModel,false);
+
+        recommend_index = []
+        for(let key in tmpModel.nodes){
+            if(instance_model.nodes[key] == undefined){
+                if(isEntity(key,tmpModel)){
+                    recommend_index.push(instance_model.nodes[key].value);
+                }
+            }
+        }
         return;
     }
 }
