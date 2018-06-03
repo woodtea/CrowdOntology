@@ -367,7 +367,7 @@ function io_recommend_insModel_index_done(msg){
         for(let key in tmpModel.nodes){
             if(instance_model.nodes[key] == undefined){
                 if(isEntity(key,tmpModel)){
-                    recommend_index.push(instance_model.nodes[key].value);
+                    recommend_index.push(tmpModel.nodes[key].value);
                 }
             }
         }

@@ -108,6 +108,11 @@ function ioConfig(server){
                         socket.emit("insModel",rep);
                     });
                     break;
+                case 'rcmd_entity':
+                    dm.handle(msg, function(rep){
+                        socket.emit("insModel",rep);
+                    });
+                    break;
             }
             //console.log(emitMsg);
             //socket.emit('insModel',emitMsg);
