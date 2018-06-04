@@ -153,6 +153,7 @@ format_remove_insModel_relation = function (msg){
 
 format_recommend_insModel = function (msg){
     let newMsg = format_basic(msg,0);
+    newMsg.nodes = msg.nodes;
     return newMsg;
 }
 

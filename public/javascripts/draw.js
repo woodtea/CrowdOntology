@@ -124,7 +124,7 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
 }
 
 
-function drawPath(path,centX=width/2, centY=height/2) {
+function drawPath(path,centX=width/2, centY=height/2,text_anchor="middle",startOffset="50%") {
     svg
         .append("path")
         .style("stroke", "grey")
@@ -172,11 +172,11 @@ function drawPath(path,centX=width/2, centY=height/2) {
 
     svg
         .append("text")
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", text_anchor)
         .attr("dy", "-5")
         .append("textPath")
         .attr("href", "#" + path.data.id)
-        .attr("startOffset", "50%")
+        .attr("startOffset", startOffset)
         .style('font-size', '10px')
         .classed("textPath", true)
         .text(path.data.value);
@@ -588,13 +588,19 @@ function drawCommons(id1,id2){
         }
     }
     let offset = - 2;//-2、2、-3、3 ...
+    let node,paths;
     for(let n=0;n<commonIds.length;n++){
-        let node = {};
+        node = {};
         node[commonIds[n]] = entity1.neighbours[commonIds[n]];
-        let paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]]);
-        drawPath(paths[0],width/2 - zoomW*R, height/2);//暂时这么处理吧，不太好看
+        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]]);
+        drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","35%");//暂时这么处理吧，不太好看
+
+        node = {};
+        node[commonIds[n]] = entity2.neighbours[commonIds[n]];
+        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity2.neighbours[commonIds[n]]);
+        drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","65%");//暂时这么处理吧，不太好看
+
         drawNode(width/2, height/2 + zoomH * r * offset, r * zoomR, node);
-        offset = offset - Math.pow(-1,n+3)*(n+4);
     }
 }
 
@@ -640,8 +646,6 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
     ox2 = ex - 0.4 * r * Math.cos(angle);
     oy2 = ey - 0.4 * r * Math.sin(angle);
 
-    console.log("xxx")
-    console.log(node);
     path.push({
         sx,
         sy,

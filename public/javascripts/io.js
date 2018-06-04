@@ -183,7 +183,7 @@ function io_revise_insModel_relation(user_id,projectId,relations){
 
 function io_recommend_insModel_node(nodes){
     //let msg = emitMsgHeader('rcmd'); //'rcmd_node');
-    let msg = emitMsgHeader('rcmdIndex'); //'rcmd_node');
+    let msg = emitMsgHeader('rcmd');
     msg["nodes"] = nodes;
     socketEmitArray('insModel',msg);
 }

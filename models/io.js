@@ -369,10 +369,10 @@ function ioConfig(server){
             msg15 = {
                 operation: 'rcmd',
                 user_id : 'user2@mail',
-                project_id : '红楼梦人物关系图谱',
+                project_id : '电影人物关系图谱',
                 operation_id : 'op2',
                 nodes:{
-                    42:{//内部信息目前都用不着
+                    480:{//内部信息目前都用不着
                         tags: [],
                         value: ""
                     }
@@ -394,75 +394,14 @@ function ioConfig(server){
             };
 
             //initiate Set
-            if(msg=="99"){
-                dm.handle(msg0, function(rep){
-                    dm.handle(msg1, function(rep){
-                        dm.handle(msg1_2, function(rep){
-                            dm.handle(msg1_3, function(rep){
-                                dm.handle(msg2, function(rep){
-                                dm.handle(msg2_9, function(rep){
-                                    var symbolId;
-                                    for(let key in rep.migrate){
-                                        symbolId = rep.migrate[key];
-                                    }
-                                    dm.handle(msg3, function(rep){
-                                        var nodeId;
-                                        for(let key in rep.migrate){
-                                            nodeId = rep.migrate[key]
-                                        }
-                                        //创建属性
-                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("出生日期",rolename1="",rolename2="出生日期",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        //创建关系
-                                        dm.handle(mcreate_relation("父子",rolename1="父亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("母子",rolename1="母亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("父女",rolename1="父亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("母女",rolename1="母亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-
-                                        dm.handle(mcreate_relation("夫妻",rolename1="丈夫",rolename2="妻子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-
-                                        dm.handle(mcreate_relation("公媳",rolename1="公公",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("婆媳",rolename1="婆婆",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-
-                                        dm.handle(mcreate_relation("兄弟",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
-                                        /*
-                                        for(let key in rep.migrate){
-                                            nodeId = rep.migrate[key]
-                                            msg4.relations[0].roles[0].node_id = rep.migrate[key]
-                                            msg4.relations[0].roles[1].node_id = rep.migrate[key]
-                                        }
-                                        dm.handle(msg4, function(rep){
-                                            msg4_1.relations[0].roles[0].node_id = nodeId
-                                            msg4_1.relations[0].roles[1].node_id = symbolId
-                                            dm.handle(msg4_1, function(rep){
-                                                return;
-                                            });
-                                            msg4_2.relations[0].roles[0].node_id = nodeId
-                                            msg4_2.relations[0].roles[1].node_id = symbolId
-                                            dm.handle(msg4_2, function(rep){
-                                                return;
-                                            });
-                                        });
-                                        */
-                                    });
-                                });
-                                });
-                            });
-                        });
-                    });
-                });
-                return;
-            }else if(msg="mcreate_movie"){
-                mcreate_movie();
+            if(msg == "init"){
+                init_project();
+            }else if(msg=="mcreate_hlm"){
+                mcreate_hlm_project();
+            }else if(msg=="mcreate_movie"){
+                mcreate_movie_project();
             }else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17];
-
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
@@ -614,7 +553,7 @@ function mcreate_user(user){
     return msg;
 }
 
-function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_id="红楼梦人物关系图谱"){
+function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_id){
     let msg = {
         operation: 'mcreate_relation',
         user_id : '123@123',
@@ -650,13 +589,63 @@ function mcreate_node(tag,value,project_id,user_id="user@mail"){
             }
         ]
     };
-    console.log("\n****")
-    console.log(msg);
-    console.log("****\n")
     return msg;
 }
 
-function mcreate_movie(){
+function init_project(){
+    msg0 = {operation:'init'};
+
+    dm.handle(msg0, function(rep) {
+        dm.handle(mcreate_user("user@mail"), function (rep) {});
+        dm.handle(mcreate_user("user1@mail"), function (rep) {});
+        dm.handle(mcreate_user("user2@mail"), function (rep) {});
+    });
+}
+
+
+function mcreate_hlm_project(){
+    msg0 = {
+        operation:'init'
+    };
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: '红楼梦人物关系图谱'
+    };
+    var humanId,movieId,roleId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "人", "红楼梦人物关系图谱"), function (rep) {
+            for (let key in rep.migrate) humanId = rep.migrate[key];
+            dm.handle(mcreate_node("Symbol", "String", "红楼梦人物关系图谱"), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                //创建属性
+                dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=humanId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=humanId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("出生日期",rolename1="",rolename2="出生日期",id1=humanId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
+                //创建关系
+                dm.handle(mcreate_relation("父子",rolename1="父亲",rolename2="儿子",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("母子",rolename1="母亲",rolename2="儿子",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("父女",rolename1="父亲",rolename2="女儿",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("母女",rolename1="母亲",rolename2="女儿",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+
+                dm.handle(mcreate_relation("夫妻",rolename1="丈夫",rolename2="妻子",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+
+                dm.handle(mcreate_relation("公媳",rolename1="公公",rolename2="媳妇",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("婆媳",rolename1="婆婆",rolename2="媳妇",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+
+                dm.handle(mcreate_relation("兄弟",rolename1="哥哥",rolename2="弟弟",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+                dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=humanId,id2=humanId,project_id="红楼梦人物关系图谱"),function(rep){});
+            });
+        });
+    });
+    return;
+}
+
+function mcreate_movie_project(){
     msg0 = {
         operation:'init'
     };
