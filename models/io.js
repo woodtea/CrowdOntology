@@ -166,12 +166,12 @@ function ioConfig(server){
             msg2 = {
                 operation: 'create_project',
                 operation_id: 'opt2',
-                name: '红楼梦'
+                name: '红楼梦人物关系图谱'
             };
             msg3 = {
                 operation: 'mcreate_node',
                 user_id : 'user1@mail.com',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes :[
                     {
@@ -184,7 +184,7 @@ function ioConfig(server){
             msg2_9 = {
                 operation: 'mcreate_node',
                 user_id : '123@132',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes :[
                     {
@@ -197,7 +197,7 @@ function ioConfig(server){
             msg4 = {
                 operation: 'mcreate_relation',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations:[
                     {
@@ -215,7 +215,7 @@ function ioConfig(server){
             msg4_1 = {
                 operation: 'mcreate_relation',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations:[
                     {
@@ -233,7 +233,7 @@ function ioConfig(server){
             msg4_2 = {
                 operation: 'mcreate_relation',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations:[
                     {
@@ -251,13 +251,13 @@ function ioConfig(server){
             msg5 = {
                 operation: 'mget',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2'
             };
             msg6 = {
                 operation: 'create_node',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes :[
                     {
@@ -270,7 +270,7 @@ function ioConfig(server){
             msg7 = {
                 operation: 'create_relation',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations:[
                     {
@@ -291,13 +291,13 @@ function ioConfig(server){
             msg8 = {
                 operation: 'get',
                 user_id : 'user2@mail',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2'
             };
             msg9 = {
                 operation: 'remove_node',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes: [
                     162
@@ -306,7 +306,7 @@ function ioConfig(server){
             msg10 = {
                 operation: 'remove_relation',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations: [
                     164
@@ -315,7 +315,7 @@ function ioConfig(server){
             msg11 = {
                 operation: 'get_tags',
                 user_id : '123@123',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 node: {
                     value:'冬瓜'
@@ -325,7 +325,7 @@ function ioConfig(server){
             msg12 = {
                 operation: 'refer',
                 user_id : 'user1@mail',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 node:{
                     front_id: '',
@@ -335,7 +335,7 @@ function ioConfig(server){
             msg13 = {
                 operation: 'create_node_proxy',
                 user_id : 'user2@mail',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes :[
                     {
@@ -348,7 +348,7 @@ function ioConfig(server){
             msg14 = {
                 operation: 'create_relation_proxy',
                 user_id : 'user2@mail',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 relations:[
                     {
@@ -369,7 +369,7 @@ function ioConfig(server){
             msg15 = {
                 operation: 'rcmd',
                 user_id : 'user2@mail',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id : 'op2',
                 nodes:{
                     42:{//内部信息目前都用不着
@@ -388,7 +388,7 @@ function ioConfig(server){
             msg17 = {
                 operation: 'rcmd_entity',
                 user_id : 'bucunzaide',
-                project_id : '红楼梦',
+                project_id : '红楼梦人物关系图谱',
                 operation_id: 'opt2',
                 topk: 1
             };
@@ -411,26 +411,26 @@ function ioConfig(server){
                                             nodeId = rep.migrate[key]
                                         }
                                         //创建属性
-                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("出生日期",rolename1="",rolename2="出生日期",id1=nodeId,id2=symbolId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("出生日期",rolename1="",rolename2="出生日期",id1=nodeId,id2=symbolId,project_id="红楼梦人物关系图谱"),function(rep){});
                                         //创建关系
-                                        dm.handle(mcreate_relation("父子",rolename1="父亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("母子",rolename1="母亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("父女",rolename1="父亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("母女",rolename1="母亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("父子",rolename1="父亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("母子",rolename1="母亲",rolename2="儿子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("父女",rolename1="父亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("母女",rolename1="母亲",rolename2="女儿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
 
-                                        dm.handle(mcreate_relation("夫妻",rolename1="丈夫",rolename2="妻子",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("夫妻",rolename1="丈夫",rolename2="妻子",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
 
-                                        dm.handle(mcreate_relation("公媳",rolename1="公公",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("婆媳",rolename1="婆婆",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("公媳",rolename1="公公",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("婆媳",rolename1="婆婆",rolename2="媳妇",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("翁婿",rolename1="岳父",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("姑婿",rolename1="岳母",rolename2="女婿",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
 
-                                        dm.handle(mcreate_relation("兄弟",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
-                                        dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦"),function(rep){});
+                                        dm.handle(mcreate_relation("兄弟",rolename1="哥哥",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("兄妹",rolename1="哥哥",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("姐弟",rolename1="姐姐",rolename2="弟弟",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("姐妹",rolename1="姐姐",rolename2="妹妹",id1=nodeId,id2=nodeId,project_id="红楼梦人物关系图谱"),function(rep){});
                                         /*
                                         for(let key in rep.migrate){
                                             nodeId = rep.migrate[key]
@@ -458,6 +458,8 @@ function ioConfig(server){
                     });
                 });
                 return;
+            }else if(msg="mcreate_movie"){
+                mcreate_movie();
             }else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17];
 
@@ -603,7 +605,16 @@ function io_recommend_insModel(rcvMsg,callback){
     return;
 }
 
-function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_id="红楼梦"){
+function mcreate_user(user){
+    let msg = {
+        operation: 'create_user',
+        operation_id: 'opt0',
+        name: user
+    };
+    return msg;
+}
+
+function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_id="红楼梦人物关系图谱"){
     let msg = {
         operation: 'mcreate_relation',
         user_id : '123@123',
@@ -623,5 +634,69 @@ function mcreate_relation(value,rolename1="",rolename2="",id1="",id2="",project_
         ]
     };
     return msg;
+}
+
+function mcreate_node(tag,value,project_id,user_id="user@mail"){
+    let msg = {
+        operation: 'mcreate_node',
+        user_id : user_id,
+        project_id : project_id,
+        operation_id : 'op0',
+        nodes :[
+            {
+                front_id: '',
+                tag : tag,
+                value : value
+            }
+        ]
+    };
+    console.log("\n****")
+    console.log(msg);
+    console.log("****\n")
+    return msg;
+}
+
+function mcreate_movie(){
+    msg0 = {
+        operation:'init'
+    };
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: '电影人物关系图谱'
+    };
+    var humanId,movieId,roleId,symbolId;
+    dm.handle(msg0, function(rep) {
+        dm.handle(msg1, function(rep) {
+            dm.handle(mcreate_user("user@mail"), function (rep) {
+                dm.handle(mcreate_user("user1@mail"), function (rep) {
+                    dm.handle(mcreate_user("user2@mail"), function (rep) {
+                        dm.handle(mcreate_node("Entity", "人", "电影人物关系图谱"), function (rep) {
+                            for (let key in rep.migrate) humanId = rep.migrate[key];
+                            dm.handle(mcreate_node("Entity", "电影", "电影人物关系图谱"), function (rep) {
+                                for (let key in rep.migrate) movieId = rep.migrate[key];
+                                dm.handle(mcreate_node("Entity", "电影人物", "电影人物关系图谱"), function (rep) {
+                                    for (let key in rep.migrate) roleId = rep.migrate[key];
+                                    dm.handle(mcreate_node("Symbol", "String", "电影人物关系图谱"), function (rep) {
+                                        for (let key in rep.migrate) symbolId = rep.migrate[key];
+                                        //创建属性
+                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=humanId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=movieId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+                                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=roleId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+                                        //创建关系
+                                        dm.handle(mcreate_relation("导演", rolename1 = "导演", rolename2 = "电影", id1 = humanId, id2 = movieId, project_id = "电影人物关系图谱"), function (rep) {});
+                                        dm.handle(mcreate_relation("出演", rolename1 = "演员", rolename2 = "电影", id1 = humanId, id2 = movieId, project_id = "电影人物关系图谱"), function (rep) {});
+                                        dm.handle(mcreate_relation("饰演", rolename1 = "演员", rolename2 = "角色", id1 = humanId, id2 = roleId, project_id = "电影人物关系图谱"), function (rep) {});
+                                        dm.handle(mcreate_relation("角色", rolename1 = "角色", rolename2 = "电影", id1 = roleId, id2 = movieId, project_id = "电影人物关系图谱"), function (rep) {});
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+    return;
 }
 module.exports = ioConfig;

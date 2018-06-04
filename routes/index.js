@@ -50,10 +50,11 @@ router.get('/signout', function(req, res, next) {
     res.redirect('/signin');
 });
 
-router.get('/workspace', function(req, res, next) {
+router.get('/workspace/:project', function(req, res, next) {
     if(checkSignIn(req,res)){
         res.render('workspace',{
             title:"Workspace",
+            project:req.params.project,
             "user":{
                 "mail":req.session.user.mail    //Forest
             }

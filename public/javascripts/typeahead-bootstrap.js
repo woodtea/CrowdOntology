@@ -106,7 +106,6 @@ function getAttributeTypes(nodeId){
 }
 
 function setAttributeTypeTypeahead(array){
-    if(array.length==0) alert("已建整所有属性");
     $('#attribute-revise .type-input').typeahead({
         source: array,
         minLength: 0,
@@ -134,7 +133,7 @@ function getRelationTypes(nodeId){
     let tag = instance_model.nodes[nodeId].tags[0];
     let entityId;
     for(entityId in model.nodes){
-        if(model.nodes[entityId].tag == tag) break;
+        if(model.nodes[entityId].value == tag) break;
     }
 
     //在model中获取所有类型

@@ -15,11 +15,13 @@ socket.on('model', function(msg){
     switch (msg.operation){
         //case 'get':
         case 'mget':
+            /*
             if(Object.keys(msg.nodes).length == 0){//forTest
                 socketEmit("iotest", "99");
                 socket_mutex = false;
                 return;
             }
+            */
             io_get_model_done(msg);
             break;
         case 'save':

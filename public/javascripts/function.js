@@ -491,6 +491,7 @@ function attributeRevise(item, type = "add") {
 
     let centerId = $("g.center").attr("id");
     let array = getAttributeTypes(centerId);
+    if(array.length == 0 && !isRevise) alert("已建立所有属性");
     setAttributeTypeTypeahead(array);
 }
 
@@ -1219,7 +1220,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
 
     for(let rId in model["relations"]){
         let r = model["relations"][rId];
-        if(r.type != "姓名") continue;
+        if(keyValueArray.indexOf(r.type) == -1) continue;//不是主属性
 
         let nId0,nId1,tmpNode;
         nId0 = r.roles[0].node_id;
@@ -1296,7 +1297,7 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
                 if(model.nodes[key].value == tag) hasError = false;
             }
             if(tag == "String") hasError = true;
-            if(hasError) err += "创建类型不合法\n";
+            if(hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担着";
 
             hasError = false;
             for(let key in instance_model.nodes){
@@ -1343,11 +1344,13 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
                 if(model.relations[key].value == tag){
                     hasError = false;
                     let roles = model.relations[key].roles;
-                    for(let n in roles){
-                        if(model.nodes[roles[n].node_id].tag == "Symbol"){
-                            hasError = true;
-                            break;
-                        }
+                    //model.nodes[roles[0].node_id].value
+                    //model.nodes[roles[1].node_id].value
+                    let tags0 = instance_model.nodes[node0Id].tags;
+                    let tags1 = instance_model.nodes[node1Id].tags;
+                    if(model.nodes[roles[0].node_id].value != tags0 || model.nodes[roles[1].node_id].value != tags1){
+                        hasError = true;
+                        break;
                     }
                     if(!hasError) break;
                 }
@@ -1371,15 +1374,6 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
                     hasError = true
                     break;
                 }
-                /*
-                for(let n in roles){
-                    if((roles[n].node_id == entityId)&&(roles[1-n].node_id == centerId)){
-                        hasError = true
-                        break;
-                    }
-                }
-                if(hasError) break;
-                */
             }
             if(hasError) err += "创建关系已存在\n";
             break;

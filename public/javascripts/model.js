@@ -1,6 +1,7 @@
 var user;
 var project;
 var symbolArray  = ["String"];
+var keyValueArray = ["姓名","名字","名称"];
 
 var recommend_model = {}
 /*
@@ -112,4 +113,13 @@ function getEntityIdByValue(value, model = instance_model) {
         }
     }
     return ;
+}
+
+function getEntityTagsById(id,model=instance_model){
+    alert(id)
+    for(let key in model.nodes){
+        alert(model.nodes[key].value);
+        if(model.nodes[key].value == id) return model.nodes[key].tags;
+    }
+    return;
 }

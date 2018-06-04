@@ -4,7 +4,7 @@
     <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
       <div class="col-xs-3">
       </div>
-      <div class="col-xs-6 title" style="text-align: center"><h4>红楼梦</h4></div>
+      <div class="col-xs-6 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
       <div class="col-xs-3">
         <div class="input-group" style="margin:auto;">
           <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
@@ -65,31 +65,32 @@
 <script language="javascript">
     window.onload = function() {
         user = $(".glyphicon-user").parent().text().slice(1);
-        //user = user.replace(/(^\s*)/g, "");
-        project = "红楼梦";
+        project = $("#project").text();
         //forTest
         //判断是否存在图谱，如果不存在就初始化图谱
         let msg = {
             operation: 'mget',  //先这么用着再说吧
             user_id : user,
-            project_id : '红楼梦',
+            project_id : project,
             operation_id : 'op1'
         };
         socketEmit("model",msg);
         let msg2 = {
             operation: 'get',
             user_id : user,
-            project_id : '红楼梦',
+            project_id : project,
             operation_id : 'op2'
         }
         socketEmit("insModel",msg2);
+        /*
         let msg3 = {
             operation: 'rcmdIndex',
             userId : user,
-            project_id : '红楼梦',
+            project_id : project,
             operation_id : 'op3'
         }
         socketEmit("insModel",msg3);
+        */
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
