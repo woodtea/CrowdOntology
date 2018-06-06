@@ -34,7 +34,7 @@ $(function () {
         if(d3.select(this).classed("isRecommendation") == true){
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
-                alert("显示推荐节点详情");
+                alert("双击节点可以直接节点与对应关系");
             });
         }else{
             clickTimeout.set(function () {
@@ -134,6 +134,7 @@ $(function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").show();
         $(item).children(".properties-revise").hide();
+        $(".properties .active").removeClass("active");
     })
 
     // 点击添加
@@ -195,6 +196,16 @@ $(function () {
         $(".properties-revise").find(".type-input").val(type);
         $(".properties-revise").find(".value-input").val(value);
 
+        //$(".properties-revise .type-input").keyup();
+        //$(".properties-revise .value-input").keyup();
+
+        let relationID = $(item).find(".relationID").attr("value");
+        let roles = instance_model.relations[relationID].roles;
+
+        $("#relation-revise").find(".role0").text(roles[0].rolename);
+        $("#relation-revise").find(".role1").text(roles[1].rolename);
+        $("#relation-revise").find(".node0").text(instance_model.nodes[roles[0].node_id].value);
+        $("#relation-revise").find(".node1").text(instance_model.nodes[roles[1].node_id].value);
         $(item).addClass("active");
 
     });
@@ -469,7 +480,7 @@ function attributeRevise(item, type = "add") {
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
     let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left"></span></div>' +
+        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
         '<div class="col-xs-8"><h4>修改</h4></div>' +
         '<div class="col-xs-2"></div>' +
         '</div>' +
@@ -487,6 +498,7 @@ function attributeRevise(item, type = "add") {
         '</div></a>';
     $(".properties-revise").find("#attribute-revise").append(html);
 
+    if(isRevise) $(".properties-revise").find("#attribute-revise .type-input").attr("disabled","disabled");
     html = generateSubmitLogo(isRevise);
     $(".properties-revise").find("#attribute-revise").append(html);
 
@@ -503,7 +515,7 @@ function relationRevise(item, type = "add") {
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
     let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left"></span></div>' +
+        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
         '<div class="col-xs-8"><h4>修改</h4></div>' +
         '<div class="col-xs-2"></div>' +
         '</div>' +
@@ -523,37 +535,7 @@ function relationRevise(item, type = "add") {
 
     //显示关系
     html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="display: none">';
-    //text方法
-    /*
-    html += '<div class="row">' +
-            '<div class="col-xs-4" style="padding: 3px"><span style="padding-left: 12px;font-weight:bold">角色</span></div>' +
-            '<div class="col-xs-8" style="padding: 3px"><span style="padding-left: 12px;font-weight:bold">承担者</span></div>' +
-            '</div>';
-    ///*
-    html += '<div class="row">' +
-            '<div class="col-xs-4" style="padding: 3px"><span style="padding-left: 12px;" class="role0"></span></div>' +
-            '<div class="col-xs-7" style="padding: 3px"><span style="padding-left: 12px;" class="node0"></span></div>' +
-            '<div class="col-xs-1" style="padding: 3px"><span class="glyphicon glyphicon-sort" data-tooltip="tooltip" data-placement="right" title="交换角色"></span></div>' +
-            '</div>';
 
-    html += '<div class="row">' +
-            '<div class="col-xs-4" style="padding: 3px"><span style="padding-left: 12px;" class="role1"></span></div>' +
-            '<div class="col-xs-7" style="padding: 3px"><span style="padding-left: 12px;" class="node1"></span></div>' +
-            '<div class="col-xs-1" style="padding: 3px"><span class="glyphicon glyphicon-sort" data-tooltip="tooltip" data-placement="right" title="交换角色"></span></div>' +
-            '</div>';
-    //*/
-    /*
-     //input方法
-    html += '<div class="row">' +
-            '<div class="col-xs-4" style="padding: 3px"><input type="text" class="stigmod-input role0" value="" readonly="readonly"></div>' +
-            '<div class="col-xs-7" style="padding: 3px"><input type="text" class="stigmod-input node0" value="" readonly="readonly"></div>' +
-            '</div>';
-
-    html += '<div class="row">' +
-            '<div class="col-xs-4" style="padding: 3px"><input type="text" class="stigmod-input role1" value="" readonly="readonly"></div>' +
-            '<div class="col-xs-7" style="padding: 3px"><input type="text" class="stigmod-input node1" value="" readonly="readonly"></div>' +
-            '</div>';
-    //*/
     //表格方法
     html += '<table class="table table-condensed" style="table-layout: fixed;margin: 0px">' +
             '<thead ><tr><th width="25%">角色</th><th width="55%">承担着</th><th width="10%"></th></tr></thead>' +
@@ -570,6 +552,12 @@ function relationRevise(item, type = "add") {
 
     $(".properties-revise").find("#relation-revise").append(html);
     $('#relation-revise [data-tooltip="tooltip"]').tooltip();
+
+    if(isRevise) {
+        $(".properties-revise").find("#relation-revise .type-input").attr("disabled","disabled");
+        $(".properties-revise").find("#relation-revise .list-group-item.stigmod-hovershow-trig").show();
+    }
+
     //提交按钮
     html = generateSubmitLogo(isRevise);
     $(".properties-revise").find("#relation-revise").append(html);
@@ -588,7 +576,7 @@ function rolseRevise(item, type = "add") {
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
     let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left"></span></div>' +
+        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" ></span></div>' +
         '<div class="col-xs-8"><h4>修改</h4></div>' +
         '<div class="col-xs-2"></div>' +
         '</div>' +
@@ -1329,8 +1317,16 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
                     let roles = instance_model.relations[key].roles;
                     for(let n in roles){
                         if(roles[n].node_id == centerId){
-                            hasError = true
-                            break;
+                            if(isRevise){
+                                //判断属性是否修改
+                                if(roles[1-n].node_id == getEntityIdByValue(value)){
+                                    hasError = true
+                                    break;
+                                }
+                            }else{//同名属性
+                                hasError = true
+                                break;
+                            }
                         }
                     }
                     if(hasError) break;

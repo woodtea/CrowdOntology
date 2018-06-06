@@ -16,10 +16,11 @@ router.get('/', function(req, res, next) {
 
 /* GET Signin page. */
 router.get('/signin', function(req, res, next) {
+    let [success,error] = getAlertMsg(req);
     res.render('signin', {
         title: 'SingIn',
-        success:req.session.success,
-        error:req.session.error
+        success:success,
+        error:error
     });
 });
 
@@ -63,10 +64,11 @@ router.get('/workspace/:project', function(req, res, next) {
 });
 
 router.get('/signup', function(req, res, next) {
+    let [success,error] = getAlertMsg(req);
     res.render('signup', {
         title: 'SingUp',
-        success:req.session.success,
-        error:req.session.error
+        success:success,
+        error:error
     });
 });
 
@@ -82,7 +84,7 @@ router.post('/signup', function(req, res, next) {
 
     if (!regexPW.exec(req.body['password'])) {
         req.session['error'] = 'Password length no less than 6 and no more than 40 characters';
-        return res.redirect('/reg');
+        return res.redirect('/signup');
     }
 
     req.session.user = {
@@ -153,5 +155,14 @@ function checkSignIn(req,res){
             return false;
         }
     }
+}
+
+function getAlertMsg(req){
+    let success = req.session.success;
+    delete req.session.success;
+    let error = req.session.error;
+    delete req.session.error;
+
+    return [success,error];
 }
 
