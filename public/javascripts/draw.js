@@ -69,8 +69,12 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
             "value": centerNode[id].value,
         }
     }
+    let fillColor = "white";
     if (centerNode[id].tags) data["tags"] = centerNode[id].tags;
-    if (centerNode[id].dataType) data["dataType"] = centerNode[id].dataType;
+    if (centerNode[id].dataType) {//是实体
+        fillColor = "#eee"
+        data["dataType"] = centerNode[id].dataType;
+    }
 
     svg
         .append("g")
@@ -89,8 +93,9 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
         })
         .append("circle")
         .attr("r", r)
-        .attr("fill", "#eee")
+        .attr("fill", fillColor)
         .attr("stroke", "gray")
+        .attr("stroke-dasharray", "1,0") //虚线宽度
         .attr("stroke-width", 1)
     //svg.select("#" + data.id)
     svg.select("[id='" + data.id+"']")
@@ -200,12 +205,21 @@ function drawPathText(path) {
 /* index */
 function drawIndex(model = instance_model) {
     $(index).find("li").remove();
-    var html = "";
+    let html = "";
+    let entities = {};
     for (let id in model.nodes) {
         if (isEntity(id)) {
-            html += generateIndex(model.nodes[id].value, id);
+            if(entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]]=[];
+            entities[model.nodes[id].tags[0]].push({value:model.nodes[id].value,id:id});
         }
     }
+
+    for(let tag in entities){
+        for(let n in entities[tag]){
+            html += generateIndex(tag,entities[tag][n].value,entities[tag][n].id);
+        }
+    }
+
     $(index).append(html);
     setIndexTypeahead(getIndexArray());
 }
@@ -235,7 +249,7 @@ function drawRelation(id1, id2, model = instance_model) {
     let relations = {};
     relations[id2] = entity1.neighbours[id2];
     drawNeighbours(width/2 - zoomW*R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
-    //共有节点绘制
+    //共有节点绘制 //属性节点不属于共有节点
     drawCommons(id1,id2);
     //独有节点绘制
     drawUnique(id1,id2);
@@ -584,6 +598,7 @@ function drawCommons(id1,id2){
     let commonIds = [];
     for(let key in entity1.neighbours){
         if(entity2.neighbours[key] != undefined){
+            //if(isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }
@@ -680,6 +695,7 @@ function drawUnique(id1,id2){
     let key;
     for(let key in entity1.neighbours){
         if(entity2.neighbours[key] != undefined){
+            //if(isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }

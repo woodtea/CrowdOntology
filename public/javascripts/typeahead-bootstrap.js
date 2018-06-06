@@ -62,7 +62,8 @@ function setClassValueTypeahead(){
 }
 //
 function getAttributeTypes(nodeId){
-    let tmpAtrrArray = ["姓名"];
+    let tmpAtrrArray = [];
+    tmpAtrrArray.push(instance_model.nodes[nodeId].dataType);
     //keyValueArray
     let wholeAttrArray = [];
     let tmpR,n,m;

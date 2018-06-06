@@ -125,7 +125,8 @@ router.get('/user', function(req, res, next) {
         res.render('user', {
             title: 'User',
             "user":{
-                "mail":req.session.user.mail    //Forest
+                "mail":req.session.user.mail,    //Forest
+                "name":req.session.user.mail.split("@")[0]
             }
         });
     }

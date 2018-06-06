@@ -1,7 +1,7 @@
 // data manager
 
 const ogmneo = require('ogmneo');
-var keyAttributeArray = ["姓名","名字","名称"];
+var keyAttributeArray = ["姓名","名字","名称","片名"];
 
 function DataManager(cfg) {
     console.log('[config] ' + cfg);
@@ -808,7 +808,6 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                         var cypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
             MATCH (name) WHERE id(name)={name_id}\n\
-            //MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role {name:\'姓名\'}]->(name)\n\
             MATCH (i)<-[:has_role]-(rel:RelInst)-[hr:has_role]->(name) WHERE hr.name IN {keyAttributeArray} \n\
             RETURN id(i) AS iid, id(rel) AS relid'.format({
                             name_id: name_id

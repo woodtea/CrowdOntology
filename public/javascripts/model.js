@@ -1,7 +1,7 @@
 var user;
 var project;
 var symbolArray  = ["String"];
-var keyValueArray = ["姓名","名字","名称"];
+var keyValueArray = ["姓名","名字","名称","片名"];
 
 var recommend_model = {}
 /*
@@ -40,7 +40,8 @@ function getEntity(id, model = instance_model) {
     //处理自己的事件
     entity.centerNode[id] = {
         "value": model.nodes[id].value,
-        "tages": model.nodes[id].tags
+        "tages": model.nodes[id].tags,
+        "dataType": model.nodes[id].dataType
     }
     //处理邻接信息
     for (let relationID in model.relations) {
@@ -116,10 +117,25 @@ function getEntityIdByValue(value, model = instance_model) {
 }
 
 function getEntityTagsById(id,model=instance_model){
-    alert(id)
     for(let key in model.nodes){
-        alert(model.nodes[key].value);
         if(model.nodes[key].value == id) return model.nodes[key].tags;
     }
     return;
+}
+
+
+function getKeyAttribute(entityIdArray){
+    let entityId = entityIdArray[0];
+    //在model中获取所有类型
+    let n,tmpR;
+    for(let r in model.relations){
+        tmpR = model.relations[r];
+        for(n=0;n<tmpR.roles.length;n++){
+            if(tmpR.roles[n].node_id == entityId) break;
+        }
+        if(tmpR.roles[n] != undefined) {
+            if(keyValueArray.indexOf(tmpR.value) != -1)  return tmpR.value;
+        }
+    }
+    return "姓名";//default
 }

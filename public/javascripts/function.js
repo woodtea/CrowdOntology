@@ -76,7 +76,7 @@ $(function () {
                 }else{//不是实体节点，需要创建节点信息
                     let value = recommend_model["nodes"][nodeID].value
                     let nodes = {};
-                    let nodeId = generateFrontNodeID(value)
+                    let nodeId = generateFrontNodeID(value);
                     nodes[nodeId] = {
                         "dataType": recommend_model["nodes"][nodeID].tags,
                         "value": value
@@ -222,6 +222,7 @@ $(function () {
         let item = $(this).parent().parent();
         switch ($(item).attr("id")) {
             case "class-revise":
+                $("g.center").click();
                 break;
             case "attribute-revise":
                 $(".properties-revise .button-left").click();
@@ -669,8 +670,8 @@ function generateSubmitLogo(hasRemove=false) {
     return html;
 }
 
-function generateIndex(text, nodeID) {
-    var html = '<li style="text-align:left;margin: 10%;font-size:16px" nodeid=' + nodeID + '>' + text + '</li>';
+function generateIndex(tag, text, nodeID) {
+    var html = '<li style="text-align:left;margin: 10%;font-size:16px" nodeid=' + nodeID + '>' + tag + " : " + text + '</li>';
     return html;
 }
 
@@ -1251,6 +1252,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         }
 
         model["nodes"][entityId]["value"] = model["nodes"][valueId]["value"];
+        model["nodes"][entityId]["dataType"] = r.type;
 
         let order = recommend_index.indexOf(model["nodes"][valueId]["value"]);
         if(order != -1) recommend_index.splice(order,1);

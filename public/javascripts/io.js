@@ -139,11 +139,12 @@ function io_create_insModel_entity(entity){
 
     //生成关系
     let relations = {};
+    let keyAttribute = getKeyAttribute(entity.tags);
     relations[entity.relationId] = {
-        "type": "姓名",
+        "type": keyAttribute,
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
-            {"rolename": "姓名", "node_id": entity.valueId}
+            {"rolename": keyAttribute, "node_id": entity.valueId}
         ]
     }
     io_create_insModel_relation(relations);
