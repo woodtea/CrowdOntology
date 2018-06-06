@@ -63,6 +63,7 @@ function setClassValueTypeahead(){
 //
 function getAttributeTypes(nodeId){
     let tmpAtrrArray = ["姓名"];
+    //keyValueArray
     let wholeAttrArray = [];
     let tmpR,n,m;
     //在instance_model中获取当前类型
@@ -71,14 +72,17 @@ function getAttributeTypes(nodeId){
         for(n=0;n<tmpR.roles.length;n++){
             if(tmpR.roles[n].node_id == nodeId) break;
         }
-        if(tmpR.roles[n] != undefined) tmpAtrrArray.push(tmpR.type);
+        if(tmpR.roles[n] != undefined) {
+            tmpAtrrArray.push(tmpR.type);
+        }
     }
+    console.log(tmpAtrrArray);
 
     //找到entityId
     let tag = instance_model.nodes[nodeId].tags[0];
     let entityId;
     for(entityId in model.nodes){
-        if(model.nodes[entityId].tag == tag) break;
+        if(model.nodes[entityId].value == tag) break;
     }
 
     //在model中获取所有类型
