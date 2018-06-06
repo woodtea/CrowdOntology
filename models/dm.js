@@ -1246,6 +1246,22 @@ function unique(arr) {
     return res;
 }
 
+function uniqueRoles(arr) {
+    let obj = {};
+    for (var i = 0; i < arr.length; i++) {
+        if(obj[arr[i][0]] == undefined)  obj[arr[i][0]] = {};
+        if(obj[arr[i][0]][arr[i][1]] == undefined) obj[arr[i][0]][arr[i][1]] = 1;
+    }
+
+    let res=[];
+    for(let rolename in obj){
+        for(let node_id in obj[rolename]){
+            res.push({rolename:rolename,node_id:node_id});
+        }
+    }
+    return res;
+}
+
 /*
 msg : {
     operation: 'rcmd',
@@ -1297,7 +1313,8 @@ DataManager.prototype.recommend = function (msg, callback) {
     MATCH (otheru1)-[:refer]->(r1)-[:from]->(iof1:inst_of)-[:to]->(tag1)\n\
     OPTIONAL MATCH (i2)<-[r2r1:has_role]-(r2)-[r2r2:has_role]->(i3)\n\
     OPTIONAL MATCH (otheru2)-[:refer]->(r2)-[:from]->(iof2:inst_of)-[:to]->(tag2)\n\
-    RETURN id(r1) AS r1, id(tag1) AS tag1, id(otheru1) AS otheru1, i2, id(r2) AS r2, id(tag2) AS tag2, id(otheru2) AS otheru2, i3'.format({
+    RETURN id(r1) AS r1, id(tag1) AS tag1, id(otheru1) AS otheru1, i2, id(r2) AS r2, id(tag2) AS tag2, id(otheru2) AS otheru2, i3\
+    , r1r1.name AS r11name, r1r2.name AS r12name, r2r1.name AS r21name, r2r2.name AS r22name'.format({
         rcmd_id: nodes[0]
     })
 
@@ -1331,7 +1348,10 @@ DataManager.prototype.recommend = function (msg, callback) {
                 var i2id = i2.identity.toString();
                 var i3 = r.get('i3');
                 var i3id = i3.identity.toString();
-
+                var r11name = r.get('r11name').toString();
+                var r12name = r.get('r12name').toString();
+                var r21name = r.get('r21name').toString();
+                var r22name = r.get('r22name').toString();
                 // resp.records.push([r1, i2, r2, i3]);
                 rcmd_relations.push(r1);
                 if (relations[r1] == undefined) {
@@ -1355,10 +1375,10 @@ DataManager.prototype.recommend = function (msg, callback) {
                     }
                 }
 
-                relations[r1].roles.push(i2id);
+                relations[r1].roles.push([r12name,i2id]);
                 relations[r1].refer_u.push(otheru1);
-                relations[r2].roles.push(i2id);
-                relations[r2].roles.push(i3id);
+                relations[r2].roles.push([r21name,i2id]);
+                relations[r2].roles.push([r22name,i3id]);
                 relations[r2].refer_u.push(otheru2);
 
                 nodes[i2id] = i2.properties;
@@ -1367,7 +1387,7 @@ DataManager.prototype.recommend = function (msg, callback) {
 
             for (var i in relations) {
                 var rel = relations[i];
-                relations[i].roles = unique(relations[i].roles);
+                relations[i].roles = uniqueRoles(relations[i].roles);
                 relations[i].refer_u = (unique(relations[i].refer_u)).length;
 
             }
