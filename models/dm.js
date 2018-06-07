@@ -1617,8 +1617,10 @@ DataManager.prototype.recommendIndex = function (msg, callback) {
                             }
                             session.close();
                             resp.msg = 'Success';
-                            resp.nodes = nodes;
-                            resp.relations = relations;
+                            //resp.nodes = nodes;
+                            //resp.relations = relations;
+                            resp.nodes = unique(nodes);
+                            resp.relations = unique(relations);
                             callback(resp);
                         });
                 });
