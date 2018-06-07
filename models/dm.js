@@ -1374,6 +1374,14 @@ DataManager.prototype.recommend = function (msg, callback) {
                         nodes[ids[j]] = {};
                     }
                 }
+                //relations[r1].roles.push([r12name,i2id]);
+                relations[r1].roles.push({rolename:r12name,node_id:i2id});
+                relations[r1].refer_u.push(otheru1);
+                relations[r2].roles.push([r21name,i2id]);
+
+                relations[r2].roles.push({rolename:r21name,node_id:i2id});
+                relations[r2].roles.push([r22name,i3id]);
+                relations[r2].refer_u.push(otheru2);
 
                 relations[r1].roles.push([r12name,i2id]);
                 relations[r1].refer_u.push(otheru1);
@@ -1592,10 +1600,12 @@ DataManager.prototype.recommendIndex = function (msg, callback) {
                                 roles: []
                             };
                         }
-                        relations[relationId].roles.push({
-                            rolename: roleName,
-                            node_id: roleId
-                        });
+                        if(relations[relationId].roles.length < 2){
+                            relations[relationId].roles.push({
+                                rolename: roleName,
+                                node_id: roleId
+                            });
+                        }
                     }
                     session.run(instCypher, {
                         pname: msg.project_id,
@@ -1608,7 +1618,9 @@ DataManager.prototype.recommendIndex = function (msg, callback) {
                                 var jId = rec.get('jId').toString();
                                 console.log(iId, jId);
                                 if (nodes[iId] != undefined) {
-                                    nodes[iId].tags.push(jId);
+                                    if(nodes[iId].tags.length<1){
+                                        nodes[iId].tags.push(jId);
+                                    }
                                 } else if (relations[iId] != undefined) {
                                     relations[iId].tag = jId;
                                 } else {
@@ -1617,10 +1629,10 @@ DataManager.prototype.recommendIndex = function (msg, callback) {
                             }
                             session.close();
                             resp.msg = 'Success';
-                            //resp.nodes = nodes;
-                            //resp.relations = relations;
-                            resp.nodes = unique(nodes);
-                            resp.relations = unique(relations);
+                            resp.nodes = nodes;
+                            resp.relations = relations;
+                            //resp.nodes = unique(nodes);
+                            //resp.relations = unique(relations);
                             callback(resp);
                         });
                 });
