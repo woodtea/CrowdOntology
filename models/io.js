@@ -368,11 +368,11 @@ function ioConfig(server){
             };
             msg15 = {
                 operation: 'rcmd',
-                user_id : 'user2@mail',
+                user_id : 'zhut@pku.edu.cn',
                 project_id : '电影人物关系图谱',
                 operation_id : 'op2',
                 nodes:{
-                    480:{//内部信息目前都用不着
+                    143:{//内部信息目前都用不着
                         tags: [],
                         value: ""
                     }
@@ -387,10 +387,23 @@ function ioConfig(server){
             
             msg17 = {
                 operation: 'rcmd_entity',
-                user_id : 'bucunzaide',
+                user_id : 'zhut@pku.edu.cn',
                 project_id : '红楼梦人物关系图谱',
                 operation_id: 'opt2',
-                topk: 1
+                topk: 7
+            };
+            
+            msg18 = {
+                operation: 'new_rcmd',
+                user_id : 'zhut@pku.edu.cn',
+                project_id : '红楼梦人物关系图谱',
+                operation_id : 'op2',
+                nodes:{
+                    143:{//内部信息目前都用不着
+                        tags: [],
+                        value: ""
+                    }
+                }
             };
 
             //initiate Set
@@ -401,7 +414,7 @@ function ioConfig(server){
             }else if(msg=="mcreate_movie"){
                 mcreate_movie_project();
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18];
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
