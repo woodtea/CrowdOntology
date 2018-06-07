@@ -1211,14 +1211,26 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         let r = model["relations"][rId];
         if(keyValueArray.indexOf(r.type) == -1) continue;//不是主属性
 
-        let nId0,nId1,tmpNode;
+        let nId0,nId1,tmpNode,tags0,tags1;
         nId0 = r.roles[0].node_id;
         nId1 = r.roles[1].node_id;
 
         //如果是推荐，好像就会出现id不存在的情况
 
-        let tags0 = model["nodes"][nId0]["tags"];
-        let tags1 = model["nodes"][nId1]["tags"];
+        if(model["nodes"][nId0] != undefined) {
+            tags0 = model["nodes"][nId0]["tags"];
+        }else{
+            console.log("alert");
+            console.log("not found nId0:"+nId0);
+            continue;
+        }
+        if(model["nodes"][nId1] != undefined) {
+            tags1 = model["nodes"][nId1]["tags"];
+        }else{
+            console.log("alert");
+            console.log("not found nId0:"+nId0);
+            continue;
+        }
 
         let entityId,valueId;
         if(tags0 != undefined){
