@@ -3,3 +3,5 @@ node_modules/
 server_config.json
 remind
 logs/*
+fetchlog.sh
+serverLogs/

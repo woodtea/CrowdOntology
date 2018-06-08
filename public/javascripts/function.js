@@ -538,7 +538,7 @@ function relationRevise(item, type = "add") {
 
     //表格方法
     html += '<table class="table table-condensed" style="table-layout: fixed;margin: 0px">' +
-            '<thead ><tr><th width="25%">角色</th><th width="55%">承担着</th><th width="10%"></th></tr></thead>' +
+            '<thead ><tr><th width="25%">角色</th><th width="55%">承担者</th><th width="10%"></th></tr></thead>' +
             '<tbody><tr>' +
                 '<th><span class="role0"></span></th>' +
                 '<th><span class="node0"></span></th>' +
@@ -889,7 +889,7 @@ function relationReviseSubmit(item) {
     let node0 = $(item).find(".node0").text();
     let node1 = $(item).find(".node1").text();
 
-    //判断关系两端的承担着是否存在
+    //判断关系两端的承担者是否存在
     let nodeId = getEntityIdByValue(value, instance_model);
     if (nodeId == undefined) {
         alert("输入对象不存在");
@@ -1299,7 +1299,7 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
                 if(model.nodes[key].value == tag) hasError = false;
             }
             if(tag == "String") hasError = true;
-            if(hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担着";
+            if(hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担者";
 
             hasError = false;
             for(let key in instance_model.nodes){

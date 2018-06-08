@@ -59,6 +59,12 @@ function getEntity(id, model = instance_model) {
                 if (id == neighbourID) continue;
                 //判断是否存在，如果尚未存在则初始化
                 if (entity.neighbours[neighbourID] == undefined) {
+                    if(model.nodes[neighbourID]==undefined){
+                        console.log("alert notfound in getEntity");
+                        console.log(neighbourID);
+                        console.log(model);
+                        continue;
+                    }
                     entity.neighbours[neighbourID] = {
                         "value": model.nodes[neighbourID].value,
                         "relations": []
