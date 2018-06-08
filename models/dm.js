@@ -1375,11 +1375,11 @@ DataManager.prototype.recommend = function (msg, callback) {
                     }
                 }
                 //relations[r1].roles.push([r12name,i2id]);
-                relations[r1].roles.push({rolename:r12name,node_id:i2id});
+                relations[r1].roles.push([r12name,i2id]);
                 relations[r1].refer_u.push(otheru1);
                 relations[r2].roles.push([r21name,i2id]);
 
-                relations[r2].roles.push({rolename:r21name,node_id:i2id});
+                relations[r2].roles.push([r21name,i2id]);
                 relations[r2].roles.push([r22name,i3id]);
                 relations[r2].refer_u.push(otheru2);
 
