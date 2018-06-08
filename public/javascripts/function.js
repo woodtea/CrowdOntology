@@ -847,7 +847,7 @@ function attributeReviseSubmit(item) {
         "type": type,
         "roles": [
             {"rolename": "", "node_id": centerId},
-            {"rolename": "", "node_id": nodeId}
+            {"rolename": type, "node_id": nodeId}
         ]
     }
     io_create_insModel_relation(relations);
