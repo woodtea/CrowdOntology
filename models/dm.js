@@ -106,6 +106,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'new_rcmd':
                 this.newRecommend(msg, callback);
                 break;
+            case 'madd_key_attr':
+                this.mAddKeyAttr(msg, callback);
+                break;
             default:
                 throw 'unknown operation';
         }
@@ -293,6 +296,59 @@ DataManager.prototype.mCreateNode = function (msg, callback) {
 
 /*
 msg : {
+    operation: 'madd_key_attr',
+    user_id : 'u1',
+    project_id : 'p1',
+    operation_id : 'op2',
+    nodes :[
+        {
+            id: '',
+            key_attr_list: []
+        }
+    ]
+}
+*/
+/*先保证一个点的情况
+*/
+DataManager.prototype.mAddKeyAttr = function (msg, callback) {
+    var node = msg.nodes[0];
+    var nid = node.id;
+    var key_list = node.key_attr_list;
+
+    var session = ogmneo.Connection.session();
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+        MATCH (p)-[:has]->(c:Concept) WHERE id(c)={nid}\n\
+        MATCH (p)-[:has]->(rel:Relation)-[:has_role]->(c) WHERE id(rel) in {key_list}\n\
+        MERGE (c)-[:has_key_attr]->(rel)'.format({
+            nid: nid,
+            key_list: '[' + key_list.toString() + ']'
+        });
+    
+    console.log("[CYPHER]");
+    console.log(cypher);
+    
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project_id
+        })
+        .then(function (res) {
+            session.close();
+            resp.msg = 'Success';
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+
+/*
+msg : {
     operation: 'mcreate_relation',
     user_id : 'u1',
     project_id : 'p1',
@@ -365,7 +421,8 @@ DataManager.prototype.mGet = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var nodeCypher = 'MATCH (p:Project {name: {pname}})\
         MATCH (p)-[:has]->(c:Concept)\
-        RETURN id(c) AS nodeId, c AS node';
+        OPTIONAL MATCH (c)-[:has_key_attr]->(rel)\n\
+        RETURN id(c) AS nodeId, c AS node, collect(distinct id(rel)) AS key_attr_list';
     var relationCypher = 'MATCH (p:Project {name: {pname}})\
         MATCH (p)-[:has]->(r:Relation)\
         MATCH (r)-[hr:has_role]->(tgt)\
@@ -384,6 +441,8 @@ DataManager.prototype.mGet = function (msg, callback) {
                 var rec = res.records[i];
                 var nodeId = rec.get('nodeId').toString();
                 var prop = rec.get('node').properties;
+                var tmp = rec.get('key_attr_list');
+                prop['key_attr_list']  = tmp.map(x=>x.toString()); //获得概念的key attr信息
                 // prop.id = nodeId;
                 nodes[nodeId] = prop;
                 console.log(prop);
@@ -792,28 +851,75 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                 });
             } else //关系没有建立
             {
+                //先判断是不是一个key attr
                 if (roles.length == 2) {
-                    var is_name = false;
-                    var inst_id = -1;
-                    var name_id = -1;
-                    for (i in roles) {
+                    // var is_name = false;
+                    // var inst_id = -1;
+                    // var name_id = -1;
+                    // for (i in roles) {
+                    //     var r = roles[i];
+                    //     //if (r.rolename == '姓名') {
+                    //     if (keyAttributeArray.indexOf(r.rolename) != -1) {
+                    //         is_name = true;
+                    //         name_id = r.node_id;
+                    //     } else {
+                    //         inst_id = r.node_id;
+                    //     }
+                    // }
+                    
+                    var ids = [];
+                    for (i in roles){
                         var r = roles[i];
-                        //if (r.rolename == '姓名') {
-                        if (keyAttributeArray.indexOf(r.rolename) != -1) {
-                            is_name = true;
-                            name_id = r.node_id;
-                        } else {
-                            inst_id = r.node_id;
-                        }
+                        ids.push(r.node_id);
                     }
-                    //如果是姓名关系
-                    if (is_name) {
+                    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+                    MATCH (u:User {name: {uname}})\n\
+                    MATCH (i {value:""}) WHERE id(i) in {id_list}\n\
+                    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)-[:has_key_attr]->(rel:Relation)\n\
+                    RETURN id(i) AS iid, collect (distinct id(rel)) AS attrs \n'.format({
+                        id_list : '[' + ids.toString() + ']'
+                    });
+
+                    session.run(cypher, {
+                        pname: msg.project_id,
+                        uname: msg.user_id
+                    })
+                    .then(function(res){
+                        var records = res.records;
+                        var is_key_attr = false;
+                        var inst_id = -1;
+                        var value_id = -1;
+                        if (records.length != 0){
+                            for (var i = 0; i < records.length; ++i){
+                                var rec = records[i];
+                                var iid = rec.get('iid').toString();
+                                var attrs = rec.get('attrs').map(x=>x.toString());
+                                // console.log(iid);
+                                // console.log(attrs);
+                                // console.log(relation.tag, relation.tag in attrs);
+                                if (attrs.indexOf(relation.tag.toString()) != -1){
+                                    inst_id = iid;
+                                    for (var j in ids)
+                                        if (ids[j] !=  iid) {
+                                            value_id = ids[j];
+                                            break;
+                                        }
+                                    is_key_attr = true;
+                                    break;
+                                }
+                            }
+                        }
+                    // console.log("is_key_attr", is_key_attr, value_id);
+                        //如果是关键属性
+                    if (is_key_attr) {
                         var cypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
-            MATCH (name) WHERE id(name)={name_id}\n\
-            MATCH (i)<-[:has_role]-(rel:RelInst)-[hr:has_role]->(name) WHERE hr.name IN {keyAttributeArray} \n\
+            MATCH (val) WHERE id(val)={value_id}\n\
+            MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role]->(val) \n\
+            MATCH (rel)-[:from]->(iof:inst_of)-[:to]->(tag) WHERE id(tag)={tag_id}\n\
             RETURN id(i) AS iid, id(rel) AS relid'.format({
-                            name_id: name_id
+                            value_id: value_id,
+                            tag_id: relation.tag
                         });
                         var resp = extractBasic(msg);
                         resp.error = false;
@@ -878,6 +984,15 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                         msg.operation += '/create_relation';
                         DataManager.prototype.createRelation(msg, callback);
                     }
+
+                    })
+                    .catch(function (err) {
+                        resp.error = true;
+                        resp.msg = err;
+                        callback(resp);
+                    });
+
+                    
                 } else {
                     DataManager.prototype.createRelation(msg, callback);
                 }

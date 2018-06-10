@@ -406,6 +406,19 @@ function ioConfig(server){
                 }
             };
 
+            msg19 = {
+                operation: 'madd_key_attr',
+                user_id : 'zhut@pku.edu.cn',
+                project_id : '电影人物关系图谱',
+                operation_id : 'op2',
+                nodes :[
+                    {
+                        id: '667',
+                        key_attr_list: ['621']
+                    }
+                ]
+            }
+
             //initiate Set
             if(msg == "init"){
                 init_project();
@@ -414,7 +427,7 @@ function ioConfig(server){
             }else if(msg=="mcreate_movie"){
                 mcreate_movie_project();
             }else{
-                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18];
+                let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
