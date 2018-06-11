@@ -265,24 +265,25 @@ $(function () {
         //读取类型
         let type = $(this).val();
         //查找model，找到对应的角色名
-        let relationId,role0,role1;
+        let relationId,role0,role1,id0,id1,tag0,tag1;
         for(let key in model.relations){
             if(model.relations[key].value == type){
                 relationId = key;
                 role0 = model.relations[key].roles[0].rolename;
                 role1 = model.relations[key].roles[1].rolename;
+                id0 = model.relations[key].roles[0].node_id;
+                id1 = model.relations[key].roles[1].node_id;
+                tag0 = model.nodes[id0].value;
+                tag1 = model.nodes[id1].value;
                 break;
             }
         }
         //更新role信息
         if(relationId!=undefined){
-            if($("#relation-revise").children().find(".role0").hasClass("stigmod-input")){//input样式
-                $("#relation-revise").children().find(".role0").val(role0);
-                $("#relation-revise").children().find(".role1").val(role1);
-            }else{//text样式
-                $("#relation-revise").children().find(".role0").text(role0);
-                $("#relation-revise").children().find(".role1").text(role1);
-            }
+            $("#relation-revise").children().find(".role0").text(role0);
+            $("#relation-revise").children().find(".role1").text(role1);
+            $("#relation-revise").children().find(".role0").attr("tag",tag0);
+            $("#relation-revise").children().find(".role1").attr("tag",tag1);
             if(relationId!=undefined) $("#relation-revise").children().eq(1).show();
         }
         return;
@@ -294,20 +295,26 @@ $(function () {
 
         let centerId = $("g.center").attr("id");
         let centerValue = instance_model.nodes[centerId].value;
+        let centerTag = instance_model.nodes[centerId].tags[0];
 
+        let role0Type = $("#relation-revise").children().find(".role0").attr("tag");
+        let node0Value = $("#relation-revise").children().find(".node0").val();
+        let role1Type = $("#relation-revise").children().find(".role1").attr("tag");
         let node1Value = $("#relation-revise").children().find(".node1").val();
 
-        let node0 = centerValue,node1 = value;
-        if(node1Value == centerValue){
-            node1 = centerValue;
-            node0 = value;
+        //如果已经存在信息
+        if(role0Type == centerTag && node0Value == centerValue){
+            $("#relation-revise").children().find(".node1").text(value)
+        }else if(role1Type == centerTag && node1Value == centerValue){
+            $("#relation-revise").children().find(".node0").text(value)
         }
-        if($("#relation-revise").children().find(".node0").hasClass("stigmod-input")){//input样式
-            $("#relation-revise").children().find(".node0").val(node0)
-            $("#relation-revise").children().find(".node1").val(node1)
-        }else{//text样式
-            $("#relation-revise").children().find(".node0").text(node0)
-            $("#relation-revise").children().find(".node1").text(node1)
+        //否则重新处理
+        else if(role0Type == centerTag){
+            $("#relation-revise").children().find(".node0").text(centerValue)
+            $("#relation-revise").children().find(".node1").text(value)
+        }else{
+            $("#relation-revise").children().find(".node0").text(value)
+            $("#relation-revise").children().find(".node1").text(centerValue)
         }
 
         return;
@@ -538,7 +545,7 @@ function relationRevise(item, type = "add") {
 
     //表格方法
     html += '<table class="table table-condensed" style="table-layout: fixed;margin: 0px">' +
-            '<thead ><tr><th width="25%">角色</th><th width="55%">承担者</th><th width="10%"></th></tr></thead>' +
+            '<thead ><tr><th width="30%">角色</th><th width="50%">承担者</th><th width="10%"></th></tr></thead>' +
             '<tbody><tr>' +
                 '<th><span class="role0"></span></th>' +
                 '<th><span class="node0"></span></th>' +
@@ -567,8 +574,8 @@ function relationRevise(item, type = "add") {
     let array = getRelationTypes(centerId);
     setRelationTypeTypeahead(array);
 
-    array = getRelationValues(centerId)
-    setRelationValueTypeahead(array);
+    let entities = getRelationValues(centerId)
+    setRelationValueTypeahead(entities,centerId);
 }
 
 function rolseRevise(item, type = "add") {
@@ -1211,7 +1218,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         let r = model["relations"][rId];
         if(keyValueArray.indexOf(r.type) == -1) continue;//不是主属性
 
-        let nId0,nId1,tmpNode,tags0,tags1;
+        let nId0,nId1,tags0,tags1;
         nId0 = r.roles[0].node_id;
         nId1 = r.roles[1].node_id;
 
@@ -1222,13 +1229,15 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         }else{
             console.log("alert");
             console.log("not found nId0:"+nId0);
+            console.log("model:"+model);
             continue;
         }
         if(model["nodes"][nId1] != undefined) {
             tags1 = model["nodes"][nId1]["tags"];
         }else{
             console.log("alert");
-            console.log("not found nId0:"+nId0);
+            console.log("not found nId1:"+nId1);
+            console.log("model:"+model);
             continue;
         }
 
@@ -1254,8 +1263,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         model["nodes"][entityId]["value"] = model["nodes"][valueId]["value"];
         model["nodes"][entityId]["dataType"] = r.type;
 
-        let order = recommend_index.indexOf(model["nodes"][valueId]["value"]);
-        if(order != -1) recommend_index.splice(order,1);
+        removeNodeInRecommendIndex(model["nodes"][entityId]["tags"][0],model["nodes"][entityId]["value"]);
 
         delete model["nodes"][valueId];
         delete model["relations"][rId];

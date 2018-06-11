@@ -31,7 +31,7 @@
     // AMD module is defined
     else if (typeof define === 'function' && define.amd) {
         define(['jquery'], function ($) {
-            return factory ($);
+            return factory($);
         });
     } else {
         factory(root.jQuery);
@@ -58,21 +58,28 @@
         this.updater = this.options.updater || this.updater;
         this.displayText = this.options.displayText || this.displayText;
         this.itemLink = this.options.itemLink || this.itemLink;
+        this.itemTitle = this.options.itemTitle || this.itemTitle;
         this.followLinkOnSelect = this.options.followLinkOnSelect || this.followLinkOnSelect;
         this.source = this.options.source;
         this.delay = this.options.delay;
-        this.$menu = $(this.options.menu);
+        this.theme = this.options.theme && this.options.themes && this.options.themes[this.options.theme] || Typeahead.defaults.themes[Typeahead.defaults.theme];
+        this.$menu = $(this.options.menu || this.theme.menu);
         this.$appendTo = this.options.appendTo ? $(this.options.appendTo) : null;
         this.fitToElement = typeof this.options.fitToElement == 'boolean' ? this.options.fitToElement : false;
         this.shown = false;
         this.listen();
-        this.showHintOnFocus = typeof this.options.showHintOnFocus == 'boolean' || this.options.showHintOnFocus === "all" ? this.options.showHintOnFocus : false;
+        this.showHintOnFocus = typeof this.options.showHintOnFocus == 'boolean' || this.options.showHintOnFocus === 'all' ? this.options.showHintOnFocus : false;
         this.afterSelect = this.options.afterSelect;
         this.afterEmptySelect = this.options.afterEmptySelect;
         this.addItem = false;
         this.value = this.$element.val() || this.$element.text();
         this.keyPressed = false;
-        this.focused = this.$element.is( ":focus" );
+        this.focused = this.$element.is(':focus');
+        this.changeInputOnSelect = this.options.changeInputOnSelect || this.changeInputOnSelect;
+        this.changeInputOnMove = this.options.changeInputOnMove || this.changeInputOnMove;
+        this.openLinkInNewTab = this.options.openLinkInNewTab || this.openLinkInNewTab;
+        this.selectOnBlur = this.options.selectOnBlur || this.selectOnBlur;
+        this.showCategoryHeader = this.options.showCategoryHeader || this.showCategoryHeader;
     };
 
     Typeahead.prototype = {
@@ -110,21 +117,28 @@
                 if (!newVal) {
                     newVal = '';
                 }
-                this.$element
-                    .val(this.displayText(newVal) || newVal)
-                    .text(this.displayText(newVal) || newVal)
-                    .change();
-                this.afterSelect(newVal);
-                if(this.followLinkOnSelect && this.itemLink(val)) {
-                    document.location = this.itemLink(val);
+
+                if (this.changeInputOnSelect) {
+                    this.$element
+                        .val(this.displayText(newVal) || newVal)
+                        .text(this.displayText(newVal) || newVal)
+                        .change();
+                }
+
+                if (this.followLinkOnSelect && this.itemLink(val)) {
+                    if (this.openLinkInNewTab) {
+                        window.open(this.itemLink(val), '_blank');
+                    } else {
+                        document.location = this.itemLink(val);
+                    }
                     this.afterSelect(newVal);
-                } else if(this.followLinkOnSelect && !this.itemLink(val)) {
+                } else if (this.followLinkOnSelect && !this.itemLink(val)) {
                     this.afterEmptySelect(newVal);
                 } else {
                     this.afterSelect(newVal);
                 }
             } else {
-                this.afterEmptySelect(newVal);
+                this.afterEmptySelect();
             }
 
             return this.hide();
@@ -160,9 +174,9 @@
 
             if (!this.hasSameParent) {
                 // We cannot rely on the element position, need to position relative to the window
-                element.css("position", "fixed");
+                element.css('position', 'fixed');
                 var offset = this.$element.offset();
-                pos.top =  offset.top;
+                pos.top = offset.top;
                 pos.left = offset.left;
             }
             // The rules for bootstrap are: 'dropup' in the parent and 'dropdown-menu-right' in the element.
@@ -177,7 +191,7 @@
             element.css({ top: newTop, left: newLeft }).show();
 
             if (this.options.fitToElement === true) {
-                element.css("width", this.$element.outerWidth() + "px");
+                element.css('width', this.$element.outerWidth() + 'px');
             }
 
             this.shown = true;
@@ -191,7 +205,6 @@
         },
 
         lookup: function (query) {
-            var items;
             if (typeof(query) != 'undefined' && query !== null) {
                 this.query = query;
             } else {
@@ -244,7 +257,7 @@
             }
 
             // Add item
-            if (this.options.addItem){
+            if (this.options.addItem) {
                 items.push(this.options.addItem);
             }
 
@@ -264,9 +277,13 @@
 
             while ((item = items.shift())) {
                 var it = this.displayText(item);
-                if (!it.toLowerCase().indexOf(this.query.toLowerCase())) beginswith.push(item);
-                else if (~it.indexOf(this.query)) caseSensitive.push(item);
-                else caseInsensitive.push(item);
+                if (!it.toLowerCase().indexOf(this.query.toLowerCase())) {
+                    beginswith.push(item);
+                } else if (~it.indexOf(this.query)) {
+                    caseSensitive.push(item);
+                } else {
+                    caseInsensitive.push(item);
+                }
             }
 
             return beginswith.concat(caseSensitive, caseInsensitive);
@@ -274,38 +291,38 @@
 
         highlighter: function (item) {
             var text = this.query;
-            if(text===""){
+            if (text === '') {
                 return item;
             }
             var matches = item.match(/(>)([^<]*)(<)/g);
             var first = [];
             var second = [];
             var i;
-            if(matches && matches.length){
-                //html
+            if (matches && matches.length) {
+                // html
                 for (i = 0; i < matches.length; ++i) {
-                    if (matches[i].length > 2) {//escape '><'
+                    if (matches[i].length > 2) {// escape '><'
                         first.push(matches[i]);
                     }
                 }
-            }else{
-                //text
+            } else {
+                // text
                 first = [];
                 first.push(item);
             }
-            text = text.replace((/[\(\)\/\.\*\+\?\[\]]/g), function(mat) {
+            text = text.replace((/[\(\)\/\.\*\+\?\[\]]/g), function (mat) {
                 return '\\' + mat;
             });
-            var reg = new RegExp(text, "g");
+            var reg = new RegExp(text, 'g');
             var m;
             for (i = 0; i < first.length; ++i) {
                 m = first[i].match(reg);
-                if(m && m.length>0){//find all text nodes matches
+                if (m && m.length > 0) {// find all text nodes matches
                     second.push(first[i]);
                 }
             }
             for (i = 0; i < second.length; ++i) {
-                item = item.replace(second[i],second[i].replace(reg, '<strong>$&</strong>'));
+                item = item.replace(second[i], second[i].replace(reg, '<strong>$&</strong>'));
             }
             return item;
         },
@@ -317,39 +334,45 @@
             var data = [];
             var _category = that.options.separator;
 
-            $.each(items, function (key,value) {
+            $.each(items, function (key, value) {
                 // inject separator
-                if (key > 0 && value[_category] !== items[key - 1][_category]){
+                if (key > 0 && value[_category] !== items[key - 1][_category]) {
                     data.push({
                         __type: 'divider'
                     });
                 }
 
-                // inject category header
-                if (value[_category] && (key === 0 || value[_category] !== items[key - 1][_category])){
-                    data.push({
-                        __type: 'category',
-                        name: value[_category]
-                    });
+                if (this.showCategoryHeader) {
+                    // inject category header
+                    if (value[_category] && (key === 0 || value[_category] !== items[key - 1][_category])) {
+                        data.push({
+                            __type: 'category',
+                            name: value[_category]
+                        });
+                    }
                 }
+
                 data.push(value);
             });
 
             items = $(data).map(function (i, item) {
                 if ((item.__type || false) == 'category'){
-                    return $(that.options.headerHtml).text(item.name)[0];
+                    return $(that.options.headerHtml || that.theme.headerHtml).text(item.name)[0];
                 }
 
                 if ((item.__type || false) == 'divider'){
-                    return $(that.options.headerDivider)[0];
+                    return $(that.options.headerDivider || that.theme.headerDivider)[0];
                 }
 
                 var text = self.displayText(item);
-                i = $(that.options.item).data('value', item);
-                i.find(that.options.itemContentSelector).addBack(that.options.itemContentSelector).html(that.highlighter(text, item));
-                if(this.followLinkOnSelect) {
+                i = $(that.options.item || that.theme.item).data('value', item);
+                i.find(that.options.itemContentSelector || that.theme.itemContentSelector)
+                    .addBack(that.options.itemContentSelector || that.theme.itemContentSelector)
+                    .html(that.highlighter(text, item));
+                if(that.options.followLinkOnSelect) {
                     i.find('a').attr('href', self.itemLink(item));
                 }
+                i.find('a').attr('title', self.itemTitle(item));
                 if (text == self.$element.val()) {
                     i.addClass('active');
                     self.$element.data('active', item);
@@ -374,18 +397,28 @@
             return null;
         },
 
+        itemTitle: function (item) {
+            return null;
+        },
+
         next: function (event) {
             var active = this.$menu.find('.active').removeClass('active');
             var next = active.next();
 
             if (!next.length) {
-                next = $(this.$menu.find('li')[0]);
+                next = $(this.$menu.find($(this.options.item || this.theme.item).prop('tagName'))[0]);
+            }
+
+            while (next.hasClass('divider') || next.hasClass('dropdown-header')) {
+                next = next.next();
             }
 
             next.addClass('active');
             // added for screen reader
             var newVal = this.updater(next.data('value'));
-            this.$element.val(this.displayText(newVal) || newVal);
+            if (this.changeInputOnMove) {
+                this.$element.val(this.displayText(newVal) || newVal);
+            }
         },
 
         prev: function (event) {
@@ -393,52 +426,67 @@
             var prev = active.prev();
 
             if (!prev.length) {
-                prev = this.$menu.find('li').last();
+                prev = this.$menu.find($(this.options.item || this.theme.item).prop('tagName')).last();
+            }
+
+            while (prev.hasClass('divider') || prev.hasClass('dropdown-header')) {
+                prev = prev.prev();
             }
 
             prev.addClass('active');
             // added for screen reader
             var newVal = this.updater(prev.data('value'));
-            this.$element.val(this.displayText(newVal) || newVal);
+            if (this.changeInputOnMove) {
+                this.$element.val(this.displayText(newVal) || newVal);
+            }
         },
 
         listen: function () {
             this.$element
-                .on('focus',    $.proxy(this.focus, this))
-                .on('blur',     $.proxy(this.blur, this))
-                .on('keypress', $.proxy(this.keypress, this))
-                .on('propertychange input',    $.proxy(this.input, this))
-                .on('keyup',    $.proxy(this.keyup, this));
+                .on('focus.bootstrap3Typeahead', $.proxy(this.focus, this))
+                .on('blur.bootstrap3Typeahead', $.proxy(this.blur, this))
+                .on('keypress.bootstrap3Typeahead', $.proxy(this.keypress, this))
+                .on('propertychange.bootstrap3Typeahead input.bootstrap3Typeahead', $.proxy(this.input, this))
+                .on('keyup.bootstrap3Typeahead', $.proxy(this.keyup, this));
 
             if (this.eventSupported('keydown')) {
-                this.$element.on('keydown', $.proxy(this.keydown, this));
+                this.$element.on('keydown.bootstrap3Typeahead', $.proxy(this.keydown, this));
             }
 
-            if ('ontouchstart' in document.documentElement) {
+            var itemTagName = $(this.options.item || this.theme.item).prop('tagName');
+            if ('ontouchstart' in document.documentElement && 'onmousemove' in document.documentElement) {
                 this.$menu
-                    .on('touchstart', 'li', $.proxy(this.touchstart, this))
-                    .on('touchend', 'li', $.proxy(this.click, this));
+                    .on('touchstart', itemTagName, $.proxy(this.touchstart, this))
+                    .on('touchend', itemTagName, $.proxy(this.click, this))
+                    .on('click', $.proxy(this.click, this))
+                    .on('mouseenter', itemTagName, $.proxy(this.mouseenter, this))
+                    .on('mouseleave', itemTagName, $.proxy(this.mouseleave, this))
+                    .on('mousedown', $.proxy(this.mousedown,this));
+            } else if ('ontouchstart' in document.documentElement) {
+                this.$menu
+                    .on('touchstart', itemTagName, $.proxy(this.touchstart, this))
+                    .on('touchend', itemTagName, $.proxy(this.click, this));
             } else {
                 this.$menu
                     .on('click', $.proxy(this.click, this))
-                    .on('mouseenter', 'li', $.proxy(this.mouseenter, this))
-                    .on('mouseleave', 'li', $.proxy(this.mouseleave, this))
-                    .on('mousedown', $.proxy(this.mousedown,this));
+                    .on('mouseenter', itemTagName, $.proxy(this.mouseenter, this))
+                    .on('mouseleave', itemTagName, $.proxy(this.mouseleave, this))
+                    .on('mousedown', $.proxy(this.mousedown, this));
             }
         },
 
-        destroy : function () {
-            this.$element.data('typeahead',null);
-            this.$element.data('active',null);
+        destroy: function () {
+            this.$element.data('typeahead', null);
+            this.$element.data('active', null);
             this.$element
-                .off('focus')
-                .off('blur')
-                .off('keypress')
-                .off('propertychange input')
-                .off('keyup');
+                .unbind('focus.bootstrap3Typeahead')
+                .unbind('blur.bootstrap3Typeahead')
+                .unbind('keypress.bootstrap3Typeahead')
+                .unbind('propertychange.bootstrap3Typeahead input.bootstrap3Typeahead')
+                .unbind('keyup.bootstrap3Typeahead');
 
             if (this.eventSupported('keydown')) {
-                this.$element.off('keydown');
+                this.$element.unbind('keydown.bootstrap3-typeahead');
             }
 
             this.$menu.remove();
@@ -455,7 +503,9 @@
         },
 
         move: function (e) {
-            if (!this.shown) return;
+            if (!this.shown) {
+                return;
+            }
 
             switch (e.keyCode) {
                 case 9: // tab
@@ -466,14 +516,18 @@
 
                 case 38: // up arrow
                     // with the shiftKey (this is actually the left parenthesis)
-                    if (e.shiftKey) return;
+                    if (e.shiftKey) {
+                        return;
+                    }
                     e.preventDefault();
                     this.prev();
                     break;
 
                 case 40: // down arrow
                     // with the shiftKey (this is actually the right parenthesis)
-                    if (e.shiftKey) return;
+                    if (e.shiftKey) {
+                        return;
+                    }
                     e.preventDefault();
                     this.next();
                     break;
@@ -481,8 +535,17 @@
         },
 
         keydown: function (e) {
+            /**
+             * Prevent to make an ajax call while copying and pasting.
+             *
+             * @author Simone Sacchi
+             * @version 2018/01/18
+             */
+            if (e.keyCode === 17) { // ctrl
+                return;
+            }
             this.keyPressed = true;
-            this.suppressKeyPressRepeat = ~$.inArray(e.keyCode, [40,38,9,13,27]);
+            this.suppressKeyPressRepeat = ~$.inArray(e.keyCode, [40, 38, 9, 13, 27]);
             if (!this.shown && e.keyCode == 40) {
                 this.lookup();
             } else {
@@ -491,7 +554,9 @@
         },
 
         keypress: function (e) {
-            if (this.suppressKeyPressRepeat) return;
+            if (this.suppressKeyPressRepeat) {
+                return;
+            }
             this.move(e);
         },
 
@@ -518,16 +583,22 @@
                     break;
 
                 case 9: // tab
-                    if (!this.shown || (this.showHintOnFocus && !this.keyPressed)) return;
+                    if (!this.shown || (this.showHintOnFocus && !this.keyPressed)) {
+                        return;
+                    }
                     this.select();
                     break;
                 case 13: // enter
-                    if (!this.shown) return;
+                    if (!this.shown) {
+                        return;
+                    }
                     this.select();
                     break;
 
                 case 27: // escape
-                    if (!this.shown) return;
+                    if (!this.shown) {
+                        return;
+                    }
                     this.hide();
                     break;
             }
@@ -539,8 +610,8 @@
                 this.focused = true;
                 this.keyPressed = false;
                 if (this.options.showHintOnFocus && this.skipShowHintOnFocus !== true) {
-                    if(this.options.showHintOnFocus === "all") {
-                        this.lookup("");
+                    if (this.options.showHintOnFocus === 'all') {
+                        this.lookup('');
                     } else {
                         this.lookup();
                     }
@@ -553,7 +624,9 @@
 
         blur: function (e) {
             if (!this.mousedover && !this.mouseddown && this.shown) {
-                this.select();
+                if (this.selectOnBlur) {
+                    this.select();
+                }
                 this.hide();
                 this.focused = false;
                 this.keyPressed = false;
@@ -582,7 +655,9 @@
 
         mouseleave: function (e) {
             this.mousedover = false;
-            if (!this.focused && this.shown) this.hide();
+            if (!this.focused && this.shown) {
+                this.hide();
+            }
         },
 
         /**
@@ -590,7 +665,7 @@
          */
         mousedown: function (e) {
             this.mouseddown = true;
-            this.$menu.one("mouseup", function(e){
+            this.$menu.one('mouseup', function (e) {
                 // IE won't fire this, but FF and Chrome will so we reset our flag for them here
                 this.mouseddown = false;
             }.bind(this));
@@ -625,7 +700,9 @@
             var $this = $(this);
             var data = $this.data('typeahead');
             var options = typeof option == 'object' && option;
-            if (!data) $this.data('typeahead', (data = new Typeahead(this, options)));
+            if (!data) {
+                $this.data('typeahead', (data = new Typeahead(this, options)));
+            }
             if (typeof option == 'string' && data[option]) {
                 if (arg.length > 1) {
                     data[option].apply(data, Array.prototype.slice.call(arg, 1));
@@ -639,9 +716,6 @@
     Typeahead.defaults = {
         source: [],
         items: 8,
-        menu: '<ul class="typeahead dropdown-menu" role="listbox"></ul>',
-        item: '<li><a class="dropdown-item" href="#" role="option"></a></li>',
-        itemContentSelector:'a',
         minLength: 1,
         scrollHeight: 0,
         autoSelect: true,
@@ -651,8 +725,28 @@
         followLinkOnSelect: false,
         delay: 0,
         separator: 'category',
-        headerHtml: '<li class="dropdown-header"></li>',
-        headerDivider: '<li class="divider" role="separator"></li>'
+        changeInputOnSelect: true,
+        changeInputOnMove: true,
+        openLinkInNewTab: false,
+        selectOnBlur: true,
+        showCategoryHeader: true,
+        theme: "bootstrap3",
+        themes: {
+            bootstrap3: {
+                menu: '<ul class="typeahead dropdown-menu" role="listbox"></ul>',
+                item: '<li><a class="dropdown-item" href="#" role="option"></a></li>',
+                itemContentSelector: "a",
+                headerHtml: '<li class="dropdown-header"></li>',
+                headerDivider: '<li class="divider" role="separator"></li>'
+            },
+            bootstrap4: {
+                menu: '<div class="typeahead dropdown-menu" role="listbox"></div>',
+                item: '<button class="dropdown-item" role="option"></button>',
+                itemContentSelector: '.dropdown-item',
+                headerHtml: '<h6 class="dropdown-header"></h6>',
+                headerDivider: '<div class="dropdown-divider"></div>'
+            }
+        }
     };
 
     $.fn.typeahead.Constructor = Typeahead;
@@ -671,7 +765,9 @@
 
     $(document).on('focus.typeahead.data-api', '[data-provide="typeahead"]', function (e) {
         var $this = $(this);
-        if ($this.data('typeahead')) return;
+        if ($this.data('typeahead')) {
+            return;
+        }
         $this.typeahead($this.data());
     });
 

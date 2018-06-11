@@ -221,7 +221,8 @@ function drawIndex(model = instance_model) {
     }
 
     $(index).append(html);
-    setIndexTypeahead(getIndexArray());
+    let array = getIndexArray(instance_model);
+    setIndexTypeahead(array);
 }
 
 /* compound functions */
