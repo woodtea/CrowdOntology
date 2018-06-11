@@ -618,6 +618,23 @@ function mcreate_node(tag,value,project_id,user_id="user@mail"){
     return msg;
 }
 
+function madd_key_attr(node_id,arrlist,user_id,project_id){
+    msg = {
+        operation: 'madd_key_attr',
+        user_id : user_id,
+        project_id : project_id,
+        operation_id : 'op0',
+        nodes :[
+            {
+                id: node_id,             //'667',
+                key_attr_list: arrlist  //['621']
+            }
+        ]
+    }
+
+    return msg;
+}
+
 function init_project(){
     msg0 = {operation:'init'};
 
@@ -698,14 +715,27 @@ function mcreate_movie_project(){
                     dm.handle(mcreate_node("Symbol", "String", "电影人物关系图谱"), function (rep) {
                         for (let key in rep.migrate) symbolId = rep.migrate[key];
                         //创建属性
-                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=humanId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+                        dm.handle(mcreate_relation("姓名",rolename1="",rolename2="姓名",id1=humanId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=humanId,[relationId],user_id="",project_id="电影人物关系图谱"),function(rep){});
+                        });
                         dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=humanId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
                         dm.handle(mcreate_relation("出生年份",rolename1="",rolename2="出生年份",id1=humanId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
 
-                        dm.handle(mcreate_relation("片名",rolename1="",rolename2="片名",id1=movieId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+
+                        dm.handle(mcreate_relation("片名",rolename1="",rolename2="片名",id1=movieId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=movieId,[relationId],user_id="",project_id="电影人物关系图谱"),function(rep){});
+                        });
                         dm.handle(mcreate_relation("上映日期",rolename1="",rolename2="上映日期",id1=movieId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
 
-                        dm.handle(mcreate_relation("名称",rolename1="",rolename2="名称",id1=roleId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
+                        dm.handle(mcreate_relation("名称",rolename1="",rolename2="名称",id1=roleId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=roleId,[relationId],user_id="",project_id="电影人物关系图谱"),function(rep){});
+                        });
                         dm.handle(mcreate_relation("性别",rolename1="",rolename2="性别",id1=roleId,id2=symbolId,project_id="电影人物关系图谱"),function(rep){});
                         //创建关系
                         dm.handle(mcreate_relation("导演", rolename1 = "导演", rolename2 = "电影", id1 = humanId, id2 = movieId, project_id = "电影人物关系图谱"), function (rep) {});
