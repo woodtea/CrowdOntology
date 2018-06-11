@@ -51,6 +51,7 @@ g.center text {
 
 #relation-revise thead th{
     font-weight: bold;
+    background-color: #eeeeee;
 }
 
 #relation-revise tbody th{
