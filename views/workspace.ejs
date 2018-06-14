@@ -75,22 +75,6 @@
             operation_id : 'op1'
         };
         socketEmit("model",msg);
-        let msg2 = {
-            operation: 'get',
-            user_id : user,
-            project_id : project,
-            operation_id : 'op2'
-        }
-        socketEmit("insModel",msg2);
-
-        let msg3 = {
-            operation: 'rcmdIndex',
-            userId : user,
-            project_id : project,
-            operation_id : 'op3'
-        }
-        socketEmit("insModel",msg3);
-
     }
     window.onbeforeunload = function() {
         //let user = $(".glyphicon-user").parent().text();
