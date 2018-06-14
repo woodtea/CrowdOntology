@@ -1594,7 +1594,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
             MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT (i)<-[:refer]-(u)\n\
             MATCH (rel)-[hr:has_role]->(role)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
-            RETURN rel, collect(distinct [hr.name, role]) AS role_info,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({
+            RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({
                 id_list: l1_list_str
             }); 
 
@@ -1608,12 +1608,12 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                 for (var i = 0; i < res.records.length; i++){
                     var rec = res.records[i];
                     var rid = rec.get('rel').identity.toString();
-                    var role_info = rec.get('role_info');
+                    var roles = rec.get('roles');
                     var refer_u = rec.get('refer_u').toString();
                     var role_tmp = [];
-                    for (var j in role_info){
-                        var rname = role_info[j][0];
-                        var rnode = role_info[j][1];
+                    for (var j in roles){
+                        var rname = roles[j][0];
+                        var rnode = roles[j][1];
                         var roleid = rnode.identity.toString();
                         if (nodes[roleid] == undefined)
                             nodes[roleid] = {};
@@ -1627,7 +1627,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                         });
                     }
                     relations[rid] = rec.get('rel').properties;
-                    relations[rid]['role_info'] = role_tmp;
+                    relations[rid]['roles'] = role_tmp;
                     relations[rid]['refer_u'] = refer_u;
                     relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
                 }
@@ -1636,7 +1636,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                 rcmd_list = [];
                 for (k in relations){
                     var rel = relations[k];
-                    if (rel['role_info'][0]['node_id'] == tgt_node || rel['role_info'][0]['node_id'] == tgt_node){
+                    if (rel['roles'][0]['node_id'] == tgt_node || rel['roles'][0]['node_id'] == tgt_node){
                         rcmd_list.push(k);
                     }
                 }
@@ -1727,7 +1727,7 @@ DataManager.prototype.recommendEntity = function(msg, callback){
             MATCH (i)<-[:has_role]-(rel)\n\
             MATCH (rel)-[hr:has_role]->(role)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
-            RETURN rel, collect(distinct [hr.name, role]) AS role_info,  collect(distinct id(tag)) AS tags'.format({
+            RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags'.format({
                 id_list: id_list_str
             }); 
             session
@@ -1740,11 +1740,11 @@ DataManager.prototype.recommendEntity = function(msg, callback){
                     for (var i = 0; i < res.records.length; i++){
                         var rec = res.records[i];
                         var rid = rec.get('rel').identity.toString();
-                        var role_info = rec.get('role_info');
+                        var roles = rec.get('roles');
                         var role_tmp = [];
-                        for (var j in role_info){
-                            var rname = role_info[j][0];
-                            var rnode = role_info[j][1];
+                        for (var j in roles){
+                            var rname = roles[j][0];
+                            var rnode = roles[j][1];
                             var roleid = rnode.identity.toString();
                             if (nodes[roleid] == undefined)
                                 nodes[roleid] = {};
@@ -1758,7 +1758,7 @@ DataManager.prototype.recommendEntity = function(msg, callback){
                             });
                         }
                         relations[rid] = rec.get('rel').properties;
-                        relations[rid]['role_info'] = role_tmp;
+                        relations[rid]['roles'] = role_tmp;
                         relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
                     }
                     
