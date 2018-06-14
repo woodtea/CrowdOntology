@@ -1622,7 +1622,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                         }
                         // nodes[roleid] = rnode.properties;
                         role_tmp.push({
-                            role_name: rname,
+                            rolename: rname,
                             node_id: roleid
                         });
                     }
@@ -1753,7 +1753,7 @@ DataManager.prototype.recommendEntity = function(msg, callback){
                             }
                             // nodes[roleid] = rnode.properties;
                             role_tmp.push({
-                                role_name: rname,
+                                rolename: rname,
                                 node_id: roleid
                             });
                         }
