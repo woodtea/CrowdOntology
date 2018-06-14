@@ -15,13 +15,6 @@ socket.on('model', function(msg){
     switch (msg.operation){
         //case 'get':
         case 'mget':
-            /*
-            if(Object.keys(msg.nodes).length == 0){//forTest
-                socketEmit("iotest", "99");
-                socket_mutex = false;
-                return;
-            }
-            */
             io_get_model_done(msg);
             break;
         case 'save':
@@ -63,6 +56,9 @@ socket.on('insModel', function(msg){
             break;
         case 'rcmdIndex':
             io_recommend_insModel_index_done(msg);
+            break;
+        case 'rcmd_entity':
+            io_recommend_insModel_entity_done(msg);
             break;
     }
 });
@@ -218,6 +214,13 @@ function io_get_model_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
+        let msg2 = {
+            operation: 'get',
+            user_id : user,
+            project_id : project,
+            operation_id : 'op2'
+        }
+        socketEmit("insModel",msg2);
     }
 }
 
@@ -234,6 +237,15 @@ function io_get_insModel_done(msg){
     if(msg.error){
         return;
     }else{
+        let msg3 = {
+            operation: 'rcmd_entity',
+            user_id : user,
+            project_id : project,
+            operation_id : 'op3',
+            topk: 100
+        }
+        socketEmit("insModel",msg3);
+
         instance_model = {
             "nodes": msg.nodes,
             "relations": msg.relations
@@ -301,7 +313,8 @@ function io_create_insModel_relation_done(msg){
             nodeId = instance_model.relations[relationId].roles[n].node_id;
             if(nodeId != centerId) break;
         }
-        if(!prepareNewEntity()){
+
+        if(!prepareNewEntity(instance_model,true,isGetRcmd)){
             let notRecommendation = $("g.center.isCentralized").attr("id");
             if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
                 $("#"+centerId).click();
@@ -344,9 +357,13 @@ function io_recommend_insModel_node_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        prepareNewEntity(recommend_model,false);
 
         let centerId = $("g.center").attr("id");
+        recommend_model.nodes[centerId] = instance_model.nodes[centerId];
+
+        prepareNewEntity(recommend_model,false);
+
+        //let centerId = $("g.center").attr("id");
         let entity = getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
@@ -355,6 +372,33 @@ function io_recommend_insModel_node_done(msg){
 }
 
 function io_recommend_insModel_index_done(msg){
+    socket_mutex = false;
+    if(msg.error){
+        return;
+    }else{
+        tmpMsgPop(msg.operationId);
+
+        let tmpModel = {
+            "nodes": msg.nodes,
+            "relations": msg.relations
+        }
+        prepareNewEntity(tmpModel,false);
+
+        recommend_index_init();
+        for(let key in tmpModel.nodes){
+            if(instance_model.nodes[key] == undefined){
+                if(isEntity(key,tmpModel)){
+                    //recommend_index.push(tmpModel.nodes[key].value);
+                    recommend_index[tmpModel.nodes[key].tags[0]].push(tmpModel.nodes[key].value);
+                }
+            }
+        }
+        return;
+    }
+}
+
+function io_recommend_insModel_entity_done(msg){
+    socket_mutex = false;
     if(msg.error){
         return;
     }else{

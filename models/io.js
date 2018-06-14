@@ -121,6 +121,7 @@ function ioConfig(server){
                     break;
                 case 'rcmd_entity':
                     dm.handle(msg, function(rep){
+                        console.log(rep);
                         logger.trace(JSON.stringify(rep))
                         socket.emit("insModel",rep);
                     });
@@ -387,8 +388,8 @@ function ioConfig(server){
             
             msg17 = {
                 operation: 'rcmd_entity',
-                user_id : 'zhut@pku.edu.cn',
-                project_id : '红楼梦人物关系图谱',
+                user_id : 'user1@mail',
+                project_id : '电影人物关系图谱',
                 operation_id: 'opt2',
                 topk: 7
             };
@@ -555,9 +556,10 @@ function io_remove_insModel_relation(rcvMsg,callback){
 
 function io_recommend_insModel(rcvMsg,callback){
     let newMsg = formatExchange.web2Server(rcvMsg);
-
+    newMsg.operation = "new_rcmd";  //使用new_rcmd，弃用rcmd
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
+        emitMsg.operation = "rcmd";//使用new_rcmd，弃用rcmd
         emitMsg.nodes = rep.nodes;
         emitMsg.relations = rep.relations;
         emitMsg.rcmd_relations = rep.rcmd_relations;
