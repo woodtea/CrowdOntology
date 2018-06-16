@@ -55,6 +55,7 @@ $(function () {
     //双击节点
     $(document).on("dblclick", 'g', function () {
         if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
+            isGetRcmd = true;
             clickTimeout.clear();
             //引用推荐节点
             let nodeID = $(this).attr("id");
@@ -90,8 +91,13 @@ $(function () {
 
             let relations;
             for(let n in relationsArray){
+                let rcmdR = recommend_model["relations"][relationsArray[n]];
                 relations = {};
-                relations[relationsArray[n]] = recommend_model["relations"][relationsArray[n]];
+                relations[relationsArray[n]] = {
+                    roles:rcmdR.roles,
+                    tag:rcmdR.tag,
+                    type:rcmdR.type
+                };
                 io_create_insModel_relation(relations);
             }
         } else {
@@ -1210,7 +1216,7 @@ getValueId = function(value,item){
     }
 }
 
-function prepareNewEntity(model=instance_model,refreshSvg = true){
+function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false){
 
     let hasCenterNode = false, centerNode;
 
@@ -1277,7 +1283,16 @@ function prepareNewEntity(model=instance_model,refreshSvg = true){
         drawIndex();
         drawEntity(centerNode);
         $("#" + centerNode).click();
+        //$("#" + centerNode).delay("500").trigger("dblclick");
+        if(getRcmd){
+            isGetRcmd = false;
+            $("#" + centerNode).delay("500").trigger("dblclick");
+        }
         return true;
+    }
+    if(getRcmd){
+        isGetRcmd = false;
+        $("#" + centerNode).delay("500").trigger("dblclick");
     }
     return false;
 }

@@ -129,7 +129,7 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
 }
 
 
-function drawPath(path,centX=width/2, centY=height/2,text_anchor="middle",startOffset="50%") {
+function drawPath(path,centX=width/2, centY=height/2,textAnchor="middle",startOffset="50%") {
     svg
         .append("path")
         .style("stroke", "grey")
@@ -140,21 +140,6 @@ function drawPath(path,centX=width/2, centY=height/2,text_anchor="middle",startO
             if (path.cx1 == undefined) {
                 return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
             } else {
-                /*
-                 let str;
-                 if(path.sx<path.ex){
-                 str =  "M" + path.sx + "," + path.sy +
-                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.cx1 + "," +path.cy1 +
-                 "L"+ path.cx2 + "," + path.cy2 +
-                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.ex + "," + path.ey;
-                 }else{
-                 str =  "M" + path.ex + "," + path.ey +
-                 "Q"+ path.nx2 + "," + path.ny2 + "," + path.cx2 + "," +path.cy2 +
-                 "L"+ path.cx1 + "," + path.cy1 +
-                 "Q"+ path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
-                 }
-                 return str;
-                 */
                 let str;
                 if (path.sx < path.ex) {
                     str = "M" + path.sx + "," + path.sy +
@@ -175,26 +160,17 @@ function drawPath(path,centX=width/2, centY=height/2,text_anchor="middle",startO
     let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
     $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
 
+    drawPathText(path,textAnchor,startOffset);
+}
+
+function drawPathText(path,textAnchor="middle",startOffset="50%") {
     svg
         .append("text")
-        .attr("text-anchor", text_anchor)
+        .attr("text-anchor", textAnchor)
         .attr("dy", "-5")
         .append("textPath")
         .attr("href", "#" + path.data.id)
         .attr("startOffset", startOffset)
-        .style('font-size', '10px')
-        .classed("textPath", true)
-        .text(path.data.value);
-}
-
-function drawPathText(path) {
-    svg
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-5")
-        .append("textPath")
-        .attr("href", "#" + path.data.id)
-        .attr("startOffset", "50%")
         .style('font-size', '10px')
         .classed("textPath", true)
         .text(path.data.value);
@@ -408,6 +384,7 @@ function getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend
 }
 
 function getPath(centX, centY, R, r, angle, node) {
+
     let rotate = angle;
     angle = 0; //2018.2.26更新，angle变为rotate处理
 
@@ -466,7 +443,17 @@ function getPath(centX, centY, R, r, angle, node) {
         ox2 = ex - 0.4 * r * Math.cos(angle);
         oy2 = ey - 0.4 * r * Math.sin(angle);
 
-
+        let data = node.relations[i];
+        if(instance_model.relations[data.id] != undefined){
+            let roles = instance_model.relations[data.id].roles;
+            if(roles[0].rolename!= "" && roles[1].rolename!= ""){
+                if(roles[1].node_id == node.id){
+                    data.value = roles[0].rolename + "-" + roles[1].rolename;
+                }else{
+                    data.value = roles[1].rolename + "-" + roles[0].rolename;
+                }
+            }
+        }
         //if ((i - m / 2) == -1 && m == n) m = m - 2; //避免双数情况下的中心边
         path.push({
             sx,
@@ -546,6 +533,17 @@ function getPathText(centX, centY, R, r, angle, node) {
         ox2 = ex - 0.4 * r * Math.cos(angle);
         oy2 = ey - 0.4 * r * Math.sin(angle);
 
+        let data = node.relations[i];
+        if(instance_model.relations[node.relations[i].id] != undefined){
+            let roles = instance_model.relations[node.relations[i].id].roles;
+            if(roles[0].rolename!= "" && roles[1].rolename!= ""){
+                if(roles[1].node_id == node.id){
+                    data.value = roles[0].rolename + " / " + roles[1].rolename;
+                }else{
+                    data.value = roles[1].rolename + " / " + roles[0].rolename;
+                }
+            }
+        }
 
         if ((i - m / 2) == -1 && m == n) m = m - 2;
         path.push({

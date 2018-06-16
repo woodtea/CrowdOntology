@@ -214,6 +214,18 @@ function io_get_model_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
+        symbolArray = [];
+        keyValueArray = [];
+        let key_attr_list;
+        for(let key in model.nodes){
+            if(model.nodes[key].tag == "Symbol") symbolArray.push(model.nodes[key].value)
+            if(model.nodes[key].tag == "Entity") {
+                key_attr_list = model.nodes[key].key_attr_list;
+                for(let i in key_attr_list){
+                    keyValueArray.push(model.relations[key_attr_list[i]].value);
+                }
+            }
+        }
         let msg2 = {
             operation: 'get',
             user_id : user,
@@ -242,7 +254,7 @@ function io_get_insModel_done(msg){
             user_id : user,
             project_id : project,
             operation_id : 'op3',
-            topk: 100
+            topk: 1
         }
         socketEmit("insModel",msg3);
 

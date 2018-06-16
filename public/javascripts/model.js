@@ -2,7 +2,7 @@ var user;
 var project;
 var symbolArray  = ["String"];
 var keyValueArray = ["姓名","名字","名称","片名"];
-
+var isGetRcmd = false;
 var recommend_model = {}
 /*
   * 其实可以改模型为类
@@ -60,6 +60,7 @@ function getEntity(id, model = instance_model) {
                 //判断是否存在，如果尚未存在则初始化
                 if (entity.neighbours[neighbourID] == undefined) {
                     if(model.nodes[neighbourID]==undefined){
+                        alert("Not found!" + neighbourID);
                         console.log("alert notfound in getEntity");
                         console.log(neighbourID);
                         console.log(model);
@@ -82,6 +83,11 @@ function getEntity(id, model = instance_model) {
 }
 
 function isEntity(id,model=instance_model){
+    if(model.nodes[id] == undefined){
+        console.log("Alert: entity not found!")
+        console.log("entity id:"+id);
+        return;
+    }
     if (model.nodes[id].tags == undefined) return; //数据结构异常
 
     let tags = model.nodes[id].tags;
