@@ -254,7 +254,7 @@ function io_get_insModel_done(msg){
             user_id : user,
             project_id : project,
             operation_id : 'op3',
-            topk: 1
+            topk: 100
         }
         socketEmit("insModel",msg3);
 
@@ -262,7 +262,8 @@ function io_get_insModel_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        prepareNewEntity();
+        //prepareNewEntity();
+        prepareNewEntity(instance_model,false);
     }
 }
 
@@ -421,7 +422,6 @@ function io_recommend_insModel_entity_done(msg){
             "relations": msg.relations
         }
         prepareNewEntity(tmpModel,false);
-
         recommend_index_init();
         for(let key in tmpModel.nodes){
             if(instance_model.nodes[key] == undefined){

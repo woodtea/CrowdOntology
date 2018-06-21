@@ -57,3 +57,20 @@ g.center text {
 #relation-revise tbody th{
     font-weight: normal;
 }
+
+.index.list-group{
+    border:1px dashed;
+    height:605px;
+}
+
+.properties.list-group{
+    border:1px dashed;
+    height:605px;
+    display:none
+}
+
+.properties-revise.list-group{
+    border:1px dashed;
+    height:605px;
+    display:none
+}

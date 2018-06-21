@@ -538,9 +538,9 @@ function getPathText(centX, centY, R, r, angle, node) {
             let roles = instance_model.relations[node.relations[i].id].roles;
             if(roles[0].rolename!= "" && roles[1].rolename!= ""){
                 if(roles[1].node_id == node.id){
-                    data.value = roles[0].rolename + " / " + roles[1].rolename;
+                    data.value = roles[0].rolename + " - " + roles[1].rolename;
                 }else{
-                    data.value = roles[1].rolename + " / " + roles[0].rolename;
+                    data.value = roles[1].rolename + " - " + roles[0].rolename;
                 }
             }
         }
@@ -606,19 +606,19 @@ function drawCommons(id1,id2){
     for(let n=0;n<commonIds.length;n++){
         node = {};
         node[commonIds[n]] = entity1.neighbours[commonIds[n]];
-        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]]);
+        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]],false);
         drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","35%");//暂时这么处理吧，不太好看
 
         node = {};
         node[commonIds[n]] = entity2.neighbours[commonIds[n]];
-        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity2.neighbours[commonIds[n]]);
+        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity2.neighbours[commonIds[n]],true);
         drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","65%");//暂时这么处理吧，不太好看
 
         drawNode(width/2, height/2 + zoomH * r * offset, r * zoomR, node);
     }
 }
 
-function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
+function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
 
     angle = 0;
     let rotate = angle;
@@ -660,6 +660,20 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
     ox2 = ex - 0.4 * r * Math.cos(angle);
     oy2 = ey - 0.4 * r * Math.sin(angle);
 
+    let data = node.relations[0];
+    let nodeId = getEntityIdByValue(node.value,instance_model);
+     if(instance_model.relations[data.id] != undefined){
+        let roles = instance_model.relations[data.id].roles;
+        if(roles[0].rolename!= "" && roles[1].rolename!= ""){
+            console.log(roles[1].node_id)
+            console.log(nodeId)
+            if(roles[1].node_id == nodeId ^ reverse){
+                data.value = roles[0].rolename + "-" + roles[1].rolename;
+            }else{
+                data.value = roles[1].rolename + "-" + roles[0].rolename;
+            }
+        }
+    }
     path.push({
         sx,
         sy,
@@ -677,8 +691,8 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node) {
         oy1,
         ox2,
         oy2,
-        data: node.relations[0]
-        ,rotate
+        data,
+        rotate
     });
     return path;
 }

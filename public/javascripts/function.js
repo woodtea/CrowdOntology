@@ -1292,7 +1292,7 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
     }
     if(getRcmd){
         isGetRcmd = false;
-        $("#" + centerNode).delay("500").trigger("dblclick");
+        //$("#" + centerNode).delay("500").trigger("dblclick");
     }
     return false;
 }

@@ -655,8 +655,7 @@ function init_project(){
         dm.handle(mcreate_user("zhut@pku.edu.cn"), function (rep) {});
         dm.handle(mcreate_user("chuwj@pku.edu.cn"), function (rep) {});
         dm.handle(mcreate_user("zhangzf@pku.edu.cn"), function (rep) {});
-        dm.handle(mcreate_user("zhangmy@pku.edu.cn"), function (rep) {console.log("zhangmy@pku.edu.cn")});
-        console.log("xxxxxxx");
+        dm.handle(mcreate_user("zhangmy@pku.edu.cn"), function (rep) {});
     });
 }
 
