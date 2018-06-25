@@ -262,8 +262,10 @@ function io_get_insModel_done(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        //prepareNewEntity();
-        prepareNewEntity(instance_model,false);
+        prepareNewEntity();
+        initNetwork();
+        //prepareNewEntity(instance_model,false);
+        //drawIndex();
     }
 }
 

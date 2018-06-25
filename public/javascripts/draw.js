@@ -19,6 +19,7 @@ const svg = d3
 */
 const svg = d3.select("body .graph-row .middle-content svg")
 const property = $("body .graph-row .properties");
+const propertyRevise = $("body .graph-row .properties-revise");
 const graph = $("body .graph-row .graph");
 const index = $("body .graph-row .index");
 
@@ -179,8 +180,15 @@ function drawPathText(path,textAnchor="middle",startOffset="50%") {
 //
 
 /* index */
-function drawIndex(model = instance_model) {
-    $(index).find("li").remove();
+function drawIndex(model = instance_model,showIndex=true) {
+
+    if(showIndex){
+        rightColumnShow(index);
+    }
+
+    $(index).children().remove();
+    drawRightTitle(index,"索引",false,true);
+
     let html = "";
     let entities = {};
     for (let id in model.nodes) {
@@ -190,13 +198,25 @@ function drawIndex(model = instance_model) {
         }
     }
 
+    html = "<div class='index-content' style='height: 490px;overflow: scroll'></div>";
+    $(index).append(html);
+    let indexContent = $(index).children(".index-content");
+
     for(let tag in entities){
+
+        html = generateCollapseTitle(tag,"type");
+        $(indexContent).append(html);
+
+        html = "";
         for(let n in entities[tag]){
-            html += generateIndex(tag,entities[tag][n].value,entities[tag][n].id);
+            html += generateCollapseContent(tag, entities[tag][n].value, entities[tag][n].id);
         }
+        $(indexContent).children().last().find(".list-group").append(html)
+
     }
 
-    $(index).append(html);
+
+    $(index).append(generateEntityPlusButton());
     let array = getIndexArray(instance_model);
     setIndexTypeahead(array);
 }

@@ -44,18 +44,18 @@ function getEntity(id, model = instance_model) {
         "dataType": model.nodes[id].dataType
     }
     //处理邻接信息
-    for (let relationID in model.relations) {
+    for (let relationId in model.relations) {
         let isRelated = false;
-        for (let roleIndex in model.relations[relationID].roles) {
-            if (id == model.relations[relationID].roles[roleIndex].node_id) isRelated = true;
+        for (let roleIndex in model.relations[relationId].roles) {
+            if (id == model.relations[relationId].roles[roleIndex].node_id) isRelated = true;
         }
         if (isRelated) {
             let relation = {
-                "id": relationID,
-                "value": model.relations[relationID].type
+                "id": relationId,
+                "value": model.relations[relationId].type
             }
-            for (let roleIndex in model.relations[relationID].roles) {
-                let neighbourID = model.relations[relationID].roles[roleIndex].node_id;
+            for (let roleIndex in model.relations[relationId].roles) {
+                let neighbourID = model.relations[relationId].roles[roleIndex].node_id;
                 if (id == neighbourID) continue;
                 //判断是否存在，如果尚未存在则初始化
                 if (entity.neighbours[neighbourID] == undefined) {
@@ -112,11 +112,11 @@ function getEntityIdByRelation(relationId, model = instance_model) {
     if(model.relations[relationId] == undefined) return;    //rcmd中比较常见
 
     let roles = model.relations[relationId].roles;
-    let nodeIDs = [];
+    let nodeIds = [];
     for (let role of roles) {
-        nodeIDs.push(role.node_id);
+        nodeIds.push(role.node_id);
     }
-    return nodeIDs;
+    return nodeIds;
 }
 
 function getEntityIdByValue(value, model = instance_model) {

@@ -4,6 +4,7 @@
 
 var clicks = 0;
 var mutex = 0;
+var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
 $(function () {
@@ -52,34 +53,57 @@ $(function () {
         }
     })
 
+    $(document).on('click','.list-group-item.stigmod-hovershow-trig.entity',function(){
+        if(indexMutex) return;
+
+        indexMutex = true;
+        let item = this;
+        clickTimeout.set(function () {  //这样的话只执行一遍
+            indexMutex = false;
+        });
+
+        let nodeId = $(item).find(".nodeId").attr("value");
+        $("body .graph-row .index .active").removeClass("active");
+        $(item).addClass("active");
+        drawEntity(nodeId, instance_model); //画出中心区域
+    })
+
+    $(document).on('dblclick','.list-group-item.stigmod-hovershow-trig.entity',function(){
+        clickTimeout.clear();
+        indexMutex = false;
+        let item = this;
+        let nodeId = $(item).find(".nodeId").attr("value");
+        $("#" + nodeId).click();    //点击中心节点
+    })
+
     //双击节点
     $(document).on("dblclick", 'g', function () {
         if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
             isGetRcmd = true;
             clickTimeout.clear();
             //引用推荐节点
-            let nodeID = $(this).attr("id");
+            let nodeId = $(this).attr("id");
 
-            if(instance_model["nodes"][nodeID] == undefined){   //不存在节点的话创建
+            if(instance_model["nodes"][nodeId] == undefined){   //不存在节点的话创建
 
-                if(isEntity(nodeID,recommend_model)){//是实体节点，需要创建3重信息
+                if(isEntity(nodeId,recommend_model)){//是实体节点，需要创建3重信息
 
-                    let value = recommend_model["nodes"][nodeID].value
+                    let value = recommend_model["nodes"][nodeId].value
                     let entity = {
-                        tags: recommend_model["nodes"][nodeID].tags,
+                        tags: recommend_model["nodes"][nodeId].tags,
                         value: value,
-                        nodeId: nodeID,
+                        nodeId: nodeId,
                         valueId: generateFrontNodeID(value,"v"),
                         relationId: generateFrontRelationID()
                     }
                     io_create_insModel_entity(entity);
 
                 }else{//不是实体节点，需要创建节点信息
-                    let value = recommend_model["nodes"][nodeID].value
+                    let value = recommend_model["nodes"][nodeId].value
                     let nodes = {};
                     let nodeId = generateFrontNodeID(value);
                     nodes[nodeId] = {
-                        "dataType": recommend_model["nodes"][nodeID].tags,
+                        "dataType": recommend_model["nodes"][nodeId].tags,
                         "value": value
                     }
                     io_create_insModel_node(nodes)
@@ -87,7 +111,7 @@ $(function () {
             }
             //创建关系
             let centerId = $("g.center").attr("id");
-            let relationsArray = getRelations(centerId,nodeID,recommend_model);
+            let relationsArray = getRelations(centerId,nodeId,recommend_model);
 
             let relations;
             for(let n in relationsArray){
@@ -106,9 +130,9 @@ $(function () {
             }
             clickTimeout.clear();
 
-            let nodeID = $(this).attr("id");
+            let nodeId = $(this).attr("id");
             let node = {}
-            node[nodeID] = eval('(' + JSON.stringify(instance_model.nodes[nodeID]) + ')');
+            node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
             io_recommend_insModel_node(node);
         }
     })
@@ -130,12 +154,18 @@ $(function () {
      * 右侧栏
      * */
     // 右划
+    $(document).on("click", '.index .button-right', function () {
+        rightColumnShow(property)
+    })
     $(document).on("click", '.properties .button-right', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").hide();
         $(item).children(".properties-revise").show();
     })
     // 左划
+    $(document).on("click", '.properties .button-left', function () {
+        rightColumnShow(index)
+    })
     $(document).on("click", '.properties-revise .button-left', function () {
         let item = $(this).parent().parent().parent().parent();
         $(item).children(".properties").show();
@@ -205,8 +235,8 @@ $(function () {
         //$(".properties-revise .type-input").keyup();
         //$(".properties-revise .value-input").keyup();
 
-        let relationID = $(item).find(".relationID").attr("value");
-        let roles = instance_model.relations[relationID].roles;
+        let relationId = $(item).find(".relationId").attr("value");
+        let roles = instance_model.relations[relationId].roles;
 
         $("#relation-revise").find(".role0").text(roles[0].rolename);
         $("#relation-revise").find(".role1").text(roles[1].rolename);
@@ -340,8 +370,12 @@ $(function () {
 function drawNodeDetails(id) {
     let isEntity = drawEntity(id, instance_model);
     if (isEntity) {
+        $("body .graph-row .index .active").removeClass("active");
+        let item = $(".list-group-item.stigmod-hovershow-trig.entity .nodeId[value="+id+"]");
+        $(item).parent().addClass("active");
         //处理后面
-        $(".properties-revise .button-left").click();
+        //$(".properties-revise .button-left").click();
+        rightColumnShow(property);
         $(property).children().remove();
         drawPropertyTitle();
         drawTypes(id);
@@ -352,23 +386,24 @@ function drawNodeDetails(id) {
 
 
 function drawPathDetails(id) {
-    let nodeIDs = getEntityIdByRelation(id, instance_model);
+    let nodeIds = getEntityIdByRelation(id, instance_model);
 
-    if(nodeIDs == undefined) return;
+    if(nodeIds == undefined) return;
 
-    if (nodeIDs.length > 2) {
+    if (nodeIds.length > 2) {
         alert("多元关系");
         return;
     }
     //以下只处理了二元关系
     //如果是属性则不做处理
-    let entity1 = getEntity(nodeIDs[0], instance_model);
-    let entity2 = getEntity(nodeIDs[1], instance_model);
+    let entity1 = getEntity(nodeIds[0], instance_model);
+    let entity2 = getEntity(nodeIds[1], instance_model);
 
     if (entity1 == undefined || entity2 == undefined) return;
     //如果是关系则进行绘制
-    drawRelation(nodeIDs[0], nodeIDs[1], instance_model);
+    drawRelation(nodeIds[0], nodeIds[1], instance_model);
     //关系的属性处理
+    rightColumnShow(property);
     $(property).children().remove();
     drawPropertyTitle();
     drawTypes(id);
@@ -383,12 +418,30 @@ function drawRecommendDetail(){
 }
 
 function drawPropertyTitle() {
+    /*
     $(property).append('<div class="row">' +
         '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>' +
         '<div class="col-xs-8"><h4>详情</h4></div>' +
         '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>' +
         '</div>' +
         '<hr class="stigmod-hr-narrow">');
+    */
+    drawRightTitle(property,"详情",true,false);
+}
+
+function drawRightTitle(item,title,hasLeft=false,hasRight=false) {
+    $(item).append('<div class="row">' +
+        '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>' +
+        '<div class="col-xs-8"><h4>'+title+'</h4></div>' +
+        '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>' +
+        '</div>' +
+        '<hr class="stigmod-hr-narrow">');
+    if(hasLeft){
+        $(item).find(".row").last().find(".col-xs-2").first().append('<span class="glyphicon glyphicon-chevron-left button-left"></span>')
+    }
+    if(hasRight){
+        $(item).find(".row").last().find(".col-xs-2").last().append('<span class="glyphicon glyphicon-chevron-right button-right"></span>')
+    }
 }
 
 function drawTypes(id) {
@@ -419,7 +472,7 @@ function drawAttributes(id) {
     html = "";
     html += generateContent(instance_model.nodes[id].dataType, instance_model.nodes[id].value);
     for (let attribute of attributes) {
-        html += generateContent(attribute.type, attribute.value, attribute.nodeID, attribute.relationID);
+        html += generateContent(attribute.type, attribute.value, attribute.nodeId, attribute.relationId);
     }
     $(property).find("#attribute").append(html);
 
@@ -437,7 +490,7 @@ function drawRelations(id) {
     let relations = filterRelations(entity.neighbours);
     html = "";
     for (let relation of relations) {
-        html += generateContent(relation.type, relation.value, relation.nodeID, relation.relationID);
+        html += generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
     }
     $(property).find("#relation").append(html);
 
@@ -458,17 +511,11 @@ function drawRoles(id) {
 }
 
 function classRevise(item, type = "add") {
-    $(".properties").hide();
-    $(".properties-revise").show();
-    $(".properties-revise").children().remove();
-    let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
-        '<div class="col-xs-8"><h4>添加</h4></div>' +
-        '<div class="col-xs-2"></div>' +
-        '</div>' +
-        '<hr style="margin:8px">';
-    $(".properties-revise").append(html);
 
+    rightColumnShow(propertyRevise);
+
+    $(".properties-revise").children().remove();
+    drawRightTitle(propertyRevise,"添加",false,false);
 
     html = generateTitle("实体", "class-revise");
     $(".properties-revise").append(html);
@@ -637,13 +684,52 @@ function generateXTitle(title, type) {
 
 }
 
-function generateContent(type, value, nodeID = "", relationID = "") {
+function generateCollapseTitle(title, type) {
+    let html = '<div class="panel panel-default">' +
+        '<div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#'+title+'" aria-expanded="true" aria-controls="collapseOne">' +
+        '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
+        '<span class="pull-right glyphicon glyphicon-th-list" type="remove" style="z-index: 2;"></span>' +
+        '</div>' +
+        '<div class="list-group panel-collapse collaspe in" id=' + title + '></div>' +
+        '</div>';
+    return html
+
+}
+
+
+function generateEntityPlusButton() {
+    let html = '<div class="panel panel-default">' +
+        '<div class="panel-heading">' +
+        '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' +
+        '<span class="fa fa-plus" type="class" style="z-index: 2"></span>' +
+        '</span>' +
+        '</div>' +
+        '</div>';
+    return html
+
+}
+
+function generateCollapseContent(type, value, nodeId = "") {
     if(type == undefined) type="姓名";
-    //alert(nodeID);
-    //alert(relationID);
+    //alert(nodeId);
+    //alert(relationId);
+    let html = '<a href="#" class="list-group-item stigmod-hovershow-trig entity" style="text-align: center">' +
+        '<span class="nodeId" value=' + nodeId + '></span>' +
+        '<span class="type" value=' + type + '></span>'  +
+        '<span class="value" value=' + value + '>' + value + '</span>' +
+        '<span class="pull-right stigmod-hovershow-cont">' +
+        '<span class="fa fa-search-plus"></span>' +
+        '</span></a>';
+    return html;
+}
+
+function generateContent(type, value, nodeId = "", relationId = "") {
+    if(type == undefined) type="姓名";
+    //alert(nodeId);
+    //alert(relationId);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
-        '<span class="nodeID" value=' + nodeID + '></span>' +
-        '<span class="relationID" value=' + relationID + '></span>' +
+        '<span class="nodeId" value=' + nodeId + '></span>' +
+        '<span class="relationId" value=' + relationId + '></span>' +
         '<span class="type" value=' + type + '>' + type + '</span>' + ' : ' +
         '<span class="value" value=' + value + '>' + value + '</span>' +
         '<span class="pull-right stigmod-hovershow-cont">' +
@@ -671,8 +757,8 @@ function generateSubmitLogo(hasRemove=false) {
     return html;
 }
 
-function generateIndex(tag, text, nodeID) {
-    var html = '<li style="text-align:left;margin: 10%;font-size:16px" nodeid=' + nodeID + '>' + tag + " : " + text + '</li>';
+function generateIndex(tag, text, nodeId) {
+    var html = '<li style="text-align:left;margin: 10%;font-size:16px" nodeid=' + nodeId + '>' + tag + " : " + text + '</li>';
     return html;
 }
 
@@ -690,8 +776,8 @@ function filterAttributes(neighbours) {
             //此时属于attribute
             for (let relation of neighbours[id].relations) {
                 attributes.push({
-                    relationID: relation.id,
-                    nodeID: id,
+                    relationId: relation.id,
+                    nodeId: id,
                     type: relation.value,
                     value: instance_model.nodes[id].value
                 })
@@ -709,8 +795,8 @@ function filterRelations(neighbours) {
             //此时属于relation
             for (let relation of neighbours[id].relations) {
                 relations.push({
-                    relationID: relation.id,
-                    nodeID: id,
+                    relationId: relation.id,
+                    nodeId: id,
                     type: relation.value,
                     value: instance_model.nodes[id].value
                 })
@@ -741,14 +827,14 @@ function getRoles(relation) {
 function generateFrontNodeID(val,type="e") {
     let n = getJsonLength(instance_model.nodes);
     if(val) n=val;
-    let nodeID = "front_n" + type + n;
+    let nodeId = "front_n" + type + n;
 
-    while (instance_model.nodes[nodeID] != undefined) {
+    while (instance_model.nodes[nodeId] != undefined) {
         n++;
-        nodeID = "front_n" + type + n;
+        nodeId = "front_n" + type + n;
     }
 
-    return nodeID;
+    return nodeId;
 }
 
 var OperationCounter = 0;
@@ -787,14 +873,14 @@ function hash(input){
 
 function generateFrontRelationID() {
     let n = getJsonLength(instance_model.relations);
-    let relationID = "front_r" + n;
+    let relationId = "front_r" + n;
 
-    while (instance_model.relations[relationID] != undefined) {
+    while (instance_model.relations[relationId] != undefined) {
         n++;
-        relationID = "front_r" + n;
+        relationId = "front_r" + n;
     }
 
-    return relationID;
+    return relationId;
 }
 
 function classReviseSubmit(item) {
@@ -832,8 +918,8 @@ function attributeReviseSubmit(item) {
 
     //删除旧的节点和关系
     let origItem = $(".properties").find(".active");
-    let origNode = $(origItem).find(".nodeID").attr("value");
-    let origRelation = $(origItem).find(".relationID").attr("value");
+    let origNode = $(origItem).find(".nodeId").attr("value");
+    let origRelation = $(origItem).find(".relationId").attr("value");
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         io_remove_insModel_relation(origRelation);
     }
@@ -872,8 +958,8 @@ function attributeRemoveSubmit(item) {
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
-    let origNode = $(origItem).find(".nodeID").attr("value");
-    let origRelation = $(origItem).find(".relationID").attr("value");
+    let origNode = $(origItem).find(".nodeId").attr("value");
+    let origRelation = $(origItem).find(".relationId").attr("value");
     //console.log(origNode)
     //console.log(origRelation)
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
@@ -927,8 +1013,8 @@ function relationReviseSubmit(item) {
 
     //删除旧的节点和关系
     let origItem = $(".properties").find(".active");
-    let origNode = $(origItem).find(".nodeID").attr("value");
-    let origRelation = $(origItem).find(".relationID").attr("value");
+    let origNode = $(origItem).find(".nodeId").attr("value");
+    let origRelation = $(origItem).find(".relationId").attr("value");
     /* 好像是不需要产出实体的
     if (origNode != "") {
         io_remove_insModel_node(origNode);
@@ -962,8 +1048,8 @@ function relationRemoveSubmit(item){
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
-    let origNode = $(origItem).find(".nodeID").attr("value");
-    let origRelation = $(origItem).find(".relationID").attr("value");
+    let origNode = $(origItem).find(".nodeId").attr("value");
+    let origRelation = $(origItem).find(".relationId").attr("value");
     /* 好像是不需要产出实体的
     if (origNode != "") {
         io_remove_insModel_node(origNode);
@@ -1024,14 +1110,14 @@ function getAngle(N, RN, pRN, i) {
     return angle;
 }
 
-function shiftModel(recommend_model_whole,nodeID) {
+function shiftModel(recommend_model_whole,nodeId) {
 
     //console.log("recommend_model_whole");
     //console.log(recommend_model_whole);
     let tmpModel = {};
     for(let relation in recommend_model_whole.relations){
         for(let n in recommend_model_whole.relations[relation].roles){
-            if(recommend_model_whole.relations[relation].roles[n]["node_id"] == nodeID){
+            if(recommend_model_whole.relations[relation].roles[n]["node_id"] == nodeId){
                 let id = recommend_model_whole.relations[relation].roles[1-n]["node_id"];
                 if(instance_model.nodes[id]) break;
                 tmpModel[id] = recommend_model_whole["nodes"][id]
@@ -1046,7 +1132,7 @@ function shiftModel(recommend_model_whole,nodeID) {
 
 }
 
-function transAnimation(centerID,neighbourID,relationID,model) {
+function transAnimation(centerID,neighbourID,relationId,model) {
     //获取新增节点信息
     let entity = getEntity(centerID, model);
     if (entity == undefined) return false;  //如果不是实体的话
@@ -1216,7 +1302,7 @@ getValueId = function(value,item){
     }
 }
 
-function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false){
+function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false,showIndex=false){
 
     let hasCenterNode = false, centerNode;
 
@@ -1280,9 +1366,9 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
         }
     }
     if(hasCenterNode && refreshSvg){
-        drawIndex();
+        drawIndex(instance_model,showIndex);
         drawEntity(centerNode);
-        $("#" + centerNode).click();
+        $("#" + centerNode).delay("10").click();
         //$("#" + centerNode).delay("500").trigger("dblclick");
         if(getRcmd){
             isGetRcmd = false;
@@ -1412,4 +1498,11 @@ function isCreationIllegal(type,tag,value,node0Id,node1Id){
             break;
     }
     return err;
+}
+
+function rightColumnShow(item){
+    $(index).hide();
+    $(property).hide();
+    $(propertyRevise).hide();
+    $(item).show();
 }
