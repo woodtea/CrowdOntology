@@ -74,3 +74,13 @@ g.center text {
     height:605px;
     display:none
 }
+
+.modal-dialog {
+    width: 800px;
+    margin: 30px auto;
+}
+
+#mynetwork {
+    width: 800px;
+    height: 600px;
+}

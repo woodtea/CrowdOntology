@@ -2,36 +2,43 @@
 <div class="row graph-row">
   <div class="col-xs-9 middle-content" style="border:1px solid">
     <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
-      <div class="col-xs-4">
+      <div class="col-xs-3">
         <div class="btn-group" role="group" aria-label="...">
-          <button type="button" class="btn btn-default"><b>模式</b></button>
+          <!--button type="button" class="btn btn-default"><b>模式</b></button>
           <input type="checkbox" checked data-toggle="toggle"
                  data-on="推荐" data-off="自主"
-                 data-onstyle="default">
+                 data-onstyle="default"-->
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">全局图谱</button>
         </div>
       </div>
-      <div class="col-xs-4 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
-      <div class="col-xs-4">
+      <div class="col-xs-6 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
+      <div class="col-xs-3">
         <div class="input-group" style="margin:auto;">
           <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
           <span class="input-group-btn">
-              <button class="btn btn-default" type="button" id="stigmod-search-left-btn" data-tooltip="tooltip" data-placement="top" title="实体搜索"><span class="glyphicon glyphicon-search"></span></button>
-              <button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="实体新建"><span class="fa fa-plus" aria-hidden="true" type="class"></span></button>
+              <button class="btn btn-default" type="button" id="stigmod-search-left-btn" data-tooltip="tooltip" data-placement="top" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
+              <!--button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="实体新建"><span class="fa fa-plus" aria-hidden="true" type="class"></span></button>
               <div class="btn-group">
                 <button type="button" class="btn btn-default" aria-label="Index" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" data-tooltip="tooltip" data-placement="top" title="实体索引"><span class="glyphicon glyphicon-list"></span></button>
                 <ul class="dropdown-menu index" style="max-height:320px;overflow:auto;"></ul>
-              </div>
+              </div-->
           </span>
-
         </div>
-
       </div>
     </div>
     <hr style='margin:8px'>
     <svg class="graph" width="900" height="532"></svg>
   </div>
   <div class="col-xs-3" style="text-align:center;">
-    <div class="properties list-group" style="border:1px dashed;height:605px">
+    <div class="index list-group">
+      <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8"><h4>索引</h4></div>
+        <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>
+      </div>
+      <hr style='margin:8px'>
+    </div>
+    <div class="properties list-group">
       <div class="row">
         <div class="col-xs-2"></div>
         <div class="col-xs-8"><h4>详情</h4></div>
@@ -39,7 +46,7 @@
       </div>
       <hr style='margin:8px'>
     </div>
-    <div class="properties-revise list-group" style="border:1px dashed;height:605px;display:none">
+    <div class="properties-revise list-group">
       <div class="row">
         <div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left"></span></div>
         <div class="col-xs-8"><h4>修改</h4></div>
@@ -49,6 +56,21 @@
     </div>
   </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">全局图谱</h4>
+      </div>
+      <div class="modal-body" id="mynetwork">
+      </div>
+    </div>
+  </div>
+</div>
+
 <!--script src="https://d3js.org/d3.v4.min.js"></script-->
 <script src="/javascripts/lib/d3.js"></script>
 <script src="/javascripts/lib/jquery-1.11.3.min.js"></script>
@@ -57,6 +79,7 @@
 <script src="/javascripts/lib/bootstrap.js"></script>
 <script src="/javascripts/lib/bootstrap3-typeahead.js"></script>
 <script src="/javascripts/lib/bootstrap-toggle.js"></script>
+<script src="/javascripts/lib/vis.js"></script>
 <!--script src="/javascripts/lib/objectid.js"></script-->
 <script src="/socket.io/socket.io.js"></script>
 
@@ -68,6 +91,7 @@
 <script src="/javascripts/typeahead-bootstrap.js"></script>
 
 <script src="/javascripts/io.js"></script>
+<script src="/javascripts/network.js"></script>
 
 <script language="javascript">
     window.onload = function() {
