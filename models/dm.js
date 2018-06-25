@@ -71,7 +71,8 @@ DataManager.prototype.handle = function (msg, callback) {
                 this.createNode(msg, callback);
                 break;
             case 'create_relation':
-                this.createRelation(msg, callback);
+                // this.createRelation(msg, callback);
+                this.createRelationProxy(msg, callback);//这里应该可以完全替代
                 break;
             case 'get':
                 this.get(msg, callback);
@@ -527,6 +528,25 @@ DataManager.prototype.createNodeProxy = function (msg, callback) {
 
     var resp = extractBasic(msg);
     resp.error = false;
+
+    //先判定是不是引用节点。认为id就是后台id的情况下为引用
+    var nid = parseInt(node.front_id);
+    if (!isNaN(nid)){
+        var referMsg = extractBasic(msg);
+        referMsg.error = false;
+        referMsg.operation += '/refer';
+        // referMsg.operation_id += 'rf';
+        referMsg.node = {
+            front_id: node.front_id,
+            refer_id: nid
+        };
+        DataManager.prototype.refer(referMsg, function (resp) {
+            resp.migrate = {};
+            resp.migrate[node.front_id] = nid;
+            callback(resp);
+        });
+        return;
+    }
 
     if (is_value) {
         var tagMsg = extractBasic(msg);
