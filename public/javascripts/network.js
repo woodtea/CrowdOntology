@@ -3,7 +3,7 @@ const colorsArray = ["#D2E5FF","#778899","#008B8B","#F08080"]
 
 var network
 function getContainer(){
-    return document.getElementById('mynetwork');
+    return $("#modalNetwork .modal-body")[0];//因为要求的是js对象
 }
 
 function getOptions(){
@@ -105,10 +105,10 @@ function uniqueEdges(edges){
 }
 
 function showNodeDetail(nodeId){
-    $("#myModal").modal('hide')
+    $("#modalNetwork").modal('hide')
     $("#"+nodeId).trigger("click");
 }
 
-$("#myModal").on('shown.bs.modal',function(){
+$("#modalNetwork").on('shown.bs.modal',function(){
     initNetwork();
 })

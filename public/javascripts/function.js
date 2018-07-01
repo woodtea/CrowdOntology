@@ -15,8 +15,19 @@ $(function () {
     $(document).on("click", '#stigmod-search-left-btn', function () {
         let value = $(this).parent().parent().children("input[type=text]").val();
         let nodeId = getEntityIdByValue(value, instance_model);
-        drawEntity(nodeId, instance_model); //画出中心区域
-        $("#" + nodeId).click();    //点击中心节点
+        if(nodeId != undefined){
+            drawEntity(nodeId, instance_model); //画出中心区域
+            $("#" + nodeId).click();    //点击中心节点
+        }else{
+            $("#modelSearch .modal-body h5").text('未找到"'+value+'"，'+'是否创建？');
+            $("#modelSearch").modal("show");
+        }
+    })
+
+    $(document).on("click", '#modelSearch .btn-primary', function () {
+        $("#modelSearch").modal("hide");
+        $(".fa-plus[type='class']").trigger("click");
+        $("#class-revise .value-input").val($("#stigmod-search-left-input").val());
     })
 
     /*
@@ -1505,4 +1516,10 @@ function rightColumnShow(item){
     $(property).hide();
     $(propertyRevise).hide();
     $(item).show();
+}
+
+function alert(text){
+    console.log("xxxx");
+    $("#modalAlert .modal-body h5").text(text);
+    $("#modalAlert").modal("show");
 }
