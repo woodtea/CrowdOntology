@@ -9,11 +9,7 @@
     margin-left: -20px;
 }
 
-.container {
-    width: 1200px;
-}
-
-.head.container {
+.body.container {
     width: 1200px;
 }
 
@@ -75,12 +71,22 @@ g.center text {
     display:none
 }
 
-.modal-dialog {
+#modalNetwork .modal-dialog {
     width: 800px;
     margin: 30px auto;
 }
 
-#mynetwork {
+#modalNetwork .modal-body {
     width: 800px;
     height: 600px;
+}
+
+#modelSearch .modal-footer {
+    padding: 10px;
+}
+
+path,
+textPath,
+g:hover{
+    cursor: pointer;
 }
