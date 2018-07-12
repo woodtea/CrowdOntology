@@ -236,7 +236,8 @@ function drawEntity(id, model = instance_model) {
     console.log(entity);
     if (entity == undefined) return false;  //如果不是实体的话
 
-    $(graph).children().remove();
+    //$(graph).children().remove();
+    svg.selectAll("*").remove()
     drawCircle(width / 2, height / 2, R);
     drawNeighbours(width / 2, height / 2, r, R, entity.neighbours);
     drawNode(width / 2, height / 2, r, entity.centerNode, true, true);
@@ -244,7 +245,8 @@ function drawEntity(id, model = instance_model) {
 }
 
 function drawRelation(id1, id2, model = instance_model) {
-    $(graph).children().remove();
+    //$(graph).children().remove();
+    svg.selectAll("*").remove()
     let entity1 = getEntity(id1, model);
     let entity2 = getEntity(id2, model);
     //节点
