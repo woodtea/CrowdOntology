@@ -18,11 +18,12 @@ const svg = d3
     .attr("height", height);
 */
 const svg = d3.select("body .graph-row .middle-content svg")
-const property = $("body .graph-row .properties");
-const propertyRevise = $("body .graph-row .properties-revise");
+const properties = $("body .graph-row .properties");
+const propertiesRevise = $("body .graph-row .properties-revise");
 const graph = $("body .graph-row .graph");
 const index = $("body .graph-row .index");
 
+const draw = new draw2(d3.select("#modalWorkspace svg"));
 
 /*
     基础元素绘制
@@ -136,7 +137,8 @@ function drawPath(path,centX=width/2, centY=height/2,textAnchor="middle",startOf
         .style("stroke", "grey")
         .style("stroke-width", "1px")
         .style("fill", "none")
-        .attr("id", path.data.id)
+        //.attr("id", path.data.id)
+        .attr("id", path.data.id+"-"+path.data.label)
         .attr("d", function (d) {
             if (path.cx1 == undefined) {
                 return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
@@ -159,7 +161,7 @@ function drawPath(path,centX=width/2, centY=height/2,textAnchor="middle",startOf
 
     let originPosition = ""+centX+"px "+centY+"px";
     let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
-    $("#"+path.data.id).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
+    $("#"+path.data.id+"-"+path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
 
     drawPathText(path,textAnchor,startOffset);
 }
@@ -171,10 +173,11 @@ function drawPathText(path,textAnchor="middle",startOffset="50%") {
         .attr("dy", "-5")
         .append("textPath")
         .attr("href", "#" + path.data.id)
+        .attr("href", "#" + path.data.id+"-"+path.data.label)
         .attr("startOffset", startOffset)
         .style('font-size', '10px')
         .classed("textPath", true)
-        .text(path.data.value);
+        .text(path.data.name);
 }
 
 //
@@ -223,7 +226,14 @@ function drawIndex(model = instance_model,showIndex=true) {
 
 /* compound functions */
 function drawEntity(id, model = instance_model) {
+
+    //draw.drawEntity(id,model);
+    draw.centerNode = {
+        id: id
+    }
+
     let entity = getEntity(id, model);
+    console.log(entity);
     if (entity == undefined) return false;  //如果不是实体的话
 
     $(graph).children().remove();
@@ -464,6 +474,7 @@ function getPath(centX, centY, R, r, angle, node) {
         oy2 = ey - 0.4 * r * Math.sin(angle);
 
         let data = node.relations[i];
+        /*
         if(instance_model.relations[data.id] != undefined){
             let roles = instance_model.relations[data.id].roles;
             if(roles[0].rolename!= "" && roles[1].rolename!= ""){
@@ -474,6 +485,7 @@ function getPath(centX, centY, R, r, angle, node) {
                 }
             }
         }
+        */
         //if ((i - m / 2) == -1 && m == n) m = m - 2; //避免双数情况下的中心边
         path.push({
             sx,

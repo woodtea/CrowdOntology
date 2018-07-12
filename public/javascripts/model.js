@@ -46,15 +46,20 @@ function getEntity(id, model = instance_model) {
     //处理邻接信息
     for (let relationId in model.relations) {
         let isRelated = false;
+        let centerIndex;
+        let centerRolename;
         for (let roleIndex in model.relations[relationId].roles) {
-            if (id == model.relations[relationId].roles[roleIndex].node_id) isRelated = true;
+            if (id == model.relations[relationId].roles[roleIndex].node_id) {
+                isRelated = true;
+                centerIndex = roleIndex;
+                centerRolename = model.relations[relationId].roles[roleIndex].rolename;
+            }
         }
         if (isRelated) {
-            let relation = {
-                "id": relationId,
-                "value": model.relations[relationId].type
-            }
             for (let roleIndex in model.relations[relationId].roles) {
+                //节点为当前节点
+                if(roleIndex == centerIndex) continue;
+                //当前跳过了指向自己的情况
                 let neighbourID = model.relations[relationId].roles[roleIndex].node_id;
                 if (id == neighbourID) continue;
                 //判断是否存在，如果尚未存在则初始化
@@ -74,11 +79,21 @@ function getEntity(id, model = instance_model) {
                     if (model.nodes[neighbourID].dataType != undefined) entity.neighbours[neighbourID].dataType = model.nodes[neighbourID].dataType;
                 }
                 //插入关系
+                let relation = {
+                    "id": relationId,
+                    "value": model.relations[relationId].type,
+                    "roleIndex": roleIndex,
+                    "name": centerRolename + " - " +  model.relations[relationId].roles[roleIndex].rolename,
+                    "label": centerIndex+"-"+roleIndex
+                }
+                if(centerRolename == ""){
+                    relation.name = model.relations[relationId].roles[roleIndex].rolename;
+                }
                 entity.neighbours[neighbourID].relations.push(relation);
-                //这里好像没有处理relationRole
             }
         }
     }
+
     return entity;
 }
 
@@ -107,15 +122,21 @@ function getRelation(id1, id2, model = instance_model) {
     return [entity1, entity2];
 }
 
-function getEntityIdByRelation(relationId, model = instance_model) {
+function getEntityIdByRelation(relationId,index0,index1, model = instance_model) {
 
     if(model.relations[relationId] == undefined) return;    //rcmd中比较常见
 
     let roles = model.relations[relationId].roles;
     let nodeIds = [];
-    for (let role of roles) {
-        nodeIds.push(role.node_id);
+    nodeIds.push(roles[index0].node_id);
+    nodeIds.push(roles[index1].node_id);
+
+    for(let i in roles){
+        if(i!=index0&&i!=index1){
+            nodeIds.push(roles[i].node_id);
+        }
     }
+
     return nodeIds;
 }
 

@@ -1,5 +1,5 @@
 
-const colorsArray = ["#D2E5FF","#778899","#008B8B","#F08080"]
+const colorsArray = ["#778899","#F08080","#008B8B","#D2E5FF"]
 
 var network
 function getContainer(){
@@ -44,11 +44,18 @@ function getOptions(){
             i++;
         }
     }
-    console.log(options)
+
+    options.groups["__relation"] = {
+        shape:"square",
+        size : 6,
+        font:{
+            size:12
+        }
+    }
 
     return options;
 }
-
+/*
 function getData(){
     let nodes = [],edges = [];
     for(let id in instance_model.nodes){
@@ -76,6 +83,49 @@ function getData(){
         edges: edges
     };
 console.log(data);
+    return data;
+}
+*/
+function getData(){
+    let nodes = [],edges = [];
+    for(let id in instance_model.nodes){
+        if(isEntity(id)) {
+            nodes.push({
+                id: id,
+                label: instance_model.nodes[id].value,
+                group: instance_model.nodes[id].tags[0]
+            })
+        }
+    }
+
+    for(let id in instance_model.relations){
+        let isAttribute = false;
+        let roles = instance_model.relations[id].roles;
+        for(let i in roles){
+            if(!isEntity(roles[i].node_id)) {
+                isAttribute = true;
+                break;
+            }
+        }
+
+        if(isAttribute) continue;
+
+        nodes.push({
+            id: id,
+            label: instance_model.relations[id].type,
+            group: "__relation"
+        })
+
+        for(let i in roles){
+            edges.push({from:id,to:roles[i].node_id})
+       }
+    }
+
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    console.log(data);
     return data;
 }
 
@@ -112,3 +162,6 @@ function showNodeDetail(nodeId){
 $("#modalNetwork").on('shown.bs.modal',function(){
     initNetwork();
 })
+
+$("#modalWorkspace").on('shown.bs.modal',function(){
+    draw.drawEntity(draw.centerNode.id,instance_model);})

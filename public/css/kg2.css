@@ -90,3 +90,29 @@ textPath,
 g:hover{
     cursor: pointer;
 }
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+g rect{
+    stroke: gray;
+    stroke-width: 1;
+}
+
+g.active rect{
+    stroke: #99CC66;
+    stroke-width: 2;
+}
+
+path{
+    stroke: gray;
+    stroke-width: 1;
+}
+
+path.active{
+    stroke: #99CC66;
+    stroke-width: 2;
+}

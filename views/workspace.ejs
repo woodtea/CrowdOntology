@@ -9,6 +9,7 @@
                  data-on="推荐" data-off="自主"
                  data-onstyle="default"-->
           <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalNetwork">全局图谱</button>
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalWorkspace">局部图谱</button>
         </div>
       </div>
       <div class="col-xs-6 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
@@ -66,6 +67,16 @@
 </div>
 
 <!-- Modal -->
+<div class="modal fade" id="modalWorkspace" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body" style="">
+        <svg class="graph"></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalNetwork" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -126,6 +137,7 @@
 
 <script src="/javascripts/data.js"></script>
 <script src="/javascripts/model.js"></script>
+<script src="/javascripts/draw2.js"></script>
 <script src="/javascripts/draw.js"></script>
 <script src="/javascripts/function.js"></script>
 <script src="/javascripts/typeahead-bootstrap.js"></script>
