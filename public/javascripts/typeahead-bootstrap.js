@@ -14,6 +14,7 @@ function setIndexTypeahead(array){
         source: array,
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true,
         items:8
     });
@@ -35,6 +36,7 @@ function setClassTypeTypeahead(array){
         source: array,
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
     });
 }
@@ -61,6 +63,7 @@ function setClassValueTypeahead(){
         },
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
         /*
         , afterSelect: function (item) {
@@ -129,6 +132,7 @@ function setAttributeTypeTypeahead(array){
         source: array,
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
     });
 }
@@ -138,6 +142,7 @@ function setAttributeValueTypeahead(array){
         source: array,
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
     });
 }
@@ -194,6 +199,7 @@ function setRelationTypeTypeahead(array){
         source: array,
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
     });
 }
@@ -215,7 +221,7 @@ function getRelationValues(nodeId){
     return entities;
 }
 
-
+/*
 function setRelationValueTypeahead(entities,nodeId){
     $('#relation-revise .value-input').typeahead({
         source: function(querry,process){
@@ -239,6 +245,27 @@ function setRelationValueTypeahead(entities,nodeId){
         },
         minLength: 0,
         showHintOnFocus: true,
+        fitToElement: true,
+        autoSelect: true
+    });
+}
+*/
+
+function setRelationRoleValueTypeahead(item,entities,nodeId){
+    $(item).find('input.typeahead').typeahead({
+        source: function(querry,process){
+            let type = $(item).find(".tag").attr("value");
+            if(entities[type] == undefined) {
+                array = [];
+                console.log("Alert:entities."+type+" is empty")
+            }else{
+                array = entities[type];
+            }
+            return process(array);
+        },
+        minLength: 0,
+        showHintOnFocus: true,
+        fitToElement: true,
         autoSelect: true
     });
 }
