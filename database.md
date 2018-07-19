@@ -17,7 +17,7 @@ dm.handle(msg, function(rep){
 });
 ```
 
-msg格式基本参照**接口-v0.02**，具体可参考`models/dm.js`和`models/io.js`
+msg格式基本参照**接口-v0.02**，具体可参考`models/dm.js`和`models/__backup__io.js`
 
 ## 支持的功能
 1. 创建用户

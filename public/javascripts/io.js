@@ -1,92 +1,94 @@
-var socket = io();
-var tmpMsg = {
-    type:[],
-    emit:[],
-    on:[]
-};
 
-var socket_mutex = false;
+function ioObj(){
+    this.socket = io();
+    this.socket_mutex = false;
+    this.tmpMsg = {
+        type:[],
+        emit:[],
+        on:[]
+    };
+}
 
-socket.on('iotest', function(msg){
-    alert(msg);
-});
+ioObj.prototype.init = function(){
 
-socket.on('model', function(msg){
-    switch (msg.operation){
-        //case 'get':
-        case 'mget':
-            io_get_model_done(msg);
-            break;
-        case 'save':
-            io_save_model_done(msg);
-            break;
-    }
-});
+    this.socket.on('iotest', function(msg){
+        alert(msg);
+    });
 
-socket.on('insModel', function(msg){
-    tagReformat.id2value(msg);
-    console.log(msg);
-    switch (msg.operation){
-        case 'get':
-            io_get_insModel_done(msg);
-            break;
-        case 'create_node':
-            io_create_insModel_node_done(msg);
-            break;
-        case 'remove_node':
-            io_remove_insModel_node_done(msg);
-            break;
-        case 'create_relation':
-            io_create_insModel_relation_done(msg);
-            break;
-        case 'remove_relation':
-            io_remove_insModel_relation_done(msg);
-            break;
-        case 'revise_relation':
-            io_revise_insModel_relation_done(msg);
-            break;
-        case 'rcmd_node':
-            io_recommend_insModel_node_done(msg);
-            break;
-        case 'rcmd_relation':
-            io_recommend_insModel_relation_done(msg);
-            break;
-        case 'rcmd':
-            io_recommend_insModel_node_done(msg);
-            break;
-        case 'rcmdIndex':
-            io_recommend_insModel_index_done(msg);
-            break;
-        case 'rcmd_entity':
-            io_recommend_insModel_entity_done(msg);
-            break;
-    }
-});
+    this.socket.on('model', function(msg){
+        switch (msg.operation){
+            //case 'get':
+            case 'mget':
+                that.io_get_model_done(msg);
+                break;
+            case 'save':
+                that.io_save_model_done(msg);
+                break;
+        }
+    });
 
+    let that = this;
 
+    this.socket.on('insModel', function(msg){
+        tagReformat.id2value(msg);
+        console.log(msg);
+        switch (msg.operation){
+            case 'get':
+                that.io_get_insModel_done(msg);
+                break;
+            case 'create_node':
+                that.io_create_insModel_node_done(msg);
+                break;
+            case 'remove_node':
+                that.io_remove_insModel_node_done(msg);
+                break;
+            case 'create_relation':
+                that.io_create_insModel_relation_done(msg);
+                break;
+            case 'remove_relation':
+                that.io_remove_insModel_relation_done(msg);
+                break;
+            case 'revise_relation':
+                that.io_revise_insModel_relation_done(msg);
+                break;
+            case 'rcmd_node':
+                that.io_recommend_insModel_node_done(msg);
+                break;
+            case 'rcmd_relation':
+                that.io_recommend_insModel_relation_done(msg);
+                break;
+            case 'rcmd':
+                that.io_recommend_insModel_node_done(msg);
+                break;
+            case 'rcmdIndex':
+                that.io_recommend_insModel_index_done(msg);
+                break;
+            case 'rcmd_entity':
+                that.io_recommend_insModel_entity_done(msg);
+                break;
+        }
+    });
 
-function socketEmitArray(type,msg){
+}
+
+ioObj.prototype.socketEmitArray = function(type,msg){
     tagReformat.value2id(msg);
-    //console.log(msg);
-    //console.log(socket_mutex);
-
-    tmpMsg.emit.push(msg);
-    tmpMsg.type.push(type);
-    //alert(socket_mutex);
-    if(!socket_mutex){
-        socketEmit(type, msg)
+    this.tmpMsg.emit.push(msg);
+    this.tmpMsg.type.push(type);
+    if(!this.socket_mutex){
+        this.socketEmit(type, msg)
     }
 }
 
-function socketEmit(type, msg) {
+ioObj.prototype.socketEmit = function(type, msg){
     console.log(type)
     console.log(msg)
-    socket_mutex = true;
-    socket.emit(type, msg);
+    this.socket_mutex = true;
+    this.socket.emit(type, msg);
 }
 
 /* socket emit */
-function emitMsgHeader(operation){
+ioObj.prototype.emitMsgHeader = function(operation){
     let msgHeader = {
         "operation":operation,
         "user":user,
@@ -97,25 +99,25 @@ function emitMsgHeader(operation){
 }
 
 /* model */
-function io_get_model(user_id,projectId){
-    let msg = generate_msg_base(user_id,projectId,'get');
-    socketEmitArray('model',msg);
+ioObj.prototype.io_get_model = function(user_id,projectId){
+    let msg = this.generate_msg_base(user_id,projectId,'get');
+    this.socketEmitArray('model',msg);
 }
 
-function io_save_model(user_id,projectId,model){
-    let msg = generate_msg_base(user_id,projectId,'save');
+ioObj.prototype.io_save_model = function(user_id,projectId,model){
+    let msg = this.generate_msg_base(user_id,projectId,'save');
     msg["nodes"] = model["nodes"];
     msg["relations"] = model["relations"];
-    socketEmitArray('model',msg);
+    this.socketEmitArray('model',msg);
 }
 
 /* insModel */
-function io_get_insModel(user_id,projectId){
-    let msg = generate_msg_base(user_id,projectId,'get');
-    socketEmitArray('insModel',msg);
+ioObj.prototype.io_get_insModel = function(user_id,projectId){
+    let msg = this.generate_msg_base(user_id,projectId,'get');
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_create_insModel_entity(entity){
+ioObj.prototype.io_create_insModel_entity = function(entity){
 
     //生成Entity节点
     let entityNode = {};
@@ -123,7 +125,7 @@ function io_create_insModel_entity(entity){
         "tags":entity.tags,
         "value": ""
     }
-    io_create_insModel_node(entityNode);
+    this.io_create_insModel_node(entityNode);
 
     //生成Value节点
     let valueNode = {};
@@ -131,11 +133,11 @@ function io_create_insModel_entity(entity){
         "tags": ["String"], //默认
         "value": entity.value
     }
-    io_create_insModel_node(valueNode)
+    this.io_create_insModel_node(valueNode)
 
     //生成关系
     let relations = {};
-    let keyAttribute = getKeyAttribute(entity.tags);
+    let keyAttribute = data.getKeyAttribute(entity.tags);
     relations[entity.relationId] = {
         "type": keyAttribute,
         "roles": [
@@ -143,70 +145,68 @@ function io_create_insModel_entity(entity){
             {"rolename": keyAttribute, "node_id": entity.valueId}
         ]
     }
-    io_create_insModel_relation(relations);
+    this.io_create_insModel_relation(relations);
 }
 
-function io_create_insModel_node(nodes){
-    let msg = emitMsgHeader('create_node');
+ioObj.prototype.io_create_insModel_node = function(nodes){
+    let msg = this.emitMsgHeader('create_node');
     msg["nodes"] = nodes;
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_remove_insModel_node(nodeId){
-    let msg = emitMsgHeader('remove_node');
+ioObj.prototype.io_remove_insModel_node = function(nodeId){
+    let msg = this.emitMsgHeader('remove_node');
     msg["nodes"] = {};
     msg["nodes"][nodeId] = {}
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_create_insModel_relation(relations){
-    let msg = emitMsgHeader('create_relation');
+ioObj.prototype.io_create_insModel_relation = function(relations){
+    let msg = this.emitMsgHeader('create_relation');
     msg["relations"] = relations;
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_remove_insModel_relation(relationId){
-    let msg = emitMsgHeader('remove_relation');
+ioObj.prototype.io_remove_insModel_relation = function(relationId){
+    let msg = this.emitMsgHeader('remove_relation');
     msg["relations"] = {};
     msg["relations"][relationId] = {}
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_revise_insModel_relation(user_id,projectId,relations){
-    let msg = generate_msg_base(user_id,projectId,'revise_relation');
+ioObj.prototype.io_revise_insModel_relation = function(user_id,projectId,relations){
+    let msg = this.generate_msg_base(user_id,projectId,'revise_relation');
     msg["relations"] = relations;
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_recommend_insModel_node(nodes){
-    //let msg = emitMsgHeader('rcmd'); //'rcmd_node');
-    let msg = emitMsgHeader('rcmd');
+ioObj.prototype.io_recommend_insModel_node = function(nodes){
+    //let msg = this.emitMsgHeader('rcmd'); //'rcmd_node');
+    let msg = this.emitMsgHeader('rcmd');
     msg["nodes"] = nodes;
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function io_recommend_insModel_relation(user_id,projectId,relations){
-    let msg = generate_msg_base(user_id,projectId,'rcmd_relation');
+ioObj.prototype.io_recommend_insModel_relation = function(user_id,projectId,relations){
+    let msg = this.generate_msg_base(user_id,projectId,'rcmd_relation');
     msg["relations"] = relations;
-    socketEmitArray('insModel',msg);
+    this.socketEmitArray('insModel',msg);
 }
 
-function generate_msg_base(user_id,projectId,operation){
-
+ioObj.prototype.generate_msg_base = function(user_id,projectId,operation){
     let msg = {
         'operation':operation,
         'user_id':user_id,
         'project_id':projectId,
         'operation_id': new Date()//试试objecid
     }
-
     return msg;
 }
 
 /* socket on */
 /* model */
-function io_get_model_done(msg){
-    socket_mutex = false;
+ioObj.prototype.io_get_model_done = function(msg){
+    this.socket_mutex = false;
     if(msg.error){
         return;
     }else{
@@ -217,6 +217,7 @@ function io_get_model_done(msg){
         symbolArray = [];
         keyValueArray = [];
         let key_attr_list;
+
         for(let key in model.nodes){
             if(model.nodes[key].tag == "Symbol") symbolArray.push(model.nodes[key].value)
             if(model.nodes[key].tag == "Entity") {
@@ -232,11 +233,11 @@ function io_get_model_done(msg){
             project_id : project,
             operation_id : 'op2'
         }
-        socketEmit("insModel",msg2);
+        this.socketEmit("insModel",msg2);
     }
 }
 
-function io_save_model_done(msg){
+ioObj.prototype.io_save_model_done = function(msg){
     if(msg.error){
         return;
     }else{
@@ -244,8 +245,8 @@ function io_save_model_done(msg){
     }
 }
 /* instanceModel */
-function io_get_insModel_done(msg){
-    socket_mutex = false;
+ioObj.prototype.io_get_insModel_done = function(msg){
+    this.socket_mutex = false;
     if(msg.error){
         return;
     }else{
@@ -256,26 +257,24 @@ function io_get_insModel_done(msg){
             operation_id : 'op3',
             topk: 100
         }
-        socketEmit("insModel",msg3);
+        this.socketEmit("insModel",msg3);
 
         instance_model = {
             "nodes": msg.nodes,
             "relations": msg.relations
         }
         prepareNewEntity();
-        initNetwork();
         //prepareNewEntity(instance_model,false);
         //drawIndex();
     }
 }
 
-function io_create_insModel_node_done(msg){
+ioObj.prototype.io_create_insModel_node_done = function(msg){
     if(msg.error){
         return;
     }else{
-        migrateEmitMsg(msg.migrate);
-        let curMsg = tmpMsgPop(msg.operationId);
-        //console.log(curMsg);
+        this.migrateEmitMsg(msg.migrate);
+        let curMsg = this.tmpMsgPop(msg.operationId);
         tagReformat.id2value(curMsg);
 
         let node = curMsg.nodes //tmpMsg.emit.nodes;
@@ -285,17 +284,17 @@ function io_create_insModel_node_done(msg){
             break;
         }
         if(msg.migrate[nodeId]) nodeId = msg.migrate[nodeId];
-        migrate(msg.migrate);
+        this.migrate(msg.migrate);
         //svgOperation.clickNode(nodeId)
         return;
     }
 }
 
-function io_remove_insModel_node_done(msg){
+ioObj.prototype.io_remove_insModel_node_done = function(msg){
     if(msg.error){
         return;
     }else{
-        let node = tmpMsgPop(msg.operationId).nodes;
+        let node = this.tmpMsgPop(msg.operationId).nodes;
         let nodeId;
         for(nodeId in node) break;
         removeNode(nodeId);
@@ -303,15 +302,14 @@ function io_remove_insModel_node_done(msg){
     }
 }
 
-function io_create_insModel_relation_done(msg){
+ioObj.prototype.io_create_insModel_relation_done = function(msg){
     if(msg.error){
         return;
     }else{
-        migrateEmitMsg(msg.migrate);
-        let curMsg = tmpMsgPop(msg.operationId);
+        this.migrateEmitMsg(msg.migrate);
+        let curMsg = this.tmpMsgPop(msg.operationId);
         let relation = curMsg.relations;
-        console.log("curMsg")
-        console.log(curMsg)
+        console.log(curMsg);
         tagReformat.id2value(curMsg);
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
@@ -320,7 +318,7 @@ function io_create_insModel_relation_done(msg){
             break;
         }
         if(msg.migrate[relationId]) relationId = msg.migrate[relationId];
-        migrate(msg.migrate);
+        this.migrate(msg.migrate);
 
         let centerId = $("g.center").attr("id");
         let nodeId;
@@ -335,18 +333,19 @@ function io_create_insModel_relation_done(msg){
                 $("#"+centerId).click();
                 return;
             }else{
-                transAnimation(centerId,nodeId,relationId,instance_model);
+                $("#"+centerId).click();
+                //transAnimation(centerId,nodeId,relationId,instance_model);
             }
         }
         return;
     }
 }
 
-function io_remove_insModel_relation_done(msg){
+ioObj.prototype.io_remove_insModel_relation_done = function(msg){
     if(msg.error){
         return;
     }else{
-        let relation = tmpMsgPop(msg.operationId).relations;
+        let relation = this.tmpMsgPop(msg.operationId).relations;
         let relationId;
         for(relationId in relation) break;
         delete instance_model["relations"][relationId];
@@ -354,7 +353,7 @@ function io_remove_insModel_relation_done(msg){
     }
 }
 
-function io_revise_insModel_relation_done(msg){
+ioObj.prototype.io_revise_insModel_relation_done = function(msg){
     if(msg.error){
         return;
     }else{
@@ -362,11 +361,11 @@ function io_revise_insModel_relation_done(msg){
     }
 }
 
-function io_recommend_insModel_node_done(msg){
+ioObj.prototype.io_recommend_insModel_node_done = function(msg){
     if(msg.error){
         return;
     }else{
-        tmpMsgPop(msg.operationId);
+        this.tmpMsgPop(msg.operationId);
 
         recommend_model = {
             "nodes": msg.nodes,
@@ -386,12 +385,12 @@ function io_recommend_insModel_node_done(msg){
     }
 }
 
-function io_recommend_insModel_index_done(msg){
-    socket_mutex = false;
+ioObj.prototype.io_recommend_insModel_index_done = function(msg){
+    this.socket_mutex = false;
     if(msg.error){
         return;
     }else{
-        tmpMsgPop(msg.operationId);
+        this.tmpMsgPop(msg.operationId);
 
         let tmpModel = {
             "nodes": msg.nodes,
@@ -399,10 +398,10 @@ function io_recommend_insModel_index_done(msg){
         }
         prepareNewEntity(tmpModel,false);
 
-        recommend_index_init();
+        data.recommend_index_init();
         for(let key in tmpModel.nodes){
             if(instance_model.nodes[key] == undefined){
-                if(isEntity(key,tmpModel)){
+                if(data.isEntity(key,tmpModel)){
                     //recommend_index.push(tmpModel.nodes[key].value);
                     recommend_index[tmpModel.nodes[key].tags[0]].push(tmpModel.nodes[key].value);
                 }
@@ -412,22 +411,22 @@ function io_recommend_insModel_index_done(msg){
     }
 }
 
-function io_recommend_insModel_entity_done(msg){
-    socket_mutex = false;
+ioObj.prototype.io_recommend_insModel_entity_done = function(msg){
+    this.socket_mutex = false;
     if(msg.error){
         return;
     }else{
-        tmpMsgPop(msg.operationId);
+        this.tmpMsgPop(msg.operationId);
 
         let tmpModel = {
             "nodes": msg.nodes,
             "relations": msg.relations
         }
         prepareNewEntity(tmpModel,false);
-        recommend_index_init();
+        data.recommend_index_init();
         for(let key in tmpModel.nodes){
             if(instance_model.nodes[key] == undefined){
-                if(isEntity(key,tmpModel)){
+                if(data.isEntity(key,tmpModel)){
                     //recommend_index.push(tmpModel.nodes[key].value);
                     recommend_index[tmpModel.nodes[key].tags[0]].push(tmpModel.nodes[key].value);
                 }
@@ -437,7 +436,7 @@ function io_recommend_insModel_entity_done(msg){
     }
 }
 
-function io_recommend_insModel_relation_done(msg){
+ioObj.prototype.io_recommend_insModel_relation_done = function(msg){
     if(msg.error){
         return;
     }else{
@@ -449,21 +448,7 @@ function io_recommend_insModel_relation_done(msg){
     }
 }
 
-io_test = function(){
-    msg = "hello";
-    socketEmitArray('iotest', msg);
-}
-
-io_test2 = function(msg = "hello"){
-    socket.emit('iotest', msg);
-}
-
-socket.on('iotest_back', function(msg){
-    //alert("123")
-    console.log(msg);
-});
-
-migrate = function(obj,model=instance_model){
+ioObj.prototype.migrate = function(obj,model=instance_model){
     if(obj == undefined) return;
     for(let key in obj){
         if(key == obj[key]) continue;//对应推荐的情况；
@@ -490,14 +475,14 @@ migrate = function(obj,model=instance_model){
     return;
 }
 
-migrateEmitMsg = function(obj){
+ioObj.prototype.migrateEmitMsg = function(obj){
     if(obj == undefined) return;
     for(let key in obj){
         if(key == obj[key]) continue; //实际上没有发生改变
         //if(key.indexOf("front_n")!=-1){
             //更新emit里面的id
-            for(let emitMsgOrder in tmpMsg.emit){
-                let tmpMsp = tmpMsg.emit[emitMsgOrder];
+            for(let emitMsgOrder in this.tmpMsg.emit){
+                let tmpMsp = this.tmpMsg.emit[emitMsgOrder];
                 if(tmpMsp["nodes"]){
                     if(!tmpMsp["nodes"][key]) continue; //EmitArray可能不存在当前节点
                     else{
@@ -520,8 +505,8 @@ migrateEmitMsg = function(obj){
         //}
         //if(key.indexOf("front_r")!=-1){
             //更新emit里面的id
-            for(let emitMsgOrder in tmpMsg.emit) {
-                let tmpMsp = tmpMsg.emit[emitMsgOrder];
+            for(let emitMsgOrder in this.tmpMsg.emit) {
+                let tmpMsp = this.tmpMsg.emit[emitMsgOrder];
                 if(tmpMsp["relations"]){
                     if(!tmpMsp["relations"][key]) continue; //EmitArray可能不存在当前节点
                     else{
@@ -538,45 +523,21 @@ migrateEmitMsg = function(obj){
 }
 
 
-copyObj = function(obj1,obj2){
-
-    for(let key in obj2){
-        obj1[key] = obj2[key];
-    }
-    return;
-}
-
-removeNode = function(nodeId,model=instance_model){
-
-    for(let rel in model["relations"]){
-        for(let n in model["relations"][rel]["roles"]){
-            let tmp = model["relations"][rel]["roles"][n];
-            if(tmp["node_id"] == nodeId)  {
-                if(model.nodes[nodeId].tags != undefined){
-                    alert("存在其他关系，节点无法删除")
-                }
-                return;
-            }
-        }
-    }
-    delete model["nodes"][nodeId];
-}
-
-tmpMsgPop= function(operationId){
+ioObj.prototype.tmpMsgPop= function(operationId){
 
     let tmpObj = {};
-    for(let n in tmpMsg.emit){
-        if(tmpMsg.emit[n].operationId == operationId){
-            copyObj(tmpObj,tmpMsg.emit[n])
-            tmpMsg.emit.splice(n,1);
-            tmpMsg.type.splice(n,1)
+    for(let n in this.tmpMsg.emit){
+        if(this.tmpMsg.emit[n].operationId == operationId){
+            copyObj(tmpObj,this.tmpMsg.emit[n])
+            this.tmpMsg.emit.splice(n,1);
+            this.tmpMsg.type.splice(n,1)
         }
     }
 
-    if(tmpMsg.emit.length > 0) {    //为什么明明等于0还是等进入
-        socketEmit(tmpMsg.type[0],tmpMsg.emit[0]);
+    if(this.tmpMsg.emit.length > 0) {    //为什么明明等于0还是等进入
+        this.socketEmit(this.tmpMsg.type[0],this.tmpMsg.emit[0]);
     }else{
-        socket_mutex = false
+        this.socket_mutex = false
     }
     return tmpObj;
 }

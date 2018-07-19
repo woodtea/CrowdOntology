@@ -2,7 +2,7 @@
 function getIndexArray(tmpModel=instance_model){
     let indexArray = [];
     for (let id in tmpModel.nodes) {
-        if (isEntity(id)) {
+        if (data.isEntity(id)) {
             indexArray.push(tmpModel.nodes[id].value);
         }
     }

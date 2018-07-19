@@ -1,37 +1,23 @@
-var user;
-var project;
-var symbolArray  = ["String"];
-var keyValueArray = ["姓名","名字","名称","片名"];
-var isGetRcmd = false;
-var recommend_model = {}
+
+function modelObj(svg=""){
 /*
-  * 其实可以改模型为类
-  * class model {
-  *  constructor(){}
-  * */
+    this.instance_model = {nodes:{}, relations:{}}
+    this.model = {nodes:{}, relations:{}}
+    this.recommend_model = {nodes:{}, relations:{}}
+    this.recommend_index = {}
 
-function getModel() {
-    return instance_model;
-}
-
-function updateModel() {
-
-}
-
-function getIndex(model = instance_model) {
-    let index = {};
-    for (let id in model.nodes) {
-        if (isEntity(id)) {
-            index[id] = model.nodes[id].value;
-        }
-    }
-    return index;
+    this.user = "";
+    this.project = "";
+    this.symbolArray  = ["String"];
+    this.keyValueArray = ["姓名","名字","名称","片名"];
+    this.isGetRcmd = false;
+*/
 }
 
 
-function getEntity(id, model = instance_model) {
+modelObj.prototype.getEntity = function(id, model = instance_model) {
     //判断是否是实体
-    if (!isEntity(id)) return;
+    if (!this.isEntity(id)) return;
     //包括自己和邻接信息
     let entity = {
         centerNode: {},
@@ -97,7 +83,8 @@ function getEntity(id, model = instance_model) {
     return entity;
 }
 
-function isEntity(id,model=instance_model){
+modelObj.prototype.isEntity = function(id, model=instance_model){
+
     if(model.nodes[id] == undefined){
         console.log("Alert: entity not found!")
         console.log("entity id:"+id);
@@ -115,14 +102,7 @@ function isEntity(id,model=instance_model){
     return false;
 }
 
-
-function getRelation(id1, id2, model = instance_model) {
-    let entity1 = getEntity(id1, model);
-    let entity2 = getEntity(id2, model);
-    return [entity1, entity2];
-}
-
-function getEntityIdByRelation(relationId,index0,index1, model = instance_model) {
+modelObj.prototype.getEntityIdByRelation = function(relationId,index0,index1, model=instance_model) {
 
     if(model.relations[relationId] == undefined) return;    //rcmd中比较常见
 
@@ -140,7 +120,7 @@ function getEntityIdByRelation(relationId,index0,index1, model = instance_model)
     return nodeIds;
 }
 
-function getEntityIdByValue(value, model = instance_model) {
+modelObj.prototype.getEntityIdByValue = function(value, model = instance_model) {
     for(let id in model.nodes){
         if(model.nodes[id].value == value ){
             return id;
@@ -149,15 +129,7 @@ function getEntityIdByValue(value, model = instance_model) {
     return ;
 }
 
-function getEntityTagsById(id,model=instance_model){
-    for(let key in model.nodes){
-        if(model.nodes[key].value == id) return model.nodes[key].tags;
-    }
-    return;
-}
-
-
-function getKeyAttribute(entityIdArray){
+modelObj.prototype.getKeyAttribute = function(entityIdArray){
     let entityId = entityIdArray[0];
     //在model中获取所有类型
     let n,tmpR;
@@ -171,4 +143,21 @@ function getKeyAttribute(entityIdArray){
         }
     }
     return "姓名";//default
+}
+
+
+modelObj.prototype.recommend_index_init = function(){
+    for(let key in model.nodes){
+        if(model.nodes[key].tag == "Entity"){
+            recommend_index[model.nodes[key].value] = [];
+        }
+    }
+}
+
+modelObj.prototype.removeNodeInRecommendIndex = function(type,value){
+    if(recommend_index[type] != undefined) {
+        let order = recommend_index[type].indexOf(value);
+        if(order != -1) recommend_index[type].splice(order,1);
+    }
+    return;
 }

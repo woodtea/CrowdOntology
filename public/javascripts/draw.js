@@ -17,13 +17,13 @@ const svg = d3
     .attr("width", width)
     .attr("height", height);
 */
-const svg = d3.select("body .graph-row .middle-content svg")
+const svg = d3.select("#modalWorkspace svg")
 const properties = $("body .graph-row .properties");
 const propertiesRevise = $("body .graph-row .properties-revise");
-const graph = $("body .graph-row .graph");
 const index = $("body .graph-row .index");
 
-const draw = new draw2(d3.select("#modalWorkspace svg"));
+//const draw = new draw2(d3.select("#modalWorkspace svg"));
+const draw = new draw2(d3.select("body .graph-row .middle-content svg"));
 
 /*
     基础元素绘制
@@ -63,7 +63,7 @@ function drawModal(centX, centY, R){
 }
 
 function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized = false, isRecommendation = false) {
-    let id;
+    let id,data;
     for (let tmpid in centerNode) {
         id = tmpid;
         data = {
@@ -195,7 +195,7 @@ function drawIndex(model = instance_model,showIndex=true) {
     let html = "";
     let entities = {};
     for (let id in model.nodes) {
-        if (isEntity(id)) {
+        if (data.isEntity(id)) {
             if(entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]]=[];
             entities[model.nodes[id].tags[0]].push({value:model.nodes[id].value,id:id});
         }
@@ -232,7 +232,7 @@ function drawEntity(id, model = instance_model) {
         id: id
     }
 
-    let entity = getEntity(id, model);
+    let entity = data.getEntity(id, model);
     console.log(entity);
     if (entity == undefined) return false;  //如果不是实体的话
 
@@ -247,8 +247,8 @@ function drawEntity(id, model = instance_model) {
 function drawRelation(id1, id2, model = instance_model) {
     //$(graph).children().remove();
     svg.selectAll("*").remove()
-    let entity1 = getEntity(id1, model);
-    let entity2 = getEntity(id2, model);
+    let entity1 = data.getEntity(id1, model);
+    let entity2 = data.getEntity(id2, model);
     //节点
     drawCircle(width/2 - zoomW*R, height/2, R * zoomR);
     drawNode(width/2 - zoomW*R, height/2, r * zoomR, entity1.centerNode);
@@ -263,15 +263,15 @@ function drawRelation(id1, id2, model = instance_model) {
     //独有节点绘制
     drawUnique(id1,id2);
     //将两端节点放到前排
-    svgBringToFront($("#"+id1));
-    svgBringToFront($("#"+id2));
+    svg.svgBringToFront($("#"+id1));
+    svg.svgBringToFront($("#"+id2));
 }
 
 
 function drawRecommendation(rcmdNeighbours, model = instance_model) {
     let id = $("g.center.isCentralized").attr("id");
-    if(!isEntity(id)) return false;
-    let entity = getEntity(id, model);
+    if(!data.isEntity(id)) return false;
+    let entity = data.getEntity(id, model);
 
     //一个问题是当前rcmdNeighbours包含自身的，所以覆盖了entity.neighbours
     for(let key in entity.neighbours){
@@ -625,13 +625,13 @@ function refillNode(data) {
 
 function drawCommons(id1,id2){
 
-    let entity1 = getEntity(id1);
-    let entity2 = getEntity(id2);
+    let entity1 = data.getEntity(id1);
+    let entity2 = data.getEntity(id2);
 
     let commonIds = [];
     for(let key in entity1.neighbours){
         if(entity2.neighbours[key] != undefined){
-            //if(isEntity(key)) commonIds.push(key);
+            //if(data.isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }
@@ -695,7 +695,7 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
     oy2 = ey - 0.4 * r * Math.sin(angle);
 
     let data = node.relations[0];
-    let nodeId = getEntityIdByValue(node.value,instance_model);
+    let nodeId = data.getEntityIdByValue(node.value,instance_model);
      if(instance_model.relations[data.id] != undefined){
         let roles = instance_model.relations[data.id].roles;
         if(roles[0].rolename!= "" && roles[1].rolename!= ""){
@@ -735,14 +735,14 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
 
 function drawUnique(id1,id2){
 
-    let entity1 = getEntity(id1);
-    let entity2 = getEntity(id2);
+    let entity1 = data.getEntity(id1);
+    let entity2 = data.getEntity(id2);
 
     let commonIds = [];
     let key;
     for(let key in entity1.neighbours){
         if(entity2.neighbours[key] != undefined){
-            //if(isEntity(key)) commonIds.push(key);
+            //if(data.isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }

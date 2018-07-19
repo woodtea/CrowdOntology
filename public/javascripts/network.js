@@ -1,12 +1,62 @@
 
-const colorsArray = ["#778899","#F08080","#008B8B","#D2E5FF"]
+function networkObj(){
 
-var network
-function getContainer(){
+    //this.colorsArray = ["#778899","#F08080","#008B8B","#D2E5FF"]
+
+    let that = this;
+    this.network = new vis.Network(that.getContainer(),that.getData(),that.getOptions());
+
+    this.network.on("click", function (params) {
+        if (params.nodes.length == 1) {
+        }else if(params.edges.length == 1){
+            //clickOnEdge
+            let id = params.edges[0]
+            let edge = that.network.body.data.edges._data[id];
+
+            if(that.network.body.data.nodes._data[edge.from].group == "__relation"){
+                that.network.selectNodes([edge.from])
+            }else if(that.network.body.data.nodes._data[edge.to].group == "__relation"){
+                that.network.selectNodes([edge.to])
+            }
+        }
+    });
+
+    this.network.on("doubleClick", function (params) {
+        if(params.nodes.length==1){
+            let id = params.nodes[0]
+            that.showNodeDetail(id)
+            console.log(that.network.body.data.nodes._data[id].group);
+        }else if(params.edges.length == 1){
+            //clickOnEdge
+            let id = params.edges[0]
+            let edge = that.network.body.data.edges._data[id];
+            console.log(edge);
+            if(that.network.body.data.nodes._data[edge.from].group == "__relation"){
+                that.network.selectNodes([edge.from])
+            }else if(that.network.body.data.nodes._data[edge.to].group == "__relation"){
+                that.network.selectNodes([edge.to])
+            }
+        }
+    });
+}
+
+networkObj.prototype.setData = function(){
+    this.network.setData(this.getData());
+}
+
+
+networkObj.prototype.showNodeDetail = function(nodeId){
+    $("#modalNetwork").modal('hide')
+    svg.drawEntity(nodeId, instance_model); //画出中心区域
+    //$("#"+nodeId).trigger("click");
+}
+
+
+networkObj.prototype.getContainer = function(){
     return $("#modalNetwork .modal-body")[0];//因为要求的是js对象
 }
 
-function getOptions(){
+networkObj.prototype.getOptions = function(){
     var options = {
         nodes: {
             shape: 'dot',
@@ -37,7 +87,7 @@ function getOptions(){
             let group = model.nodes[key].value;
             options.groups[group] = {
                 color:{
-                    background: colorsArray[i],//'#D2E5FF',
+                    background: this.colorsArray[i],//'#D2E5FF',
                     border:'#2B7CE9'
                 }
             }
@@ -55,41 +105,12 @@ function getOptions(){
 
     return options;
 }
-/*
-function getData(){
+
+networkObj.prototype.getData = function(){
+
     let nodes = [],edges = [];
     for(let id in instance_model.nodes){
-        if(isEntity(id)) {
-            nodes.push({
-                id: id,
-                label: instance_model.nodes[id].value,
-                group: instance_model.nodes[id].tags[0]
-            })
-        }
-    }
-
-    for(let id in instance_model.relations){
-        let roles = instance_model.relations[id].roles;
-        let order = 0;
-        if(roles[0].node_id>roles[1].node_id){
-            order = 1;
-        }
-        edges.push({from:roles[order].node_id,to:roles[1-order].node_id})
-        uniqueEdges(edges);
-    }
-
-    var data = {
-        nodes: nodes,
-        edges: edges
-    };
-console.log(data);
-    return data;
-}
-*/
-function getData(){
-    let nodes = [],edges = [];
-    for(let id in instance_model.nodes){
-        if(isEntity(id)) {
+        if(data.isEntity(id)) {
             nodes.push({
                 id: id,
                 label: instance_model.nodes[id].value,
@@ -102,7 +123,7 @@ function getData(){
         let isAttribute = false;
         let roles = instance_model.relations[id].roles;
         for(let i in roles){
-            if(!isEntity(roles[i].node_id)) {
+            if(!data.isEntity(roles[i].node_id)) {
                 isAttribute = true;
                 break;
             }
@@ -121,29 +142,13 @@ function getData(){
        }
     }
 
-    var data = {
+    return {
         nodes: nodes,
         edges: edges
     };
-    console.log(data);
-    return data;
 }
 
-function initNetwork(){
-    network = new vis.Network(getContainer(), getData(), getOptions());
-
-    network.on("doubleClick", function (params) {
-        if(params.nodes.length==1){
-            showNodeDetail(params.nodes[0])
-        }else if(params.edges.length == 1){
-            //network.edges(params.edges[0])
-        }
-    });
-
-    //network.redraw();
-}
-
-function uniqueEdges(edges){
+networkObj.prototype.uniqueEdges = function(edges){
     let record = {};
     for(let i in edges){
         if(record[edges[i].from] == undefined) record[edges[i].from]={};
@@ -153,15 +158,3 @@ function uniqueEdges(edges){
         }
     }
 }
-
-function showNodeDetail(nodeId){
-    $("#modalNetwork").modal('hide')
-    $("#"+nodeId).trigger("click");
-}
-
-$("#modalNetwork").on('shown.bs.modal',function(){
-    initNetwork();
-})
-
-$("#modalWorkspace").on('shown.bs.modal',function(){
-    draw.drawEntity(draw.centerNode.id,instance_model);})
