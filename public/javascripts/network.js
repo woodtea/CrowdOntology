@@ -96,10 +96,10 @@ networkObj.prototype.getOptions = function(){
     }
 
     options.groups["__relation"] = {
-        shape:"square",
-        size : 6,
+        shape:"diamond",
+        size : 12,
         font:{
-            size:12
+            size:14
         }
     }
 
