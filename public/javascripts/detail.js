@@ -19,7 +19,7 @@ detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true)
         }
     }
 
-    html = "<div class='index-content' style='height: 490px;overflow: scroll'></div>";
+    html = "<div class='index-content' style='height: 490px;overflow: auto'></div>";
     $(index).append(html);
     let indexContent = $(index).children(".index-content");
 
@@ -67,10 +67,20 @@ detailObj.prototype.drawRelations = function(id) {
 
 
     let entity = data.getEntity(id, instance_model);
+    //let entity = svg.getEntity(id, instance_model);
+
     let relations = filterRelations(entity.neighbours);
+    let relationArray = [];
     html = "";
     for (let relation of relations) {
-        html += this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
+        if(relationArray.indexOf(relation.relationId)==-1){
+            relationArray.push(relation.relationId);
+            html += this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
+        }else{
+            let item = $(".relationId[value='"+relation.relationId+"']");
+            item = item.parent().children(".value");
+            $(item).text($(item).text()+"、"+relation.value);
+        }
     }
     $(properties).find("#relation").append(html);
 
