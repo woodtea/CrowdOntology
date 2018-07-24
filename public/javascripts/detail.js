@@ -581,20 +581,19 @@ detailObj.prototype.filterRelations = function(rawRelations) {
         if(relationTypeArray.indexOf(rawRelation.type) != -1){
             let nodeId = [];
             let value = [];
-            if(rawRelation.roles.length>2){
-                for(let role of rawRelation.roles){
+            let centerId = $("g.entity.center").attr("id");
+            let mutex = 0;
+
+            for(let role of rawRelation.roles){
+                if(role.node_id != centerId || mutex){
                     nodeId.push(role.node_id)
                     value.push(instance_model.nodes[role.node_id].value)
-                }
-            }else{
-                let centerId = $("g.entity.center").attr("id");
-                if(rawRelation.roles[0].node_id != centerId){
-                    nodeId =  rawRelation.roles[0].node_id
                 }else{
-                    nodeId =  rawRelation.roles[1].node_id
+                    console.log(role.node_id)
+                    mutex ++;
                 }
-                value = instance_model.nodes[nodeId].value
             }
+
             relations.push({
                 relationId: id,
                 nodeId: nodeId,
