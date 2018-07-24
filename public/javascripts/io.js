@@ -217,7 +217,6 @@ ioObj.prototype.io_get_model_done = function(msg){
         symbolArray = [];
         keyValueArray = [];
         let key_attr_list;
-
         for(let key in model.nodes){
             if(model.nodes[key].tag == "Symbol") symbolArray.push(model.nodes[key].value)
             if(model.nodes[key].tag == "Entity") {
@@ -227,6 +226,21 @@ ioObj.prototype.io_get_model_done = function(msg){
                 }
             }
         }
+
+        relationTypeArray = [];
+        for(let key in model.relations){
+            let count = 0;
+            for(let role of model.relations[key].roles){
+                if(model.nodes[role.node_id].tag == "Entity"){
+                    count++;
+                    if(count>1){
+                        relationTypeArray.push(model.relations[key].value);
+                        break;
+                    }
+                }
+            }
+        }
+
         let msg2 = {
             operation: 'get',
             user_id : user,
@@ -378,7 +392,7 @@ ioObj.prototype.io_recommend_insModel_node_done = function(msg){
         prepareNewEntity(recommend_model,false);
 
         //let centerId = $("g.center").attr("id");
-        let entity = getEntity(centerId,recommend_model);
+        let entity = svg.getEntity(centerId,recommend_model);
         drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
         return;

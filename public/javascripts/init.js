@@ -8,8 +8,9 @@ var model = {nodes:{}, relations:{}}
 var recommend_model = {nodes:{}, relations:{}}
 var recommend_index = {}
 
-var symbolArray  = ["String"];
-var keyValueArray = ["姓名","名字","名称","片名"];
+var symbolArray  = [];
+var keyValueArray = [];
+var relationTypeArray = [];
 var isGetRcmd = false;
 
 //io

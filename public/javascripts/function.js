@@ -83,9 +83,13 @@ $(function () {
             let str = $(this).attr("class");
             $(this).attr("class",classStr+" active");
         })
-
+        //detail部分
         let id = $(this).attr('id');
-        drawRelationDetails(id);
+        //drawRelationDetails(id);
+        let item = $("span.relationId[value^='"+id+"']").parent();
+        console.log(item);
+        $("body .graph-row .properties .active").removeClass("active");
+        $(item).addClass("active");
 
         return;
     })

@@ -553,7 +553,7 @@ svgObj.prototype.svgBringToFront = function(item) {
 }
 
 svgObj.prototype.getAngle = function(index,nLength,rLength,startAngle){
-    let per = nLength+rLength;
+    let per = (nLength+rLength)*0.75;
     if(per<4) per=4;
 
     let m = (nLength - 1)/2;

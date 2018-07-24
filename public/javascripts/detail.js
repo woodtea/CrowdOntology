@@ -66,24 +66,27 @@ detailObj.prototype.drawRelations = function(id) {
     $(properties).append(html);
 
 
-    let entity = data.getEntity(id, instance_model);
-    //let entity = svg.getEntity(id, instance_model);
+    //let entity = data.getEntity(id, instance_model);
+    //let relations = filterRelations(entity.neighbours);
 
-    let relations = filterRelations(entity.neighbours);
+    let entity = svg.getEntity(id, instance_model);
+    let relations = this.filterRelations(entity.relations);
+
     let relationArray = [];
-    html = "";
-    for (let relation of relations) {
+    for (let i in relations) {
+        let relation = relations[i];
         if(relationArray.indexOf(relation.relationId)==-1){
             relationArray.push(relation.relationId);
-            html += this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
+            html = this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
+            $(properties).find("#relation").append(html);
         }else{
-            let item = $(".relationId[value='"+relation.relationId+"']");
-            item = item.parent().children(".value");
-            $(item).text($(item).text()+"、"+relation.value);
+            /*
+            let item = $("span.relationId[value^='"+relation.relationId+"']").parent();
+            let subItem = $(item).children(".value");
+            $(subItem).text($(subItem).text()+"、"+relation.value);
+            */
         }
     }
-    $(properties).find("#relation").append(html);
-
     $(properties).find("#relation").append(this.generatePlusLogo("relation"));
 
 }
@@ -568,4 +571,37 @@ detailObj.prototype.rightColumnShow = function(item){
     $(properties).hide();
     $(propertiesRevise).hide();
     $(item).show();
+}
+
+detailObj.prototype.filterRelations = function(rawRelations) {
+
+    let relations = []
+    for (let id in rawRelations) {
+        let rawRelation = rawRelations[id];
+        if(relationTypeArray.indexOf(rawRelation.type) != -1){
+            let nodeId = [];
+            let value = [];
+            if(rawRelation.roles.length>2){
+                for(let role of rawRelation.roles){
+                    nodeId.push(role.node_id)
+                    value.push(instance_model.nodes[role.node_id].value)
+                }
+            }else{
+                let centerId = $("g.entity.center").attr("id");
+                if(rawRelation.roles[0].node_id != centerId){
+                    nodeId =  rawRelation.roles[0].node_id
+                }else{
+                    nodeId =  rawRelation.roles[1].node_id
+                }
+                value = instance_model.nodes[nodeId].value
+            }
+            relations.push({
+                relationId: id,
+                nodeId: nodeId,
+                type: rawRelation.type,
+                value: value
+            })
+        }
+    }
+    return relations;
 }
