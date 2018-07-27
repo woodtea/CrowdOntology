@@ -341,8 +341,14 @@ ioObj.prototype.io_create_insModel_relation_done = function(msg){
             if(nodeId != centerId) break;
         }
 
-        if(!prepareNewEntity(instance_model,true,isGetRcmd)){
+        //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
+        if(!prepareNewEntity(instance_model,isRefreshSVG,isGetRcmd)){
             let notRecommendation = $("g.center.isCentralized").attr("id");
+            if(isRefreshSVG == false){
+                isRefreshSVG = true;
+                $('.properties-revise .button-ok').trigger("click");
+                return;
+            }
             if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
                 $("#"+centerId).click();
                 return;

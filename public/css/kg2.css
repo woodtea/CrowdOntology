@@ -116,3 +116,7 @@ path.active{
     stroke: #99CC66;
     stroke-width: 2;
 }
+
+.popover-title{
+    text-align: center;
+}

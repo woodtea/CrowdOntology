@@ -287,7 +287,7 @@ detailObj.prototype.classReviseSubmit = function(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    let err = isCreationIllegal("class",type,value)
+    let err = data.isCreationIllegal("class",type,value)
     if(err != ""){
         alert(err)
         return;
@@ -309,7 +309,7 @@ detailObj.prototype.attributeReviseSubmit = function(item) {
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    let err = isCreationIllegal("attribute",type,value);
+    let err = data.isCreationIllegal("attribute",type,value);
     if(err != ""){
         alert(err);
         return;
@@ -389,7 +389,18 @@ detailObj.prototype.relationReviseSubmit = function(item) {
         let node = $("#roles").children().find(".node input").eq(i).val();
         let nodeId = data.getEntityIdByValue(node, instance_model);
         if (nodeId == undefined) {
-            alert("承担者\""+node+"\"不存在");
+            let tag = $("#roles").children().find(".tag").eq(i).attr("value");
+            $("#modelAddEntity .modal-body").children().remove();
+            let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+            html += '<h4>承担者"'+node+'"不存在</h4>';
+            html += '<br/>';
+            html += '<p>是否自动创建实体'+node+'（类型：'+ tag +'）</p>';
+            html += '<p>并在实体创建后继续尝试当前创建关系</p>';
+            html += '<span style="display: none;"><input class="type-input" type="text" value='+tag+'><input class="value-input" type="text" value='+node+'></span>';
+
+            $("#modelAddEntity .modal-body").append(html)
+
+            $("#modelAddEntity").modal("show");
             return;
         }
         //加入队列
@@ -402,7 +413,7 @@ detailObj.prototype.relationReviseSubmit = function(item) {
     }
 
     //数据有效性检测
-    let err = isCreationIllegal("relation",type,"",roles);
+    let err = data.isCreationIllegal("relation",type,"",roles);
     if(err != ""){
         alert(err);
         return;
@@ -589,7 +600,6 @@ detailObj.prototype.filterRelations = function(rawRelations) {
                     nodeId.push(role.node_id)
                     value.push(instance_model.nodes[role.node_id].value)
                 }else{
-                    console.log(role.node_id)
                     mutex ++;
                 }
             }

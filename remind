@@ -23,3 +23,8 @@ model层没办法自动融合
 //Question
 Typeahead不是实时更新的
 getPathText和getPath现在好像是一样的，可以合并
+
+//
+添加两个加号
+model的问题
+实体自动创建

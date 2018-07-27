@@ -15,6 +15,7 @@ var isGetRcmd = false;
 
 //io
 var tmpMsg = {type:[], emit:[], on:[]};
+var isRefreshSVG = true;
 
 //html
 const properties = $("body .graph-row .properties");

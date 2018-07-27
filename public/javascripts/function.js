@@ -9,9 +9,6 @@ var faEditClicked = false; //很不好
 var isRevise = false; //很不好
 $(function () {
 
-    //使得提示工具Tooltip生效
-    $('[data-tooltip="tooltip"]').tooltip()
-
     $(document).on("click", '#stigmod-search-left-btn', function () {
         let value = $(this).parent().parent().children("input[type=text]").val();
         let nodeId = data.getEntityIdByValue(value, instance_model);
@@ -26,8 +23,16 @@ $(function () {
 
     $(document).on("click", '#modelSearch .btn-primary', function () {
         $("#modelSearch").modal("hide");
-        $(".fa-plus[type='class']").trigger("click");
+        //$(".fa-plus[type='class']").trigger("click");
+        detail.classRevise(this, "add");
         $("#class-revise .value-input").val($("#stigmod-search-left-input").val());
+    })
+
+    $(document).on("click", '#modelAddEntity .btn-primary', function () {
+        isRefreshSVG = false;
+        let item = $("#modelAddEntity .modal-body span");
+        detail.classReviseSubmit(item);
+        $("#modelAddEntity").modal('hide')
     })
 
     /*

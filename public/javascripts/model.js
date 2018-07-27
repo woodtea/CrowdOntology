@@ -161,3 +161,109 @@ modelObj.prototype.removeNodeInRecommendIndex = function(type,value){
     }
     return;
 }
+
+modelObj.prototype.isCreationIllegal = function (type,tag,value,roles){
+    let hasError;
+    let err="";
+    switch (type){
+        case "class":
+            hasError = true;
+            for(let key in model.nodes){
+                if(model.nodes[key].value == tag) hasError = false;
+            }
+            if(tag == "String") hasError = true;
+            if(hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担者";
+
+            hasError = false;
+            for(let key in instance_model.nodes){
+                if(data.isEntity(key) && instance_model.nodes[key].value == value) {hasError = true;break;}
+            }
+            if(hasError) err +="创建实体已存在\n";
+            break;
+        case "attribute":
+            hasError = true;
+            for(let key in model.relations){
+                if(model.relations[key].value == tag){
+                    let roles = model.relations[key].roles;
+                    for(let n in roles){
+                        if(model.nodes[roles[n].node_id].tag == "Symbol"){
+                            hasError = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(hasError) err += "创建类型不合法\n";
+
+            hasError = false;
+            for(let key in instance_model.relations){
+                if(instance_model.relations[key].type == tag) {
+                    let centerId = $("g.center").attr("id");
+                    let roles = instance_model.relations[key].roles;
+                    for(let n in roles){
+                        if(roles[n].node_id == centerId){
+                            if(isRevise){
+                                //判断属性是否修改
+                                if(roles[1-n].node_id == data.getEntityIdByValue(value)){
+                                    hasError = true
+                                    break;
+                                }
+                            }else{//同名属性
+                                hasError = true
+                                break;
+                            }
+                        }
+                    }
+                    if(hasError) break;
+                }
+            }
+            if(hasError) err += "创建属性已存在\n";
+            break;
+        case "relation":
+            //角色与承担者是否一致
+            for(let i in roles){
+                if(roles[i].nodeId != undefined) {
+                    if (roles[i].tag != instance_model.nodes[roles[i].nodeId].tags[0]) {
+                        err += "角色\""+roles[i].rolename+"("+roles[i].tag+")\"无法由\""+
+                            roles[i].node+"("+instance_model.nodes[roles[i].nodeId].tags[0]+")\"承担";
+                        break
+                    }
+                }
+            }
+            //关系是否已经存在
+            break;
+            hasError = true;
+            for(let key in model.relations){
+                if(model.relations[key].value == tag){
+                    hasError = false;
+                    let roles = model.relations[key].roles;
+                    //model.nodes[roles[0].node_id].value
+                    //model.nodes[roles[1].node_id].value
+                    let tags0 = instance_model.nodes[node0Id].tags;
+                    let tags1 = instance_model.nodes[node1Id].tags;
+                    if(model.nodes[roles[0].node_id].value != tags0 || model.nodes[roles[1].node_id].value != tags1){
+                        hasError = true;
+                        break;
+                    }
+                    if(!hasError) break;
+                }
+            }
+            if(hasError) err += "创建类型不合法\n";
+
+            hasError = false;
+            //let centerId = $("g.center").attr("id");
+            for(let key in instance_model.relations){
+                if(instance_model.relations[key].type != tag) continue;
+                let roles = instance_model.relations[key].roles;
+                if(roles[0].node_id == node0Id && roles[1].node_id == node1Id){
+                    hasError = true
+                    break;
+                }
+            }
+            if(hasError) err += "创建关系已存在\n";
+            break;
+    }
+    return err;
+}
+
+
