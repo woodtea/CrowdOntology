@@ -7,7 +7,7 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
     "animation":true,
     "title":"新建",
     "trigger":"focus",
-    "placement":"right",
+    "placement":"bottom",
     "container": 'body',
     "html":true,
     "content":'<div class="btn-group"><button class="btn btn-primary add-class">实体</button><button class="btn btn-success add-relation">关系</button></div>'
