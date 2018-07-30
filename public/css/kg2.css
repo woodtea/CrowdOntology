@@ -17,16 +17,6 @@
     text-align: left;
 }
 
-g.center circle {
-    fill: "gray";
-    stroke: "#333";
-}
-
-g.center text {
-    font-color: "white";
-}
-
-
 .properties {
     overflow: auto;
 }
@@ -79,6 +69,16 @@ g.center text {
 #modalNetwork .modal-body {
     width: 800px;
     height: 600px;
+}
+
+div.global{
+    width: 868px;
+    height: 540px;
+}
+
+svg.local{
+    width: 868px;
+    height: 535px;
 }
 
 #modelSearch .modal-footer {

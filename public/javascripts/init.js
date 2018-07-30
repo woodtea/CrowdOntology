@@ -15,7 +15,9 @@ var isGetRcmd = false;
 
 //io
 var tmpMsg = {type:[], emit:[], on:[]};
-var isRefreshSVG = true;
+var svgPending = 0;
+//colors
+var isColorful = true;
 
 //html
 const properties = $("body .graph-row .properties");
@@ -31,9 +33,11 @@ const network = new networkObj();
 const connection = new ioObj();
 
 //modal
+/*
 $("#modalNetwork").on('shown.bs.modal',function(){
     network.setData();
 })
+*/
 
 connection.init();
 io_test2 = function(msg = "hello"){

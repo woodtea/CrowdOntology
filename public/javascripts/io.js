@@ -279,7 +279,8 @@ ioObj.prototype.io_get_insModel_done = function(msg){
         }
         prepareNewEntity();
         //prepareNewEntity(instance_model,false);
-        //drawIndex();
+        //detail.drawIndex();
+        detail.rightColumnShow(index);
     }
 }
 
@@ -342,18 +343,22 @@ ioObj.prototype.io_create_insModel_relation_done = function(msg){
         }
 
         //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
-        if(!prepareNewEntity(instance_model,isRefreshSVG,isGetRcmd)){
+        if(!prepareNewEntity(instance_model,!svgPending,isGetRcmd)){
             let notRecommendation = $("g.center.isCentralized").attr("id");
-            if(isRefreshSVG == false){
-                isRefreshSVG = true;
-                $('.properties-revise .button-ok').trigger("click");
+            if(svgPending > 0){
+                svgPending--;
+                if(svgPending == 0){
+                    $('.properties-revise .button-ok').trigger("click");
+                }
                 return;
             }
             if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
                 $("#"+centerId).click();
+                network.setData();
                 return;
             }else{
                 $("#"+centerId).click();
+                network.setData();
                 //transAnimation(centerId,nodeId,relationId,instance_model);
             }
         }

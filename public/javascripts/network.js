@@ -8,6 +8,9 @@ function networkObj(){
 
     this.network.on("click", function (params) {
         if (params.nodes.length == 1) {
+            let item = $(index).find(".nodeId[value^='"+params.nodes[0]+"']")
+            $(index).find(".active").removeClass("active");
+            $(item).parent().addClass("active");
         }else if(params.edges.length == 1){
             //clickOnEdge
             let id = params.edges[0]
@@ -25,12 +28,10 @@ function networkObj(){
         if(params.nodes.length==1){
             let id = params.nodes[0]
             that.showNodeDetail(id)
-            console.log(that.network.body.data.nodes._data[id].group);
         }else if(params.edges.length == 1){
             //clickOnEdge
             let id = params.edges[0]
             let edge = that.network.body.data.edges._data[id];
-            console.log(edge);
             if(that.network.body.data.nodes._data[edge.from].group == "__relation"){
                 that.network.selectNodes([edge.from])
             }else if(that.network.body.data.nodes._data[edge.to].group == "__relation"){
@@ -46,14 +47,16 @@ networkObj.prototype.setData = function(){
 
 
 networkObj.prototype.showNodeDetail = function(nodeId){
-    $("#modalNetwork").modal('hide')
+    //$("#modalNetwork").modal('hide')
     svg.drawEntity(nodeId, instance_model); //画出中心区域
-    //$("#"+nodeId).trigger("click");
+    $("#"+nodeId).trigger("click");
+    showLocal();
 }
 
 
 networkObj.prototype.getContainer = function(){
-    return $("#modalNetwork .modal-body")[0];//因为要求的是js对象
+    return $("div.global")[0];//因为要求的是js对象
+    //return $("#modalNetwork .modal-body")[0];//因为要求的是js对象
 }
 
 networkObj.prototype.getOptions = function(){

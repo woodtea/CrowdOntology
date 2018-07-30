@@ -13,6 +13,7 @@ $(function () {
         let value = $(this).parent().parent().children("input[type=text]").val();
         let nodeId = data.getEntityIdByValue(value, instance_model);
         if (nodeId != undefined) {
+            showLocal();
             svg.drawEntity(nodeId, instance_model); //画出中心区域
             $("#" + nodeId).click();    //点击中心节点
         } else {
@@ -20,6 +21,21 @@ $(function () {
             $("#modelSearch").modal("show");
         }
     })
+
+    $(document).on("click", ".btn-group.workspace", function () {
+        if($(this).children(".btn-default").hasClass("off")){
+            //全局图谱
+            $("svg.local").hide()
+            network.setData();
+            $("div.global").show();
+            detail.drawIndex();
+        }else{
+            //局部图谱
+            $("div.global").hide()
+            $("svg.local").show()
+        }
+    })
+
 
     $(document).on("click", '#modelSearch .btn-primary', function () {
         $("#modelSearch").modal("hide");
@@ -29,9 +45,12 @@ $(function () {
     })
 
     $(document).on("click", '#modelAddEntity .btn-primary', function () {
-        isRefreshSVG = false;
+        //isRefreshSVG = false;
         let item = $("#modelAddEntity .modal-body span");
-        detail.classReviseSubmit(item);
+        svgPending = item.length-1;//第一个span是x号
+        for(let i=1;i<item.length;i++){
+            detail.classReviseSubmit(item[i],i);
+        }
         $("#modelAddEntity").modal('hide')
     })
 
@@ -66,7 +85,6 @@ $(function () {
                     $(properties).children().remove();
                     detail.drawIndex();
                     svg.drawEntity(nodeId);
-                    $(graph).children().remove();
                 } else {
                     drawNodeDetails(id);
                 }
@@ -92,7 +110,6 @@ $(function () {
         let id = $(this).attr('id');
         //drawRelationDetails(id);
         let item = $("span.relationId[value^='"+id+"']").parent();
-        console.log(item);
         $("body .graph-row .properties .active").removeClass("active");
         $(item).addClass("active");
 
@@ -119,6 +136,7 @@ $(function () {
         indexMutex = false;
         let item = this;
         let nodeId = $(item).find(".nodeId").attr("value");
+        showLocal();
         $("#" + nodeId).click();    //点击中心节点
     })
 
@@ -517,8 +535,8 @@ function hash(input){
     return retValue;
 }
 
-function generateFrontRelationID() {
-    let n = getJsonLength(instance_model.relations);
+function generateFrontRelationID(shift=0) {
+    let n = getJsonLength(instance_model.relations)+shift;
     let relationId = "front_r" + n;
 
     while (instance_model.relations[relationId] != undefined) {
@@ -740,9 +758,14 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
         }
     }
     if(hasCenterNode && refreshSvg){
+        network.setData();
         detail.drawIndex(instance_model,showIndex);
         svg.drawEntity(centerNode);
-        $("#" + centerNode).delay("10").click();
+        if(!$(".btn-group.workspace .btn-default").hasClass("off")){
+            $("#" + centerNode).delay("10").click();
+        }else{
+            drawNodeDetails(centerNode);
+        }
         //$("#" + centerNode).delay("500").trigger("dblclick");
         if(getRcmd){
             isGetRcmd = false;
@@ -906,4 +929,18 @@ removeNode = function(nodeId,model=instance_model){
     }
     */
     delete model["nodes"][nodeId];
+}
+
+showLocal = function(){
+    let isGlobal = $(".btn-group.workspace .btn-default").hasClass("off");
+    if(isGlobal){
+        $(".btn-group.workspace").children().trigger("click");
+    }
+}
+
+showGlogal = function(){
+    let isGlobal = $(".btn-group.workspace .btn-default").hasClass("off");
+    if(!isGlobal){
+        $(".btn-group.workspace").children().trigger("click");
+    }
 }

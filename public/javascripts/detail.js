@@ -171,14 +171,7 @@ detailObj.prototype.attributeRevise = function(item, type = "add") {
     $(".properties").hide();
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
-    let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
-        '<div class="col-xs-8"><h4>修改</h4></div>' +
-        '<div class="col-xs-2"></div>' +
-        '</div>' +
-        '<hr style="margin:8px">';
-    $(".properties-revise").append(html);
-
+    this.drawRightTitle(propertiesRevise,"修改",false,false);
 
     html = this.generateTitle("属性", "attribute-revise");
     $(".properties-revise").append(html);
@@ -205,13 +198,7 @@ detailObj.prototype.relationRevise = function(item, type = "add") {
     $(".properties-revise").children().remove();
     this.rightColumnShow(propertiesRevise);
 
-    let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" style="display: none"></span></div>' +
-        '<div class="col-xs-8"><h4>修改</h4></div>' +
-        '<div class="col-xs-2"></div>' +
-        '</div>' +
-        '<hr style="margin:8px">';
-    $(".properties-revise").append(html);
+    this.drawRightTitle(propertiesRevise,"修改",false,false);
 
     //中间区域修改
     html = this.generateTitle("关系", "relation-revise");
@@ -257,14 +244,7 @@ detailObj.prototype.rolseRevise = function(item, type = "add") {
     $(".properties").hide();
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
-    let html = '<div class="row">' +
-        '<div class="col-xs-2"><span class="glyphicon glyphicon-chevron-left button-left" ></span></div>' +
-        '<div class="col-xs-8"><h4>修改</h4></div>' +
-        '<div class="col-xs-2"></div>' +
-        '</div>' +
-        '<hr style="margin:8px">';
-    $(".properties-revise").append(html);
-
+    this.drawRightTitle(propertiesRevise,"修改",false,false);
 
     html = this.generateTitle("角色", "role-revise");
     $(".properties-revise").append(html);
@@ -282,7 +262,7 @@ detailObj.prototype.rolseRevise = function(item, type = "add") {
 }
 
 //submit
-detailObj.prototype.classReviseSubmit = function(item) {
+detailObj.prototype.classReviseSubmit = function(item,candidate=0) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
@@ -298,7 +278,7 @@ detailObj.prototype.classReviseSubmit = function(item) {
         value: value,
         nodeId: generateFrontNodeID(value,"e"),
         valueId: generateFrontNodeID(value,"v"),
-        relationId: generateFrontRelationID()
+        relationId: generateFrontRelationID(candidate)
     }
 
     connection.io_create_insModel_entity(entity);
@@ -384,24 +364,13 @@ detailObj.prototype.relationReviseSubmit = function(item) {
 
     let length = $("#roles").children().length;
     let roles = [];
+    let notExistArray = [];
     for(let i=0;i<length;i++){
         //判断承担者是否存在
         let node = $("#roles").children().find(".node input").eq(i).val();
         let nodeId = data.getEntityIdByValue(node, instance_model);
         if (nodeId == undefined) {
-            let tag = $("#roles").children().find(".tag").eq(i).attr("value");
-            $("#modelAddEntity .modal-body").children().remove();
-            let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-            html += '<h4>承担者"'+node+'"不存在</h4>';
-            html += '<br/>';
-            html += '<p>是否自动创建实体'+node+'（类型：'+ tag +'）</p>';
-            html += '<p>并在实体创建后继续尝试当前创建关系</p>';
-            html += '<span style="display: none;"><input class="type-input" type="text" value='+tag+'><input class="value-input" type="text" value='+node+'></span>';
-
-            $("#modelAddEntity .modal-body").append(html)
-
-            $("#modelAddEntity").modal("show");
-            return;
+            notExistArray.push({node:node,tag:$("#roles").children().find(".tag").eq(i).attr("value")})
         }
         //加入队列
         roles.push({
@@ -410,6 +379,27 @@ detailObj.prototype.relationReviseSubmit = function(item) {
             node: node,
             nodeId:nodeId
         })
+    }
+
+    if(notExistArray.length>0){
+        $("#modelAddEntity .modal-body").children().remove();
+        let string="";
+        let span="";
+        for(let i=0;i<notExistArray.length;i++){
+            string += '<p>实体'+ notExistArray[i].node+'（类型：'+ notExistArray[i].tag +'）</p>';
+            span += '<span style="display: none;"><input class="type-input" type="text" value='+notExistArray[i].tag+'><input class="value-input" type="text" value='+notExistArray[i].node+'></span>';
+        }
+        let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+        html += '<h4>以下实体尚未创建</h4>';
+        html += '<br/>';
+        html += string
+        html += '<br/>';
+        html += '<h5>是否自动创建实体，并完成关系的创建</h5>';
+        html += span
+
+        $("#modelAddEntity .modal-body").append(html)
+        $("#modelAddEntity").modal("show");
+        return;
     }
 
     //数据有效性检测

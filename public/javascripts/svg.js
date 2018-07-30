@@ -189,6 +189,18 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
         fillColor = "#eee"
         data["dataType"] = node[id].dataType;
     }
+
+    if(isColorful){//采用network中的配色
+        if (node[id].dataType) {
+            if(network.network.groups.groups[data["tags"][0]] != undefined){
+                fillColor = network.network.groups.groups[data["tags"][0]].color.background
+            }else{
+                //fillColor = network.network.groups.groups["__relation"].color.background
+                fillColor = "#D2E5FF"
+            }
+        }
+    }
+
     //添加图元
     this.svg
         .append("g")
@@ -272,10 +284,10 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
 }
 
 svgObj.prototype.drawEntityNode = function(centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false){
-    drawNode(centX, centY, r, node, "entity", isCenter = false, isCentralized = false, isRecommendation = false);
+    this.drawNode(centX, centY, r, node, "entity", isCenter = false, isCentralized = false, isRecommendation = false);
 }
 svgObj.prototype.drawRelationNode = function(centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false){
-    drawNode(centX, centY, r, node, "relation", isCenter = false, isCentralized = false, isRecommendation = false);
+    this.drawNode(centX, centY, r, node, "relation", isCenter = false, isCentralized = false, isRecommendation = false);
 }
 
 //复合操作
@@ -360,7 +372,7 @@ svgObj.prototype.getEntity = function(id, model = instance_model) {
     entity.centerNode[id] = {
         "id":id,
         "value": model.nodes[id].value,
-        "tages": model.nodes[id].tags,
+        "tags": model.nodes[id].tags,
         "dataType": model.nodes[id].dataType
     }
     //处理邻接信息
