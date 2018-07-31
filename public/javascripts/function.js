@@ -28,7 +28,9 @@ $(function () {
             $("svg.local").hide()
             network.setData();
             $("div.global").show();
-            detail.drawIndex();
+            let item = $(index).find(".active");
+            let id = $(item).children(".nodeId").attr("value");
+            detail.drawIndex(instance_model,true,id);
         }else{
             //局部图谱
             $("div.global").hide()

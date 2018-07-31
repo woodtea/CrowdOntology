@@ -1,7 +1,7 @@
 function detailObj(){}
 
 //三个模块
-detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true) {
+detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true, nodeId) {
 
     if(showIndex){
         this.rightColumnShow(index);
@@ -40,6 +40,8 @@ detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true)
     $(index).append(this.generateEntityPlusButton());
     let array = getIndexArray(instance_model);
     setIndexTypeahead(array);
+
+    $(".nodeId[value^='"+nodeId+"']").parent().addClass("active");
 }
 
 detailObj.prototype.drawAttributes = function(id) {
