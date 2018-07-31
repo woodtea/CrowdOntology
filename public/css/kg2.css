@@ -8,9 +8,14 @@
     margin-right: 10px;
     margin-left: -20px;
 }
+.head.container{
+    min-width: 1200px;
+    width: calc(100% - 200px);
+}
 
 .body.container {
-    width: 1200px;
+    min-width: 1200px;
+    width: calc(100% - 200px);
 }
 
 .panel.panel-default .list-group{
@@ -45,18 +50,18 @@
 }
 
 .index.list-group{
-    border:1px dashed;
+    border:1px solid;
     height:605px;
 }
 
 .properties.list-group{
-    border:1px dashed;
+    border:1px solid;
     height:605px;
     display:none
 }
 
 .properties-revise.list-group{
-    border:1px dashed;
+    border:1px solid;
     height:605px;
     display:none
 }
@@ -78,7 +83,7 @@ div.global{
 
 svg.local{
     width: 868px;
-    height: 535px;
+    height: 540px;
 }
 
 #modelSearch .modal-footer {

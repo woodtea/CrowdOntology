@@ -79,5 +79,12 @@
             alert("为保证用户体验，请使用最新版本的Chrome浏览器")
         }
     }
+    window.onresize = function () {
+        let width = $(window).width();
+        if(width > 1400){
+            $(".head.container").width(width-200);
+            $(".body.container").width(width-200);
+        }
+    }
 </script>
 </html>

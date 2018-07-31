@@ -1,3 +1,4 @@
+
 //config
 var user = $(".glyphicon-user").parent().text().slice(1);
 var project =  $("#project").text();

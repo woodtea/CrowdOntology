@@ -266,10 +266,12 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
     if (isCenter) {
         this.svg.select("[id='" + data.id+"']")
             .classed("center", true);
+        /*
         this.svg.select("[id='" + data.id+"']")
             .select("circle")
             .attr("fill", "#F8F8F8")
             .attr("stroke", "#00008B");
+        */
     }
     //以Entity方式显示时作为中心，用于判断是否可以进行推荐（区别于Relation下isCenter存在多个）
     if (isCentralized) {

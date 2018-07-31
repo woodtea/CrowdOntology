@@ -32,7 +32,8 @@ $(function () {
         }else{
             //局部图谱
             $("div.global").hide()
-            $("svg.local").show()
+            //$("svg.local").show()
+            $("svg.local").css("display","block");
         }
     })
 
