@@ -1,35 +1,37 @@
 <!--div class="row search-row" style="padding:10px"></div-->
 <div class="row graph-row">
-  <div class="col-xs-9 middle-content" style="border:1px solid;" >
-    <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
-      <div class="col-xs-3">
-        <div class="btn-group workspace" role="group" aria-label="...">
-          <input type="checkbox" data-toggle="toggle"
-                 data-on="局部图谱" data-off="全局图谱"
-                 data-onstyle="default">
-          <!--button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalNetwork">全局图谱</button-->
+  <div class="col-xs-9" >
+    <div class="middle-content" style="border:1px solid;">
+      <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
+        <div class="col-xs-3">
+          <div class="btn-group workspace" role="group" aria-label="...">
+            <input type="checkbox" data-toggle="toggle"
+                   data-on="局部图谱" data-off="全局图谱"
+                   data-onstyle="default">
+            <!--button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalNetwork">全局图谱</button-->
+          </div>
+        </div>
+        <div class="col-xs-6 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
+        <div class="col-xs-3">
+          <div class="input-group" style="margin:auto;">
+            <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id="stigmod-search-left-btn" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
+                <button class="btn btn-default" type="button" id="stigmod-add-left-btn" data-popover="popover"><span class="fa fa-plus" aria-hidden="true"></span></button>
+                <!--button class="btn btn-default" type="button" id="stigmod-search-left-btn" data-tooltip="tooltip" data-placement="top" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
+                <button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="实体新建" content='123'><span class="fa fa-plus" aria-hidden="true" type="class"></span></button>
+                <!--div class="btn-group">
+                  <button type="button" class="btn btn-default" aria-label="Index" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" data-tooltip="tooltip" data-placement="top" title="实体索引"><span class="glyphicon glyphicon-list"></span></button>
+                  <ul class="dropdown-menu index" style="max-height:320px;overflow:auto;"></ul>
+                </div-->
+            </span>
+          </div>
         </div>
       </div>
-      <div class="col-xs-6 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
-      <div class="col-xs-3">
-        <div class="input-group" style="margin:auto;">
-          <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
-          <span class="input-group-btn">
-              <button class="btn btn-default" type="button" id="stigmod-search-left-btn" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
-              <button class="btn btn-default" type="button" id="stigmod-add-left-btn" data-popover="popover"><span class="fa fa-plus" aria-hidden="true"></span></button>
-              <!--button class="btn btn-default" type="button" id="stigmod-search-left-btn" data-tooltip="tooltip" data-placement="top" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
-              <button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="实体新建" content='123'><span class="fa fa-plus" aria-hidden="true" type="class"></span></button>
-              <!--div class="btn-group">
-                <button type="button" class="btn btn-default" aria-label="Index" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" data-tooltip="tooltip" data-placement="top" title="实体索引"><span class="glyphicon glyphicon-list"></span></button>
-                <ul class="dropdown-menu index" style="max-height:320px;overflow:auto;"></ul>
-              </div-->
-          </span>
-        </div>
-      </div>
+      <hr style='margin:8px'>
+      <svg class="local" display="none" style="margin: auto"></svg>
+      <div class="global" style="margin: auto"></div>
     </div>
-    <hr style='margin:8px'>
-    <svg class="local" display="none" style="margin: auto"></svg>
-    <div class="global" style="margin: auto"></div>
   </div>
   <div class="col-xs-3" style="text-align:center;">
     <div class="index list-group">
