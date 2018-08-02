@@ -28,11 +28,19 @@ function svgObj(svg=""){
     }
 
     //this.initSVG();
-
+    /*
     this.index = $("body .graph-row .index");
     this.properties = $("body .graph-row .properties");
     this.propertiesRevise = $("body .graph-row .properties-revise");
+    */
 
+    this.rcmd = {
+        isRcmd: false,      //true时表示要处理rcmd
+        drawRcmd: false,    //true时表示当前绘制的是rcmd
+        tmpLen: 0,          //当前图谱中，节点连接关系的个数
+        rcmdLen: 0,         //推荐中，节点连接关系的个数
+        wholeLen: 0,        //=tmpLen+rcmdLen
+    }
 }
 
 svgObj.prototype.initSVG = function(){
@@ -61,8 +69,9 @@ svgObj.prototype.initSVG = function(){
 
 }
 
-svgObj.prototype.drawEntity = function(id, model = instance_model) {
-    let entity = this.getEntity(id, model);
+svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
+
+    let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
 
     this.centerNode = {
@@ -72,31 +81,81 @@ svgObj.prototype.drawEntity = function(id, model = instance_model) {
     }
 
     this.svg.selectAll("*").remove()
+
     this.drawCircle(this.width / 2, this.height / 2, this.R);
     this.drawCircle(this.width / 2, this.height / 2, this.R2);
 
     this.drawNode(this.width / 2, this.height / 2, this.r, entity.centerNode, "entity", true, true);
-    this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity.relations);
+    this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity.relations, 0, tmpModel);
     this.svgBringAllToFront();
+
     return true;
 }
 
-svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0){
-    let N = getJsonLength(relations);
-    let i = 0;
-    for (let key in relations) {
-        this.drawRelation(centX,centY,r,R,relations[key],startAngle,i,N)
-        i++;
+svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
+
+    let entity1 = this.getEntity(id, rcmdModel);
+    if (entity1 == undefined) return false;  //如果不是实体的话
+
+    let entity2 = this.getEntity(id, tmpModel);
+    if (entity2 == undefined) return false;  //如果不是实体的话
+
+    let rcmdLen = getJsonLength(entity1.relations);
+    let tmpLen = getJsonLength(entity2.relations);
+
+    this.rcmd = {
+        isRcmd: true,
+        drawRcmd: false,
+        tmpLen: tmpLen,
+        rcmdLen: rcmdLen,
+        wholeLen: tmpLen+rcmdLen,
     }
-/*
-    let nodes = this.getNodes(centX, centY, R, startAngle, relations);
-    for (let node of nodes) {
-        this.drawNode(node.cx, node.cy, r, node.data, "relation");
+
+    this.centerNode = {
+        id: id,
+        x: this.width/2,
+        y: this.height/2
     }
-*/
+
+    this.svg.selectAll("*").remove()
+
+    this.drawMask(this.width / 2, this.height / 2);
+
+    this.drawCircle(this.width / 2, this.height / 2, this.R);
+    this.drawCircle(this.width / 2, this.height / 2, this.R2);
+
+    this.drawNode(this.width / 2, this.height / 2, this.r, entity1.centerNode, "entity", true, false);
+    this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity2.relations, 0, tmpModel);
+
+    this.rcmd.drawRcmd = true;
+    this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity1.relations, 0, rcmdModel);
+
+    this.svgBringAllToFront();
+
+    this.rcmdDestroy();
+
+    return true;
 }
 
-svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngle, iR, N){
+svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model){
+    let N=0, i=0;
+    if(this.rcmd.isRcmd == false){
+        N = getJsonLength(relations);
+    }else{
+        N = this.rcmd.wholeLen;
+    }
+
+    if(this.rcmd.drawRcmd == true){
+        i = this.rcmd.wholeLen - this.rcmd.rcmdLen;
+    }
+
+    for (let key in relations) {
+        this.drawRelation(centX,centY,r,R,relations[key],startAngle,i,N,tmpModel)
+        i++;
+    }
+}
+
+svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngle, iR, N, tmpModel = instance_model){
     //暂时没有处理一个实体承担多个角色的问题
     let rAngle = 2 * Math.PI * iR / N + startAngle;
     let rX = centX + R * Math.cos(rAngle);
@@ -138,7 +197,7 @@ svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngl
             node.type = "relation";
             nodes.push(node);
         }else{
-            nData = instance_model.nodes[relation.roles[i].node_id];
+            nData = tmpModel.nodes[relation.roles[i].node_id];
             nData.id = relation.roles[i].node_id+"-"+relation.id;
             nData.type = "entity";
 
@@ -152,8 +211,13 @@ svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngl
         this.drawPath(paths[i],rX, rY);
     }
 
+    let isRecommendation = false;
+    if(this.rcmd.drawRcmd == true){
+        isRecommendation = true;
+    }
+
     for(let i in nodes){
-        this.drawNode(nodes[i].cx, nodes[i].cy, r, nodes[i].data, nodes[i].type);
+        this.drawNode(nodes[i].cx, nodes[i].cy, r, nodes[i].data, nodes[i].type,false,false,isRecommendation);
     }
 
     return true;
@@ -506,7 +570,7 @@ svgObj.prototype.getPath = function(centX, centY, R, r, angle, data) {
     return path;
 }
 
-svgObj.prototype.drawPath = function(path,centX=width/2, centY=height/2,textAnchor="middle",startOffset="50%") {
+svgObj.prototype.drawPath = function(path,centX=this.width/2, centY=this.height/2,textAnchor="middle",startOffset="50%") {
     this.svg
         .append("path")
         .style("fill", "none")
@@ -635,4 +699,65 @@ svgObj.prototype.transAnimation = function(centerID,neighbourID,relationId,model
         detail.drawRelations(centerID);
     }
     return true;
+}
+
+svgObj.prototype.rcmdDestroy = function(){
+    this.rcmd = {
+        isRcmd: false,      //true时表示要处理rcmd
+        drawRcmd: false,    //true时表示当前绘制的是rcmd
+        tmpLen: 0,          //当前图谱中，节点连接关系的个数
+        rcmdLen: 0,         //推荐中，节点连接关系的个数
+        wholeLen: 0,        //=tmpLen+rcmdLen
+    }
+}
+
+svgObj.prototype.drawMask = function(centX=this.width/2, centY=this.height/2){
+
+
+    let that = this;
+    let startAngle,stopAngle;
+
+    if(this.rcmd.tmpLen == 0){
+        this.rcmd.tmpLen = 0.0001;
+    }
+
+    if(this.rcmd.wholeLen == 0) {
+        startAngle = 0;
+        stopAngle = 2 * Math.PI;
+    }else{
+        startAngle = 2 * Math.PI * (this.rcmd.tmpLen - 0.5) / this.rcmd.wholeLen;
+        stopAngle = 2 * Math.PI * (this.rcmd.wholeLen - 0.5) / this.rcmd.wholeLen;
+    }
+
+
+    let startX = centX + this.R2 * Math.cos(startAngle);
+    let startY = centY + this.R2 * Math.sin(startAngle);
+
+    let stopX = centX + this.R2 * Math.cos(stopAngle);
+    let stopY = centY + this.R2 * Math.sin(stopAngle);
+
+    let rotation = 0;
+    let isDrawLarge = 0;
+    let isClockWise = 1;
+
+    if((stopAngle-startAngle)>Math.PI){
+        isDrawLarge = 1;
+    }
+
+
+    this.svg
+        //.append("mask")
+        //.attr("id", "123")
+        .append("path")
+        .classed("rcmdMask", true)
+        .style("fill", "#333")
+        .style("opacity",0.2)
+        .attr("d", function (d) {
+            let str = "M" + startX + "," + startY +
+                "A" + that.R2 + " " + that.R2 + "," + rotation + "," + isDrawLarge + "," + isClockWise + "," + stopX +  " " + stopY +
+                "L" + centX + "," + centY +
+                "Z";
+            return str;
+        });
+
 }

@@ -344,19 +344,31 @@ ioObj.prototype.io_create_insModel_relation_done = function(msg){
 
         //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
         if(!prepareNewEntity(instance_model,!svgPending,isGetRcmd)){
+            console.log(svgPending)
             let notRecommendation = $("g.center.isCentralized").attr("id");
             if(svgPending > 0){
                 svgPending--;
                 if(svgPending == 0){
-                    $('.properties-revise .button-ok').trigger("click");
+                    console.log(isGetRcmd);
+                    if(isGetRcmd){
+                        console.log("XXOONM");
+                        isGetRcmd = false;
+                        svg.svg.select("g.entity.center").classed("isCentralized", true)
+                        $("g.entity.center").trigger("dblclick");
+                    }else{
+                        console.log("createRelation")
+                        $('.properties-revise .button-ok').trigger("click");
+                    }
                 }
                 return;
             }
             if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
+                console.log("x1")
                 $("#"+centerId).click();
                 network.setData();
                 return;
             }else{
+                console.log("x2");
                 $("#"+centerId).click();
                 network.setData();
                 //transAnimation(centerId,nodeId,relationId,instance_model);
@@ -396,6 +408,8 @@ ioObj.prototype.io_recommend_insModel_node_done = function(msg){
             "nodes": msg.nodes,
             "relations": msg.relations
         }
+        console.log(msg);
+        console.log(recommend_model);
 
         let centerId = $("g.center").attr("id");
         recommend_model.nodes[centerId] = instance_model.nodes[centerId];
@@ -404,7 +418,11 @@ ioObj.prototype.io_recommend_insModel_node_done = function(msg){
 
         //let centerId = $("g.center").attr("id");
         let entity = svg.getEntity(centerId,recommend_model);
-        drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
+        console.log(entity);
+
+        //svg.drawEntity(centerId,recommend_model);
+        svg.drawRecommendation(centerId,recommend_model,instance_model)
+        //drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
         //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
         return;
     }

@@ -8,6 +8,11 @@ var instance_model = {nodes:{}, relations:{}}
 var model = {nodes:{}, relations:{}}
 var recommend_model = {nodes:{}, relations:{}}
 var recommend_index = {}
+var rcmd_pending = {
+    "entities":[],
+    "nodes":{},
+    "relations":{}
+}
 
 var symbolArray  = [];
 var keyValueArray = [];

@@ -14,7 +14,41 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
     // "content":'<div class="btn-group" data-toggle="buttons"><label class="btn btn-primary active"> <input type="checkbox" autocomplete="off" checked>实体</label><label class="btn btn-primary"><input type="checkbox" autocomplete="off">关系</label></div>'
 })
 
+
+
 $('[data-popover="popover"]').popover()
+
+/*
+$(document).on("mouseover", 'li', function () {
+    console.log($(this));
+    $(this).popover({
+        "animation":true,
+        "title":"详情",
+        "trigger":"hover",
+        "placement":"left",
+        "container": 'body',
+        "html":true,
+        "content":'<p>test1234</p>'
+    })
+
+    $(this).popover("show")
+})
+*/
+
+$(document).on("mouseover", '.rcmdMask', function () {
+    console.log($(this));
+    $(this).popover({
+        "animation":true,
+        "title":"推荐信息",
+        "trigger":"hover",
+        "placement":"left",
+        "container": 'body',
+        "html":true,
+        "content":'<p>(双击元素后，添加至当前图谱)</p>'
+    })
+
+    $(this).popover("show")
+})
 
 $(function () {
     $(document).on("click", '.popover-content .add-class', function () {

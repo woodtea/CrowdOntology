@@ -17,8 +17,8 @@ $(function () {
             svg.drawEntity(nodeId, instance_model); //画出中心区域
             $("#" + nodeId).click();    //点击中心节点
         } else {
-            $("#modelSearch .modal-body h5").text('未找到"' + value + '"，' + '是否创建？');
-            $("#modelSearch").modal("show");
+            $("#modalSearch .modal-body h5").text('未找到"' + value + '"，' + '是否创建？');
+            $("#modalSearch").modal("show");
         }
     })
 
@@ -40,21 +40,34 @@ $(function () {
     })
 
 
-    $(document).on("click", '#modelSearch .btn-primary', function () {
-        $("#modelSearch").modal("hide");
+    $(document).on("click", '#modalSearch .btn-primary', function () {
+        $("#modalSearch").modal("hide");
         //$(".fa-plus[type='class']").trigger("click");
         detail.classRevise(this, "add");
         $("#class-revise .value-input").val($("#stigmod-search-left-input").val());
     })
 
-    $(document).on("click", '#modelAddEntity .btn-primary', function () {
+    $(document).on("click", '#modalAddEntity .btn-primary', function () {
         //isRefreshSVG = false;
-        let item = $("#modelAddEntity .modal-body span");
+        let item = $("#modalAddEntity .modal-body span");
         svgPending = item.length-1;//第一个span是x号
         for(let i=1;i<item.length;i++){
             detail.classReviseSubmit(item[i],i);
         }
-        $("#modelAddEntity").modal('hide')
+        $("#modalAddEntity").modal('hide')
+    })
+
+    $(document).on("click", '#modalCiteRcmd .btn-primary', function () {
+        $("#modalCiteRcmd").modal('hide')
+        for(let i in rcmd_pending.entities){
+            connection.io_create_insModel_entity(rcmd_pending.entities[i]);
+        }
+        if(getJsonLength(rcmd_pending.nodes)>0){
+            connection.io_create_insModel_node(rcmd_pending.nodes)
+        }
+        if(getJsonLength(rcmd_pending.relations)>0){
+            connection.io_create_insModel_relation(rcmd_pending.relations);
+        }
     })
 
     /*
@@ -77,7 +90,7 @@ $(function () {
         if (d3.select(this).classed("isRecommendation") == true) {
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
-                alert("双击节点可以直接节点与对应关系");
+                //alert("双击节点可以直接节点与对应关系");
             });
         } else {
             clickTimeout.set(function () {
@@ -146,51 +159,13 @@ $(function () {
     //双击节点
     $(document).on("dblclick", 'g', function () {
         if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
-            isGetRcmd = true;
             clickTimeout.clear();
-            //引用推荐节点
-            let nodeId = $(this).attr("id");
 
-            if (instance_model["nodes"][nodeId] == undefined) {   //不存在节点的话创建
+            let id = $(this).attr("id");
+            let ids = id.split("-");
+            let relationId = ids[ids.length-1];
 
-                if (data.isEntity(nodeId, recommend_model)) {//是实体节点，需要创建3重信息
-
-                    let value = recommend_model["nodes"][nodeId].value
-                    let entity = {
-                        tags: recommend_model["nodes"][nodeId].tags,
-                        value: value,
-                        nodeId: nodeId,
-                        valueId: generateFrontNodeID(value, "v"),
-                        relationId: generateFrontRelationID()
-                    }
-                    connection.io_create_insModel_entity(entity);
-
-                } else {//不是实体节点，需要创建节点信息
-                    let value = recommend_model["nodes"][nodeId].value
-                    let nodes = {};
-                    let nodeId = generateFrontNodeID(value);
-                    nodes[nodeId] = {
-                        "dataType": recommend_model["nodes"][nodeId].tags,
-                        "value": value
-                    }
-                    connection.io_create_insModel_node(nodes)
-                }
-            }
-            //创建关系
-            let centerId = $("g.center").attr("id");
-            let relationsArray = getRelations(centerId, nodeId, recommend_model);
-
-            let relations;
-            for (let n in relationsArray) {
-                let rcmdR = recommend_model["relations"][relationsArray[n]];
-                relations = {};
-                relations[relationsArray[n]] = {
-                    roles: rcmdR.roles,
-                    tag: rcmdR.tag,
-                    type: rcmdR.type
-                };
-                connection.io_create_insModel_relation(relations);
-            }
+            detail.citeRecommendation(relationId);
         } else {
             if (d3.select(this).classed("isCentralized") == false) {
                 return;
@@ -539,6 +514,7 @@ function hash(input){
 }
 
 function generateFrontRelationID(shift=0) {
+    //好像并不能完全解决问题
     let n = getJsonLength(instance_model.relations)+shift;
     let relationId = "front_r" + n;
 
@@ -775,10 +751,6 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
             $("#" + centerNode).delay("500").trigger("dblclick");
         }
         return true;
-    }
-    if(getRcmd){
-        isGetRcmd = false;
-        //$("#" + centerNode).delay("500").trigger("dblclick");
     }
     return false;
 }
