@@ -351,24 +351,20 @@ ioObj.prototype.io_create_insModel_relation_done = function(msg){
                 if(svgPending == 0){
                     console.log(isGetRcmd);
                     if(isGetRcmd){
-                        console.log("XXOONM");
                         isGetRcmd = false;
                         svg.svg.select("g.entity.center").classed("isCentralized", true)
                         $("g.entity.center").trigger("dblclick");
                     }else{
-                        console.log("createRelation")
                         $('.properties-revise .button-ok').trigger("click");
                     }
                 }
                 return;
             }
             if(!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
-                console.log("x1")
                 $("#"+centerId).click();
                 network.setData();
                 return;
             }else{
-                console.log("x2");
                 $("#"+centerId).click();
                 network.setData();
                 //transAnimation(centerId,nodeId,relationId,instance_model);
@@ -413,6 +409,8 @@ ioObj.prototype.io_recommend_insModel_node_done = function(msg){
 
         let centerId = $("g.center").attr("id");
         recommend_model.nodes[centerId] = instance_model.nodes[centerId];
+
+        data.completeRcmdModel(recommend_model);
 
         prepareNewEntity(recommend_model,false);
 

@@ -162,6 +162,18 @@ modelObj.prototype.removeNodeInRecommendIndex = function(type,value){
     return;
 }
 
+modelObj.prototype.completeRcmdModel = function (rcmdModel=recommend_model,tmpModel=instance_model) {
+    for(let id in rcmdModel.nodes){
+        if(rcmdModel.nodes[id].value ==""){
+            if(tmpModel.nodes[id]!=undefined){
+                rcmdModel.nodes[id].value = tmpModel.nodes[id].value;
+                rcmdModel.nodes[id].dataType = tmpModel.nodes[id].dataType;
+            }
+        }
+    }
+
+}
+
 modelObj.prototype.isCreationIllegal = function (type,tag,value,roles){
     let hasError;
     let err="";
