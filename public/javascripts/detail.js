@@ -19,7 +19,7 @@ detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true,
         }
     }
 
-    html = "<div class='index-content' style='height: 490px;overflow: auto'></div>";
+    html = "<div class='index-content'></div>";
     $(index).append(html);
     let indexContent = $(index).children(".index-content");
 

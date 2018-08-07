@@ -54,6 +54,11 @@
     height:605px;
 }
 
+.index .index-content{
+    height: calc(100% - 105px);
+    overflow: auto;
+}
+
 .properties.list-group{
     border:1px solid;
     height:605px;
@@ -78,12 +83,16 @@
 
 div.global{
     width: 100%;
-    height: 540px;
+    height: calc(100% - 70px);
+    min-width: 868px;
+    min-height: 540px;
 }
 
 svg.local{
-    width: 868px;
-    height: 540px;
+    width: 100%;
+    height: calc(100% - 70px);
+    min-width: 868px;
+    min-height: 540px;
 }
 
 #modalSearch .modal-footer {

@@ -78,13 +78,27 @@
         if(navigator.appName != "Netscape"||navigator.userAgent.indexOf("Chrome") == -1 ){
             alert("为保证用户体验，请使用最新版本的Chrome浏览器")
         }
+        windowResize();
     }
     window.onresize = function () {
+        windowResize();
+    }
+    function windowResize() {
         let width = $(window).width();
+        let height = $(window).height();
+
+        /* css中如此处理
         if(width > 1400){
             $(".head.container").width(width-200);
             $(".body.container").width(width-200);
         }
+        */
+        if(height>800){ //height没有对窗体的100%
+            $(".body .middle-content").height(height-200);
+            $(".body .right-content").height(height-200);
+            $(".body .right-content").children().height(height-200-1);
+        }
+        if(width > 1400||height>800) svg.setSize();
     }
 </script>
 </html>

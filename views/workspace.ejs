@@ -5,7 +5,7 @@
       <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
         <div class="col-xs-3">
           <div class="btn-group workspace" role="group" aria-label="...">
-            <input type="checkbox" data-toggle="toggle"
+            <input type="checkbox" checked data-toggle="toggle"
                    data-on="局部图谱" data-off="全局图谱"
                    data-onstyle="default">
             <!--button type="button" class="btn btn-default" data-toggle="modal" data-target="#modalNetwork">全局图谱</button-->
@@ -29,11 +29,11 @@
         </div>
       </div>
       <hr style='margin:8px'>
-      <svg class="local" display="none" style="margin: auto"></svg>
-      <div class="global" style="margin: auto"></div>
+      <svg class="local" style="margin: auto;display:block"></svg>
+      <div class="global" style="margin: auto;display:none"></div>
     </div>
   </div>
-  <div class="col-xs-3" style="text-align:center;">
+  <div class="col-xs-3 right-content" style="text-align:center;">
     <div class="index list-group">
       <div class="row">
         <div class="col-xs-2"></div>
@@ -41,7 +41,7 @@
         <div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>
       </div>
       <hr class="stigmod-hr-narrow">
-      <div class='index-content' style='height: 490px;overflow: auto'></div>
+      <div class='index-content'></div>
       <div class="panel panel-default"><div class="panel-heading">
           <span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">
             <span class="fa fa-plus" type="class" style="z-index: 2"></span>
@@ -182,9 +182,5 @@
 
 
 <script language="javascript">
-    window.onbeforeunload = function() {
-        //let user = $(".glyphicon-user").parent().text();
-        //user = user.replace(/(^\s*)/g, "")
-        socketEmitArray('save model',data={"instance_model":instance_model,"user":user})
-    }
+    window.onbeforeunload = function() {}
 </script>

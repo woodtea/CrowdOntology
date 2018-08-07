@@ -280,6 +280,7 @@ ioObj.prototype.io_get_insModel_done = function(msg){
         prepareNewEntity();
         //prepareNewEntity(instance_model,false);
         //detail.drawIndex();
+        showGlogal();//不知道为什么，动态宽高后，直接显示network不正常。
         detail.rightColumnShow(index);
     }
 }
@@ -416,8 +417,6 @@ ioObj.prototype.io_recommend_insModel_node_done = function(msg){
 
         //let centerId = $("g.center").attr("id");
         let entity = svg.getEntity(centerId,recommend_model);
-        console.log(entity);
-
         //svg.drawEntity(centerId,recommend_model);
         svg.drawRecommendation(centerId,recommend_model,instance_model)
         //drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型

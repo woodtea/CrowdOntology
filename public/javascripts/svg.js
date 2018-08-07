@@ -5,34 +5,13 @@
 
 function svgObj(svg=""){
 
-    this.width = 870;
-    this.height = 550;
-    this.r = 30;
-    this.R = 4 * this.r; //5 * r;
-    this.R2 = 2 * this.R ;
-    /*
-    this.width = 1000,
-    this.height = 800;
-    this.r = 30;
-    this.R = 5 * r;
-    this.R2 = 2 * R;
-    */
-    this.zoomR = 0.75
-    this.zoomW = 1.25;
-    this.zoomH = 1.75;
-
     if(svg == ""){
         this.svg = d3.select("body .graph-row .middle-content svg")
     }else{
         this.svg = svg
     }
 
-    //this.initSVG();
-    /*
-    this.index = $("body .graph-row .index");
-    this.properties = $("body .graph-row .properties");
-    this.propertiesRevise = $("body .graph-row .properties-revise");
-    */
+    this.setSize();
 
     this.rcmd = {
         isRcmd: false,      //true时表示要处理rcmd
@@ -43,19 +22,8 @@ function svgObj(svg=""){
     }
 }
 
-svgObj.prototype.initSVG = function(){
-/* 不知道为什么无效
-    let tmp = this.svg;
-    tmp.style("width",this.width)
-    tmp.style("height",this.height)
+svgObj.prototype.initSVG = function(){//好像从来没用过
 
-    tmp = tmp.select(function(){return this.parentNode});
-    tmp.style("width",this.width)
-    tmp.style("height",this.height)
-
-    tmp = tmp.select(function(){return this.parentNode.parentNode.parentNode});
-    tmp.style("width",this.width)
-*/
     let tmp = $("#modalWorkspace svg");
     $(tmp).width(this.width);
     $(tmp).height(this.height);
@@ -67,6 +35,31 @@ svgObj.prototype.initSVG = function(){
     tmp = $(tmp).parent().parent();
     $(tmp).width(this.width+30);
 
+}
+
+svgObj.prototype.setSize = function () {
+
+    let tmp = this.svg._groups[0];
+
+    //this.width = 870;
+    //this.height = 550;
+
+    this.width = $(tmp).parent().width();//减去上檐
+    this.height = $(tmp).parent().height()-70;
+
+    this.ratio = 1;
+    if(this.height<this.width){
+        this.ratio =  1>this.height/600?1:this.height/600;
+    }
+
+    //this.r =  30;
+    this.r = this.ratio * 30;
+    this.R = 4 * this.r; //5 * r;
+    this.R2 = 2 * this.R ;
+
+    this.zoomR = 0.75
+    this.zoomW = 1.25;
+    this.zoomH = 1.75;
 }
 
 svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
