@@ -86,14 +86,14 @@ generatePoperContent = function (id,tmpModel=instance_model) {
     //drawAttributes
     content += generatePoperLine(tmpModel.nodes[id].dataType + " : " + tmpModel.nodes[id].value)//主属性
 
-    entity = data.getEntity(id);
+    entity = data.getEntity(id,tmpModel);
     let attributes = filterAttributes(entity.neighbours);
     attributes.forEach(function (attribute,index,array) {//其他属性
         content += generatePoperLine(attribute.type + " : " + attribute.value)
     })
 
     //drawRelations
-    entity = svg.getEntity(id);
+    entity = svg.getEntity(id,tmpModel);
     let relations = detail.filterRelations(entity.relations,id);
     let relationArray = [];
     for (let i in relations) {
