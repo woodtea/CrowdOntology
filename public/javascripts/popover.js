@@ -79,12 +79,12 @@ $(function () {
     })
 });
 
-generatePoperContent = function (id) {
+generatePoperContent = function (id,tmpModel=tmpModel) {
     let content = "";
     //drawTypes
-    content += generatePoperLine("实体 : " + instance_model.nodes[id].tags[0])
+    content += generatePoperLine("实体 : " + tmpModel.nodes[id].tags[0])
     //drawAttributes
-    content += generatePoperLine(instance_model.nodes[id].dataType + " : " + instance_model.nodes[id].value)//主属性
+    content += generatePoperLine(tmpModel.nodes[id].dataType + " : " + tmpModel.nodes[id].value)//主属性
 
     entity = data.getEntity(id);
     let attributes = filterAttributes(entity.neighbours);
