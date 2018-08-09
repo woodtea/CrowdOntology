@@ -1,5 +1,5 @@
 //Index
-function getIndexArray(tmpModel=instance_model){
+function getIndexArray(tmpModel = instance_model) {
     let indexArray = [];
     for (let id in tmpModel.nodes) {
         if (data.isEntity(id)) {
@@ -9,29 +9,29 @@ function getIndexArray(tmpModel=instance_model){
     return indexArray;
 }
 
-function setIndexTypeahead(array){
+function setIndexTypeahead(array) {
     $('#stigmod-search-left-input').typeahead({
         source: array,
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
         autoSelect: true,
-        items:8
+        items: 8
     });
 }
 
 //Entity
-function getEntityTypes(tmpModel=model){
+function getEntityTypes(tmpModel = model) {
     let array = [];
-    for(let key in tmpModel.nodes){
-        if(tmpModel.nodes[key].tag == "Entity"){
+    for (let key in tmpModel.nodes) {
+        if (tmpModel.nodes[key].tag == "Entity") {
             array.push(tmpModel.nodes[key].value);
         }
     }
     return array;
 }
 
-function setClassTypeTypeahead(array){
+function setClassTypeTypeahead(array) {
     $('#class-revise .type-input').typeahead({
         source: array,
         minLength: 0,
@@ -41,21 +41,21 @@ function setClassTypeTypeahead(array){
     });
 }
 
-function setClassValueTypeahead(){
+function setClassValueTypeahead() {
     $('#class-revise .value-input').typeahead({
-        source: function(querry,process){
+        source: function (querry, process) {
             let type = $('#class-revise .type-input').val();
             let array = [];
-            if(type == ""){
+            if (type == "") {
                 console.log("Alert: In ClassValueTypeahead, class type is \"\"");
-                for(let key in recommend_index){
+                for (let key in recommend_index) {
                     array.push(...recommend_index[key]);
                 }
             }
-            else if(recommend_index[type] == undefined) {
+            else if (recommend_index[type] == undefined) {
                 array = [];
-                console.log("Alert:recommend_index."+type+" is empty")
-            }else{
+                console.log("Alert:recommend_index." + type + " is empty")
+            } else {
                 array = recommend_index[type];
             }
             //if(array.length == 0) array = ["[==Not Found==]"];
@@ -66,31 +66,31 @@ function setClassValueTypeahead(){
         fitToElement: true,
         autoSelect: true
         /*
-        , afterSelect: function (item) {
-            //选择项之后的事件 ，item是当前选中的。
-            if(item == "[==Not Found==]") {
-                alert(item);
-                $('#class-revise .value-input').val("");
-            }
-        },
-        */
+         , afterSelect: function (item) {
+         //选择项之后的事件 ，item是当前选中的。
+         if(item == "[==Not Found==]") {
+         alert(item);
+         $('#class-revise .value-input').val("");
+         }
+         },
+         */
     });
 }
 
 //ttribute
-function getAttributeTypes(nodeId){
+function getAttributeTypes(nodeId) {
     let tmpAtrrArray = [];
     tmpAtrrArray.push(instance_model.nodes[nodeId].dataType);
     //keyValueArray
     let wholeAttrArray = [];
-    let tmpR,n,m;
+    let tmpR, n, m;
     //在instance_model中获取当前类型
-    for(let r in instance_model.relations){
+    for (let r in instance_model.relations) {
         tmpR = instance_model.relations[r];
-        for(n=0;n<tmpR.roles.length;n++){
-            if(tmpR.roles[n].node_id == nodeId) break;
+        for (n = 0; n < tmpR.roles.length; n++) {
+            if (tmpR.roles[n].node_id == nodeId) break;
         }
-        if(tmpR.roles[n] != undefined) {
+        if (tmpR.roles[n] != undefined) {
             tmpAtrrArray.push(tmpR.type);
         }
     }
@@ -99,35 +99,35 @@ function getAttributeTypes(nodeId){
     //找到entityId
     let tag = instance_model.nodes[nodeId].tags[0];
     let entityId;
-    for(entityId in model.nodes){
-        if(model.nodes[entityId].value == tag) break;
+    for (entityId in model.nodes) {
+        if (model.nodes[entityId].value == tag) break;
     }
 
     //在model中获取所有类型
-    for(let r in model.relations){
+    for (let r in model.relations) {
         tmpR = model.relations[r];
-        for(n=0;n<tmpR.roles.length;n++){
-            if(tmpR.roles[n].node_id == entityId) break;
+        for (n = 0; n < tmpR.roles.length; n++) {
+            if (tmpR.roles[n].node_id == entityId) break;
         }
-        if(tmpR.roles[n] != undefined) {
+        if (tmpR.roles[n] != undefined) {
             //先判断是否为attr
-            for(m=0;m<tmpR.roles.length;m++){
-                if(model.nodes[tmpR.roles[m].node_id].tag == "Symbol") break;
+            for (m = 0; m < tmpR.roles.length; m++) {
+                if (model.nodes[tmpR.roles[m].node_id].tag == "Symbol") break;
             }
             //是attr所以介入
-            if(tmpR.roles[m] != undefined) wholeAttrArray.push(tmpR.value);
+            if (tmpR.roles[m] != undefined) wholeAttrArray.push(tmpR.value);
         }
     }
     //求差集
     let array = [];
-    wholeAttrArray.forEach((a)=>{
-        let c = tmpAtrrArray.findIndex(b=>a == b);
+    wholeAttrArray.forEach((a) => {
+        let c = tmpAtrrArray.findIndex(b => a == b);
         if (c == -1) array.push(a);
     })
     return array;
 }
 
-function setAttributeTypeTypeahead(array){
+function setAttributeTypeTypeahead(array) {
     $('#attribute-revise .type-input').typeahead({
         source: array,
         minLength: 0,
@@ -137,64 +137,64 @@ function setAttributeTypeTypeahead(array){
     });
 }
 /*
-function setAttributeValueTypeahead(array){
-    $('#attribute-revise .value-input').typeahead({
-        source: array,
-        minLength: 0,
-        showHintOnFocus: true,
-        fitToElement: true,
-        autoSelect: true
-    });
-}
-*/
+ function setAttributeValueTypeahead(array){
+ $('#attribute-revise .value-input').typeahead({
+ source: array,
+ minLength: 0,
+ showHintOnFocus: true,
+ fitToElement: true,
+ autoSelect: true
+ });
+ }
+ */
 //Relation
-function getRelationTypes(nodeId){
+function getRelationTypes(nodeId) {
     let tmpArray = [];
     let wholeArray = [];
-    let tmpR,n,m;
-/*  relation可以重复，故将tmpArray设置为空
-    //在instance_model中获取当前类型
-    for(let r in instance_model.relations){
-        tmpR = instance_model.relations[r];
-        for(n=0;n<tmpR.roles.length;n++){
-            if(tmpR.roles[n].node_id == nodeId) break;
-        }
-        if(tmpR.roles[n] != undefined) tmpArray.push(tmpR.type);
-    }
-*/
+    let tmpR, n, m;
+    /*  relation可以重复，故将tmpArray设置为空
+     //在instance_model中获取当前类型
+     for(let r in instance_model.relations){
+     tmpR = instance_model.relations[r];
+     for(n=0;n<tmpR.roles.length;n++){
+     if(tmpR.roles[n].node_id == nodeId) break;
+     }
+     if(tmpR.roles[n] != undefined) tmpArray.push(tmpR.type);
+     }
+     */
     //找到entityId
     let tag = instance_model.nodes[nodeId].tags[0];
     let entityId;
-    for(entityId in model.nodes){
-        if(model.nodes[entityId].value == tag) break;
+    for (entityId in model.nodes) {
+        if (model.nodes[entityId].value == tag) break;
     }
 
     //在model中获取所有类型
-    for(let r in model.relations){
+    for (let r in model.relations) {
         tmpR = model.relations[r];
-        for(n=0;n<tmpR.roles.length;n++){
-            if(tmpR.roles[n].node_id == entityId) break;
+        for (n = 0; n < tmpR.roles.length; n++) {
+            if (tmpR.roles[n].node_id == entityId) break;
         }
-        if(tmpR.roles[n] != undefined) {
+        if (tmpR.roles[n] != undefined) {
             //先判断是否为relation
-            for(m=0;m<tmpR.roles.length;m++){
-                if(model.nodes[tmpR.roles[m].node_id].tag == "Symbol") break;
+            for (m = 0; m < tmpR.roles.length; m++) {
+                if (model.nodes[tmpR.roles[m].node_id].tag == "Symbol") break;
             }
             //是relation所以介入
-            if(tmpR.roles[m] == undefined) wholeArray.push(tmpR.value);
+            if (tmpR.roles[m] == undefined) wholeArray.push(tmpR.value);
         }
     }
     //求差集
     let array = [];
-    wholeArray.forEach((a)=>{
-        let c = tmpArray.findIndex(b=>a == b);
+    wholeArray.forEach((a) => {
+        let c = tmpArray.findIndex(b => a == b);
         if (c == -1) array.push(a);
     })
     return array;
 }
 
 
-function setRelationTypeTypeahead(array){
+function setRelationTypeTypeahead(array) {
     $('#relation-revise .type-input').typeahead({
         source: array,
         minLength: 0,
@@ -206,14 +206,14 @@ function setRelationTypeTypeahead(array){
 
 
 //
-function getRelationValues(nodeId){
+function getRelationValues(nodeId) {
     //给关系和类型吧
     let entities = {};
-    for(let key in instance_model.nodes){
+    for (let key in instance_model.nodes) {
         //if(key != nodeId){//关系的另一段可以是他本身
         let tmp = instance_model.nodes[key];
-        if(symbolArray.indexOf(tmp.tags[0])==-1) {
-            if(entities[tmp.tags[0]]==undefined) entities[tmp.tags[0]] = [];
+        if (symbolArray.indexOf(tmp.tags[0]) == -1) {
+            if (entities[tmp.tags[0]] == undefined) entities[tmp.tags[0]] = [];
             entities[tmp.tags[0]].push(tmp.value);
         }
         //}
@@ -222,43 +222,43 @@ function getRelationValues(nodeId){
 }
 
 /*
-function setRelationValueTypeahead(entities,nodeId){
-    $('#relation-revise .value-input').typeahead({
-        source: function(querry,process){
-            let type = $('#relation-revise .type-input').val();
-            type = getRoleUndertakerType(type,nodeId)[0];
-            let array = [];
-            if(type == ""){
-                console.log("Alert: In setRelationValueTypeahead, relation type is \"\"");
-                for(let key in entities){
-                    array.push(...entities[key]);
-                }
-            }
-            else if(entities[type] == undefined) {
-                array = [];
-                console.log("Alert:entities."+type+" is empty")
-            }else{
-                array = entities[type];
-            }
-            //if(array.length == 0) array = ["[==Not Found==]"];
-            return process(array);
-        },
-        minLength: 0,
-        showHintOnFocus: true,
-        fitToElement: true,
-        autoSelect: true
-    });
-}
-*/
+ function setRelationValueTypeahead(entities,nodeId){
+ $('#relation-revise .value-input').typeahead({
+ source: function(querry,process){
+ let type = $('#relation-revise .type-input').val();
+ type = getRoleUndertakerType(type,nodeId)[0];
+ let array = [];
+ if(type == ""){
+ console.log("Alert: In setRelationValueTypeahead, relation type is \"\"");
+ for(let key in entities){
+ array.push(...entities[key]);
+ }
+ }
+ else if(entities[type] == undefined) {
+ array = [];
+ console.log("Alert:entities."+type+" is empty")
+ }else{
+ array = entities[type];
+ }
+ //if(array.length == 0) array = ["[==Not Found==]"];
+ return process(array);
+ },
+ minLength: 0,
+ showHintOnFocus: true,
+ fitToElement: true,
+ autoSelect: true
+ });
+ }
+ */
 
-function setRelationRoleValueTypeahead(item,entities,nodeId){
+function setRelationRoleValueTypeahead(item, entities, nodeId) {
     $(item).find('input.typeahead').typeahead({
-        source: function(querry,process){
+        source: function (querry, process) {
             let type = $(item).find(".tag").attr("value");
-            if(entities[type] == undefined) {
+            if (entities[type] == undefined) {
                 array = [];
-                console.log("Alert:entities."+type+" is empty")
-            }else{
+                console.log("Alert:entities." + type + " is empty")
+            } else {
                 array = entities[type];
             }
             return process(array);
@@ -270,24 +270,24 @@ function setRelationRoleValueTypeahead(item,entities,nodeId){
     });
 }
 
-function getRoleUndertakerType(relationType,uId){
+function getRoleUndertakerType(relationType, uId) {
     let types = [];
     let uType = instance_model.nodes[uId].tags[0];
 
-    for(let r in model.relations){
+    for (let r in model.relations) {
         let countUId = 0;//UId在问题中出现的次数
-        if(model.relations[r].value == relationType){//找到对应关系
+        if (model.relations[r].value == relationType) {//找到对应关系
             let relation = model.relations[r];
-            for(let n in relation.roles){//遍历所有角色
+            for (let n in relation.roles) {//遍历所有角色
                 let tmpType = model.nodes[relation.roles[n].node_id].value;
-                if(tmpType == uType){
+                if (tmpType == uType) {
                     countUId++;
                     continue;
-                }else{
+                } else {
                     types.push(tmpType);
                 }
             }
-            if(countUId>1) types.push(uType);
+            if (countUId > 1) types.push(uType);
         }
     }
 

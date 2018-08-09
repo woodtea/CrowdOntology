@@ -1,21 +1,22 @@
-function detailObj(){}
+function detailObj() {
+}
 
 //三个模块
-detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true, nodeId) {
+detailObj.prototype.drawIndex = function (model = instance_model, showIndex = true, nodeId) {
 
-    if(showIndex){
+    if (showIndex) {
         this.rightColumnShow(index);
     }
 
     $(index).children().remove();
-    this.drawRightTitle(index,"索引",false,true);
+    this.drawRightTitle(index, "索引", false, true);
 
     let html = "";
     let entities = {};
     for (let id in model.nodes) {
         if (data.isEntity(id)) {
-            if(entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]]=[];
-            entities[model.nodes[id].tags[0]].push({value:model.nodes[id].value,id:id});
+            if (entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]] = [];
+            entities[model.nodes[id].tags[0]].push({value: model.nodes[id].value, id: id});
         }
     }
 
@@ -23,13 +24,13 @@ detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true,
     $(index).append(html);
     let indexContent = $(index).children(".index-content");
 
-    for(let tag in entities){
+    for (let tag in entities) {
 
-        html = this.generateCollapseTitle(tag,"type");
+        html = this.generateCollapseTitle(tag, "type");
         $(indexContent).append(html);
 
         html = "";
-        for(let n in entities[tag]){
+        for (let n in entities[tag]) {
             html += this.generateCollapseContent(tag, entities[tag][n].value, entities[tag][n].id);
         }
         $(indexContent).children().last().find(".list-group").append(html)
@@ -41,10 +42,10 @@ detailObj.prototype.drawIndex = function (model = instance_model,showIndex=true,
     let array = getIndexArray(instance_model);
     setIndexTypeahead(array);
 
-    $(".nodeId[value^='"+nodeId+"']").parent().addClass("active");
+    $(".nodeId[value^='" + nodeId + "']").parent().addClass("active");
 }
 
-detailObj.prototype.drawAttributes = function(id) {
+detailObj.prototype.drawAttributes = function (id) {
 
     let html = this.generateTitle("属性", "attribute");
     $(properties).append(html);
@@ -62,7 +63,7 @@ detailObj.prototype.drawAttributes = function(id) {
 
 }
 
-detailObj.prototype.drawRelations = function(id) {
+detailObj.prototype.drawRelations = function (id) {
 
     let html = this.generateTitle("关系", "relation");
     $(properties).append(html);
@@ -77,16 +78,16 @@ detailObj.prototype.drawRelations = function(id) {
     let relationArray = [];
     for (let i in relations) {
         let relation = relations[i];
-        if(relationArray.indexOf(relation.relationId)==-1){
+        if (relationArray.indexOf(relation.relationId) == -1) {
             relationArray.push(relation.relationId);
             html = this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
             $(properties).find("#relation").append(html);
-        }else{
+        } else {
             /*
-            let item = $("span.relationId[value^='"+relation.relationId+"']").parent();
-            let subItem = $(item).children(".value");
-            $(subItem).text($(subItem).text()+"、"+relation.value);
-            */
+             let item = $("span.relationId[value^='"+relation.relationId+"']").parent();
+             let subItem = $(item).children(".value");
+             $(subItem).text($(subItem).text()+"、"+relation.value);
+             */
         }
     }
     $(properties).find("#relation").append(this.generatePlusLogo("relation"));
@@ -94,7 +95,7 @@ detailObj.prototype.drawRelations = function(id) {
 }
 
 //模块内条目
-detailObj.prototype.drawTypes = function(id) {
+detailObj.prototype.drawTypes = function (id) {
     let html = this.generateTitle("类型", "type");
     $(properties).append(html);
 
@@ -112,7 +113,7 @@ detailObj.prototype.drawTypes = function(id) {
     $(properties).find("#type").children().last().find(".stigmod-hovershow-cont").hide();
 }
 
-detailObj.prototype.drawRoles = function(id) {
+detailObj.prototype.drawRoles = function (id) {
     let html = this.generateTitle("角色", "role");
     $(properties).append(html);
 
@@ -124,32 +125,32 @@ detailObj.prototype.drawRoles = function(id) {
     }
 }
 
-detailObj.prototype.drawPropertyTitle = function() {
-    this.drawRightTitle(properties,"详情",true,false);
+detailObj.prototype.drawPropertyTitle = function () {
+    this.drawRightTitle(properties, "详情", true, false);
 }
 
-detailObj.prototype.drawRightTitle = function(item,title,hasLeft=false,hasRight=false) {
+detailObj.prototype.drawRightTitle = function (item, title, hasLeft = false, hasRight = false) {
     $(item).append('<div class="row">' +
         '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-left button-left"></span--></div>' +
-        '<div class="col-xs-8"><h4>'+title+'</h4></div>' +
+        '<div class="col-xs-8"><h4>' + title + '</h4></div>' +
         '<div class="col-xs-2"><!--span class="glyphicon glyphicon-chevron-right button-right"></span--></div>' +
         '</div>' +
         '<hr class="stigmod-hr-narrow">');
-    if(hasLeft){
+    if (hasLeft) {
         $(item).find(".row").last().find(".col-xs-2").first().append('<span class="glyphicon glyphicon-chevron-left button-left"></span>')
     }
-    if(hasRight){
+    if (hasRight) {
         $(item).find(".row").last().find(".col-xs-2").last().append('<span class="glyphicon glyphicon-chevron-right button-right"></span>')
     }
 }
 
 //revise
-detailObj.prototype.classRevise = function(item, type = "add") {
+detailObj.prototype.classRevise = function (item, type = "add") {
 
     this.rightColumnShow(propertiesRevise);
 
     $(".properties-revise").children().remove();
-    this.drawRightTitle(propertiesRevise,"添加",false,false);
+    this.drawRightTitle(propertiesRevise, "添加", false, false);
 
     html = this.generateTitle("实体", "class-revise");
     $(".properties-revise").append(html);
@@ -169,11 +170,11 @@ detailObj.prototype.classRevise = function(item, type = "add") {
     setClassValueTypeahead();
 }
 
-detailObj.prototype.attributeRevise = function(item, type = "add") {
+detailObj.prototype.attributeRevise = function (item, type = "add") {
     $(".properties").hide();
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
-    this.drawRightTitle(propertiesRevise,"修改",false,false);
+    this.drawRightTitle(propertiesRevise, "修改", false, false);
 
     html = this.generateTitle("属性", "attribute-revise");
     $(".properties-revise").append(html);
@@ -185,22 +186,22 @@ detailObj.prototype.attributeRevise = function(item, type = "add") {
         '</div></a>';
     $(".properties-revise").find("#attribute-revise").append(html);
 
-    if(isRevise) $(".properties-revise").find("#attribute-revise .type-input").attr("disabled","disabled");
+    if (isRevise) $(".properties-revise").find("#attribute-revise .type-input").attr("disabled", "disabled");
     html = this.generateSubmitLogo(isRevise);
     $(".properties-revise").find("#attribute-revise").append(html);
 
     let centerId = $("g.center").attr("id");
     let array = getAttributeTypes(centerId);
-    if(array.length == 0 && !isRevise) alert("已建立所有属性");
+    if (array.length == 0 && !isRevise) alert("已建立所有属性");
     setAttributeTypeTypeahead(array);
 }
 
-detailObj.prototype.relationRevise = function(item, type = "add") {
+detailObj.prototype.relationRevise = function (item, type = "add") {
     //表头
     $(".properties-revise").children().remove();
     this.rightColumnShow(propertiesRevise);
 
-    this.drawRightTitle(propertiesRevise,"修改",false,false);
+    this.drawRightTitle(propertiesRevise, "修改", false, false);
 
     //中间区域修改
     html = this.generateTitle("关系", "relation-revise");
@@ -213,10 +214,10 @@ detailObj.prototype.relationRevise = function(item, type = "add") {
     $(".properties-revise").find("#relation-revise").append(html);
 
     //显示关系
-    html = '<div class="panel panel-default list-group-item" style="display: none">' +
+    html = '<div class="panel panel-default list-group-item showPopover" style="display: none">' +
         '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
         '<div class="stigmod-rcmd-title row">' +
-        '<span class="col-xs-4">' + "角色" +  '</span>' +
+        '<span class="col-xs-4">' + "角色" + '</span>' +
         '<span class="col-xs-8">' + "承担者" + '</span>' +
         '</div>' +
         '</div>' +
@@ -227,8 +228,8 @@ detailObj.prototype.relationRevise = function(item, type = "add") {
     $(".properties-revise").find("#relation-revise").append(html);
     $('#relation-revise [data-tooltip="tooltip"]').tooltip();
 
-    if(isRevise) {
-        $(".properties-revise").find("#relation-revise .type-input").attr("disabled","disabled");
+    if (isRevise) {
+        $(".properties-revise").find("#relation-revise .type-input").attr("disabled", "disabled");
         //$(".properties-revise").find("#relation-revise .list-group-item").show();
     }
 
@@ -242,11 +243,11 @@ detailObj.prototype.relationRevise = function(item, type = "add") {
     setRelationTypeTypeahead(array);
 }
 
-detailObj.prototype.rolseRevise = function(item, type = "add") {
+detailObj.prototype.rolseRevise = function (item, type = "add") {
     $(".properties").hide();
     $(".properties-revise").show();
     $(".properties-revise").children().remove();
-    this.drawRightTitle(propertiesRevise,"修改",false,false);
+    this.drawRightTitle(propertiesRevise, "修改", false, false);
 
     html = this.generateTitle("角色", "role-revise");
     $(".properties-revise").append(html);
@@ -264,13 +265,13 @@ detailObj.prototype.rolseRevise = function(item, type = "add") {
 }
 
 //submit
-detailObj.prototype.classReviseSubmit = function(item,candidate=0) {
+detailObj.prototype.classReviseSubmit = function (item, candidate = 0) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    let err = data.isCreationIllegal("class",type,value)
-    if(err != ""){
+    let err = data.isCreationIllegal("class", type, value)
+    if (err != "") {
         alert(err)
         return;
     }
@@ -278,21 +279,21 @@ detailObj.prototype.classReviseSubmit = function(item,candidate=0) {
     let entity = {
         tags: [type],
         value: value,
-        nodeId: generateFrontNodeID(value,"e"),
-        valueId: generateFrontNodeID(value,"v"),
+        nodeId: generateFrontNodeID(value, "e"),
+        valueId: generateFrontNodeID(value, "v"),
         relationId: generateFrontRelationID(candidate)
     }
 
     connection.io_create_insModel_entity(entity);
 }
 
-detailObj.prototype.attributeReviseSubmit = function(item) {
+detailObj.prototype.attributeReviseSubmit = function (item) {
 
     let type = $(item).find(".type-input").val();
     let value = $(item).find(".value-input").val();
 
-    let err = data.isCreationIllegal("attribute",type,value);
-    if(err != ""){
+    let err = data.isCreationIllegal("attribute", type, value);
+    if (err != "") {
         alert(err);
         return;
     }
@@ -334,7 +335,7 @@ detailObj.prototype.attributeReviseSubmit = function(item) {
     return;
 }
 
-detailObj.prototype.attributeRemoveSubmit = function(item) {
+detailObj.prototype.attributeRemoveSubmit = function (item) {
     let centerID = $(".graph .center").attr("id");
 
     //删除旧的关系
@@ -350,7 +351,7 @@ detailObj.prototype.attributeRemoveSubmit = function(item) {
     if (!(origNode == "" || origNode == undefined)) {
         alert("remove node!")
         connection.io_remove_insModel_node(origNode);
-    }else{//则当前节点为中心节点
+    } else {//则当前节点为中心节点
         alert("remove center node!")
         connection.io_remove_insModel_node($(".graph .center").attr("id"));
     }
@@ -359,7 +360,7 @@ detailObj.prototype.attributeRemoveSubmit = function(item) {
     //transAnimation(centerID,null,null,instance_model);
 }
 
-detailObj.prototype.relationReviseSubmit = function(item) {
+detailObj.prototype.relationReviseSubmit = function (item) {
 
     let type = $(item).find(".type-input").val();
     //let value = $(item).find(".value-input").val();
@@ -367,29 +368,29 @@ detailObj.prototype.relationReviseSubmit = function(item) {
     let length = $("#roles").children().length;
     let roles = [];
     let notExistArray = [];
-    for(let i=0;i<length;i++){
+    for (let i = 0; i < length; i++) {
         //判断承担者是否存在
         let node = $("#roles").children().find(".node input").eq(i).val();
         let nodeId = data.getEntityIdByValue(node, instance_model);
         if (nodeId == undefined) {
-            notExistArray.push({node:node,tag:$("#roles").children().find(".tag").eq(i).attr("value")})
+            notExistArray.push({node: node, tag: $("#roles").children().find(".tag").eq(i).attr("value")})
         }
         //加入队列
         roles.push({
             rolename: $("#roles").children().find(".role").eq(i).attr("value"),
             tag: $("#roles").children().find(".tag").eq(i).attr("value"),
             node: node,
-            nodeId:nodeId
+            nodeId: nodeId
         })
     }
 
-    if(notExistArray.length>0){
+    if (notExistArray.length > 0) {
         $("#modalAddEntity .modal-body").children().remove();
-        let string="";
-        let span="";
-        for(let i=0;i<notExistArray.length;i++){
-            string += '<p>实体'+ notExistArray[i].node+'（类型：'+ notExistArray[i].tag +'）</p>';
-            span += '<span style="display: none;"><input class="type-input" type="text" value='+notExistArray[i].tag+'><input class="value-input" type="text" value='+notExistArray[i].node+'></span>';
+        let string = "";
+        let span = "";
+        for (let i = 0; i < notExistArray.length; i++) {
+            string += '<p>实体' + notExistArray[i].node + '（类型：' + notExistArray[i].tag + '）</p>';
+            span += '<span style="display: none;"><input class="type-input" type="text" value=' + notExistArray[i].tag + '><input class="value-input" type="text" value=' + notExistArray[i].node + '></span>';
         }
         let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
         html += '<h4>以下实体尚未创建</h4>';
@@ -405,8 +406,8 @@ detailObj.prototype.relationReviseSubmit = function(item) {
     }
 
     //数据有效性检测
-    let err = data.isCreationIllegal("relation",type,"",roles);
-    if(err != ""){
+    let err = data.isCreationIllegal("relation", type, "", roles);
+    if (err != "") {
         alert(err);
         return;
     }
@@ -426,10 +427,10 @@ detailObj.prototype.relationReviseSubmit = function(item) {
         "type": type,
         "roles": []
     }
-    for(let i in roles){
+    for (let i in roles) {
         relations[relationId].roles[i] = {
             "rolename": roles[i].rolename,
-            "node_id":roles[i].nodeId
+            "node_id": roles[i].nodeId
         }
     }
 
@@ -437,7 +438,7 @@ detailObj.prototype.relationReviseSubmit = function(item) {
     return;
 }
 
-detailObj.prototype.relationRemoveSubmit = function(item){
+detailObj.prototype.relationRemoveSubmit = function (item) {
     let centerID = $(".graph .center").attr("id");
 
     //删除旧的关系
@@ -460,7 +461,7 @@ detailObj.prototype.relationRemoveSubmit = function(item){
 }
 
 //html
-detailObj.prototype.generateTitle = function(title, type) {
+detailObj.prototype.generateTitle = function (title, type) {
     let html = '<div class="panel panel-default">' +
         '<div class="panel-heading">' +
         '<div class="panel-title stigmod-rcmd-title">' + title + '</div>' +
@@ -472,7 +473,7 @@ detailObj.prototype.generateTitle = function(title, type) {
     return html
 }
 
-detailObj.prototype.generateXTitle = function(title, type) {
+detailObj.prototype.generateXTitle = function (title, type) {
     let html = '<div class="panel panel-default">' +
         '<div class="panel-heading">' +
         '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
@@ -484,9 +485,9 @@ detailObj.prototype.generateXTitle = function(title, type) {
 
 }
 
-detailObj.prototype.generateCollapseTitle = function(title, type) {
+detailObj.prototype.generateCollapseTitle = function (title, type) {
     let html = '<div class="panel panel-default">' +
-        '<div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#'+title+'" aria-expanded="true" aria-controls="collapseOne">' +
+        '<div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#' + title + '" aria-expanded="true" aria-controls="collapseOne">' +
         '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' + title + '</span>' +
         '<span class="pull-right glyphicon glyphicon-th-list" type="remove" style="z-index: 2;"></span>' +
         '</div>' +
@@ -495,7 +496,7 @@ detailObj.prototype.generateCollapseTitle = function(title, type) {
     return html
 }
 
-detailObj.prototype.generateEntityPlusButton = function() {
+detailObj.prototype.generateEntityPlusButton = function () {
     let html = '<div class="panel panel-default">' +
         '<div class="panel-heading">' +
         '<span class="panel-title stigmod-rcmd-title" style="margin-left: 30%;margin-right: 25%">' +
@@ -506,13 +507,13 @@ detailObj.prototype.generateEntityPlusButton = function() {
     return html
 }
 
-detailObj.prototype.generateCollapseContent = function(type, value, nodeId = "") {
-    if(type == undefined) type="姓名";
+detailObj.prototype.generateCollapseContent = function (type, value, nodeId = "") {
+    if (type == undefined) type = "姓名";
     //alert(nodeId);
     //alert(relationId);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig entity" style="text-align: center">' +
         '<span class="nodeId" value=' + nodeId + '></span>' +
-        '<span class="type" value=' + type + '></span>'  +
+        '<span class="type" value=' + type + '></span>' +
         '<span class="value" value=' + value + '>' + value + '</span>' +
         '<span class="pull-right stigmod-hovershow-cont">' +
         '<span class="fa fa-search-plus" style="z-index: 100"></span>' +
@@ -520,8 +521,8 @@ detailObj.prototype.generateCollapseContent = function(type, value, nodeId = "")
     return html;
 }
 
-detailObj.prototype.generateContent = function(type, value, nodeId = "", relationId = "") {
-    if(type == undefined) type="姓名";
+detailObj.prototype.generateContent = function (type, value, nodeId = "", relationId = "") {
+    if (type == undefined) type = "姓名";
     //alert(nodeId);
     //alert(relationId);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
@@ -535,64 +536,66 @@ detailObj.prototype.generateContent = function(type, value, nodeId = "", relatio
     return html;
 }
 
-detailObj.prototype.generatePlusLogo = function(type) {
+detailObj.prototype.generatePlusLogo = function (type) {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
         '<span class="fa fa-plus" type=' + type + '></span></a>';
     return html;
 }
 
-detailObj.prototype.generateSubmitLogo = function(hasRemove=false) {
+detailObj.prototype.generateSubmitLogo = function (hasRemove = false) {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
         '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >确认</button></span>' +
-        '<span>&nbsp;</span>'+
+        '<span>&nbsp;</span>' +
         '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >取消</button></span>' +
         '<span>&nbsp;</span>';
-    if(hasRemove){
+    if (hasRemove) {
         html += '<span class="button-remove" type="remove"><button class="btn btn-default btn-sm" type="button" >删除</button></span>' +
             '</a>';
     }
     return html;
 }
 
-detailObj.prototype.generateIndex = function(tag, text, nodeId) {
+detailObj.prototype.generateIndex = function (tag, text, nodeId) {
     var html = '<li style="text-align:left;margin: 10%;font-size:16px" nodeid=' + nodeId + '>' + tag + " : " + text + '</li>';
     return html;
 }
 
-detailObj.prototype.generateRole = function(role,node,tag,relationId){
-    let html ='<div class="list-group-item stigmod-hovershow-trig row ">' +
+detailObj.prototype.generateRole = function (role, node, tag, relationId) {
+    let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
         '<span class="col-xs-4 role vcenter" value=' + role + '>' + role + '</span>' +
         '<span class="col-xs-8 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" value=' + node + '></input></span>' +
-        '<span class="tag" style="display: none" value='+tag+'>'+
-        '<span class="relation" style="display: none" value='+relationId+'>'+
+        '<span class="tag" style="display: none" value=' + tag + '>' +
+        '<span class="relation" style="display: none" value=' + relationId + '>' +
         '</div>';
     return html;
 }
 
-detailObj.prototype.rightColumnShow = function(item){
+detailObj.prototype.rightColumnShow = function (item) {
     $(index).hide();
     $(properties).hide();
     $(propertiesRevise).hide();
     $(item).show();
 }
 
-detailObj.prototype.filterRelations = function(rawRelations) {
+detailObj.prototype.filterRelations = function (rawRelations,centerId) {
 
     let relations = []
     for (let id in rawRelations) {
         let rawRelation = rawRelations[id];
-        if(relationTypeArray.indexOf(rawRelation.type) != -1){
+        if (relationTypeArray.indexOf(rawRelation.type) != -1) {
             let nodeId = [];
             let value = [];
-            let centerId = $("g.entity.center").attr("id");
+            if(centerId==undefined){
+                let centerId = $("g.entity.center").attr("id");
+            }
             let mutex = 0;
 
-            for(let role of rawRelation.roles){
-                if(role.node_id != centerId || mutex){
+            for (let role of rawRelation.roles) {
+                if (role.node_id != centerId || mutex) {
                     nodeId.push(role.node_id)
                     value.push(instance_model.nodes[role.node_id].value)
-                }else{
-                    mutex ++;
+                } else {
+                    mutex++;
                 }
             }
 
@@ -607,12 +610,12 @@ detailObj.prototype.filterRelations = function(rawRelations) {
     return relations;
 }
 
-detailObj.prototype.citeRecommendation = function(relationId,tmpModel=recommend_model){
+detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recommend_model) {
 
     isGetRcmd = true;
     svgPending = 0;
 
-    if(tmpModel.relations[relationId] == undefined){
+    if (tmpModel.relations[relationId] == undefined) {
         console.log("citeRecommendation error!");
         return;
     }
@@ -622,14 +625,14 @@ detailObj.prototype.citeRecommendation = function(relationId,tmpModel=recommend_
     let relationsStr = "";
 
     rcmd_pending = {
-        "entities":[],
-        "nodes":{},
-        "relations":{}
+        "entities": [],
+        "nodes": {},
+        "relations": {}
     }
 
-    let relationIdShift=0;
+    let relationIdShift = 0;
 
-    for(let i in tmpModel.relations[relationId].roles){
+    for (let i in tmpModel.relations[relationId].roles) {
 
         let nodeId = tmpModel.relations[relationId].roles[i].node_id;   //找到每一个承担者
 
@@ -647,7 +650,7 @@ detailObj.prototype.citeRecommendation = function(relationId,tmpModel=recommend_
                     relationId: generateFrontRelationID(relationIdShift++)
                 }
                 //connection.io_create_insModel_entity(entity);
-                entitiesStr += value+",";
+                entitiesStr += value + ",";
                 rcmd_pending.entities.push(entity);
                 svgPending++;//每个实体都会有主属性的关系
             } else {//不是实体节点，需要创建节点信息
@@ -659,10 +662,10 @@ detailObj.prototype.citeRecommendation = function(relationId,tmpModel=recommend_
                     "value": value
                 }
                 //connection.io_create_insModel_node(nodes)
-                nodesStr += value+",";
+                nodesStr += value + ",";
                 rcmd_pending.nodes = nodes;
             }
-        }else{
+        } else {
             relationsStr += instance_model["nodes"][nodeId].value + ","
         }
     }
@@ -671,20 +674,20 @@ detailObj.prototype.citeRecommendation = function(relationId,tmpModel=recommend_
     let relations = {};
     relations[relationId] = tmpModel.relations[relationId]
     //connection.io_create_insModel_relation(relations);
-    relationsStr = " ["+tmpModel.relations[relationId].type+"] " + relationsStr;
+    relationsStr = " [" + tmpModel.relations[relationId].type + "] " + relationsStr;
     rcmd_pending.relations = relations;
     svgPending++;
 
     $("#modalCiteRcmd .modal-body").children().remove();
-    let string="";
-    if(entitiesStr.length>0){
-        string += "<p><b>实体: </b>"+entitiesStr.substring(0,entitiesStr.length-1)+"</p>";
+    let string = "";
+    if (entitiesStr.length > 0) {
+        string += "<p><b>实体: </b>" + entitiesStr.substring(0, entitiesStr.length - 1) + "</p>";
     }
-    if(nodesStr.length>0){
-        string += "<p><b>属性: </b>"+nodesStr.substring(0,nodesStr.length-1)+"</p>";
+    if (nodesStr.length > 0) {
+        string += "<p><b>属性: </b>" + nodesStr.substring(0, nodesStr.length - 1) + "</p>";
     }
-    if(relationsStr.length>0){
-        string += "<p><b>关系: </b>"+relationsStr.substring(0,relationsStr.length-1)+"</p>";
+    if (relationsStr.length > 0) {
+        string += "<p><b>关系: </b>" + relationsStr.substring(0, relationsStr.length - 1) + "</p>";
     }
 
     let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';

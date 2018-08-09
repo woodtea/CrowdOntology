@@ -10,13 +10,13 @@ const zoomW = 1.25;
 const zoomH = 1.75;
 /* atomic functions */
 /*
-const svg = d3
-    .select("body .graph-row .middle-content")
-    .append("svg")
-    .classed("graph", true)
-    .attr("width", width)
-    .attr("height", height);
-*/
+ const svg = d3
+ .select("body .graph-row .middle-content")
+ .append("svg")
+ .classed("graph", true)
+ .attr("width", width)
+ .attr("height", height);
+ */
 const svg = d3.select("#modalWorkspace svg")
 const properties = $("body .graph-row .properties");
 const propertiesRevise = $("body .graph-row .properties-revise");
@@ -26,12 +26,12 @@ const index = $("body .graph-row .index");
 const draw = new draw2(d3.select("body .graph-row .middle-content svg"));
 
 /*
-    基础元素绘制
+ 基础元素绘制
  */
 function drawTitle(str) {
     //svg.append("title")
     //    .text(str);
-    $("body .graph-row .title").html("<h4>"+str+"</h4>");
+    $("body .graph-row .title").html("<h4>" + str + "</h4>");
 }
 
 
@@ -50,7 +50,7 @@ function drawCircle(centX, centY, R) {
         .attr("stroke-width", 1);
 }
 
-function drawModal(centX, centY, R){
+function drawModal(centX, centY, R) {
     svg
         .append("circle")
         .classed("auxiliary", true)
@@ -58,12 +58,12 @@ function drawModal(centX, centY, R){
         .attr("cy", centY)
         .attr("r", R)
         .attr("fill", "#000")
-        .attr("fill-opacity","0.3");
+        .attr("fill-opacity", "0.3");
 
 }
 
 function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized = false, isRecommendation = false) {
-    let id,data;
+    let id, data;
     for (let tmpid in centerNode) {
         id = tmpid;
         data = {
@@ -100,7 +100,7 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
         .attr("stroke-dasharray", "1,0") //虚线宽度
         .attr("stroke-width", 1)
     //svg.select("#" + data.id)
-    svg.select("[id='" + data.id+"']")
+    svg.select("[id='" + data.id + "']")
         .append("text")
         .text(data.value)
         .attr("font-size", "12px")
@@ -109,36 +109,36 @@ function drawNode(centX, centY, r, centerNode, isCenter = false, isCentralized =
 
     if (isCenter) {
         //svg.select("#" + data.id)
-        svg.select("[id='" + data.id+"']")
+        svg.select("[id='" + data.id + "']")
             .classed("center", true);
         //svg.select("#" + data.id)
-        svg.select("[id='" + data.id+"']")
+        svg.select("[id='" + data.id + "']")
             .select("circle")
             .attr("fill", "#F8F8F8")
             .attr("stroke", "#00008B");
     }
     if (isCentralized) {
         //svg.select("#" + data.id)
-        svg.select("[id='" + data.id+"']")
+        svg.select("[id='" + data.id + "']")
             .classed("isCentralized", true);
     }
     if (isRecommendation) {
         //svg.select("#" + data.id)
-        svg.select("[id='" + data.id+"']")
-            .classed("isRecommendation",true);
+        svg.select("[id='" + data.id + "']")
+            .classed("isRecommendation", true);
     }
 
 }
 
 
-function drawPath(path,centX=width/2, centY=height/2,textAnchor="middle",startOffset="50%") {
+function drawPath(path, centX = width / 2, centY = height / 2, textAnchor = "middle", startOffset = "50%") {
     svg
         .append("path")
         .style("stroke", "grey")
         .style("stroke-width", "1px")
         .style("fill", "none")
         //.attr("id", path.data.id)
-        .attr("id", path.data.id+"-"+path.data.label)
+        .attr("id", path.data.id + "-" + path.data.label)
         .attr("d", function (d) {
             if (path.cx1 == undefined) {
                 return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
@@ -159,21 +159,21 @@ function drawPath(path,centX=width/2, centY=height/2,textAnchor="middle",startOf
             }
         });
 
-    let originPosition = ""+centX+"px "+centY+"px";
-    let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
-    $("#"+path.data.id+"-"+path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
+    let originPosition = "" + centX + "px " + centY + "px";
+    let rotateAngle = (path.rotate / (2 * Math.PI) * 360) % 360;
+    $("#" + path.data.id + "-" + path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
 
-    drawPathText(path,textAnchor,startOffset);
+    drawPathText(path, textAnchor, startOffset);
 }
 
-function drawPathText(path,textAnchor="middle",startOffset="50%") {
+function drawPathText(path, textAnchor = "middle", startOffset = "50%") {
     svg
         .append("text")
         .attr("text-anchor", textAnchor)
         .attr("dy", "-5")
         .append("textPath")
         .attr("href", "#" + path.data.id)
-        .attr("href", "#" + path.data.id+"-"+path.data.label)
+        .attr("href", "#" + path.data.id + "-" + path.data.label)
         .attr("startOffset", startOffset)
         .style('font-size', '10px')
         .classed("textPath", true)
@@ -183,21 +183,21 @@ function drawPathText(path,textAnchor="middle",startOffset="50%") {
 //
 
 /* index */
-function drawIndex(model = instance_model,showIndex=true) {
+function drawIndex(model = instance_model, showIndex = true) {
 
-    if(showIndex){
+    if (showIndex) {
         rightColumnShow(index);
     }
 
     $(index).children().remove();
-    drawRightTitle(index,"索引",false,true);
+    drawRightTitle(index, "索引", false, true);
 
     let html = "";
     let entities = {};
     for (let id in model.nodes) {
         if (data.isEntity(id)) {
-            if(entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]]=[];
-            entities[model.nodes[id].tags[0]].push({value:model.nodes[id].value,id:id});
+            if (entities[model.nodes[id].tags[0]] == undefined) entities[model.nodes[id].tags[0]] = [];
+            entities[model.nodes[id].tags[0]].push({value: model.nodes[id].value, id: id});
         }
     }
 
@@ -205,13 +205,13 @@ function drawIndex(model = instance_model,showIndex=true) {
     $(index).append(html);
     let indexContent = $(index).children(".index-content");
 
-    for(let tag in entities){
+    for (let tag in entities) {
 
-        html = generateCollapseTitle(tag,"type");
+        html = generateCollapseTitle(tag, "type");
         $(indexContent).append(html);
 
         html = "";
-        for(let n in entities[tag]){
+        for (let n in entities[tag]) {
             html += generateCollapseContent(tag, entities[tag][n].value, entities[tag][n].id);
         }
         $(indexContent).children().last().find(".list-group").append(html)
@@ -250,37 +250,37 @@ function drawRelation(id1, id2, model = instance_model) {
     let entity1 = data.getEntity(id1, model);
     let entity2 = data.getEntity(id2, model);
     //节点
-    drawCircle(width/2 - zoomW*R, height/2, R * zoomR);
-    drawNode(width/2 - zoomW*R, height/2, r * zoomR, entity1.centerNode);
-    drawCircle(width/2 + zoomW*R, height/2, R * zoomR);
-    drawNode(width/2 + zoomW*R, height/2, r * zoomR, entity2.centerNode);
+    drawCircle(width / 2 - zoomW * R, height / 2, R * zoomR);
+    drawNode(width / 2 - zoomW * R, height / 2, r * zoomR, entity1.centerNode);
+    drawCircle(width / 2 + zoomW * R, height / 2, R * zoomR);
+    drawNode(width / 2 + zoomW * R, height / 2, r * zoomR, entity2.centerNode);
     //节点间连线绘制
     let relations = {};
     relations[id2] = entity1.neighbours[id2];
-    drawNeighbours(width/2 - zoomW*R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
+    drawNeighbours(width / 2 - zoomW * R, height * 1 / 2, r * zoomR, R * zoomR, relations, 0);
     //共有节点绘制 //属性节点不属于共有节点
-    drawCommons(id1,id2);
+    drawCommons(id1, id2);
     //独有节点绘制
-    drawUnique(id1,id2);
+    drawUnique(id1, id2);
     //将两端节点放到前排
-    svg.svgBringToFront($("#"+id1));
-    svg.svgBringToFront($("#"+id2));
+    svg.svgBringToFront($("#" + id1));
+    svg.svgBringToFront($("#" + id2));
 }
 
 
 function drawRecommendation(rcmdNeighbours, model = instance_model) {
     let id = $("g.center.isCentralized").attr("id");
-    if(!data.isEntity(id)) return false;
+    if (!data.isEntity(id)) return false;
     let entity = data.getEntity(id, model);
 
     //一个问题是当前rcmdNeighbours包含自身的，所以覆盖了entity.neighbours
-    for(let key in entity.neighbours){
+    for (let key in entity.neighbours) {
         delete rcmdNeighbours[key];
     }
 
-    drawModal(width / 2, height / 2, R+2*r);
-    drawCircle(width / 2, height / 2, 5/3*R);
-    drawRecommendNeighbours(width / 2, height / 2, r, 5/3*R, entity.neighbours, rcmdNeighbours);
+    drawModal(width / 2, height / 2, R + 2 * r);
+    drawCircle(width / 2, height / 2, 5 / 3 * R);
+    drawRecommendNeighbours(width / 2, height / 2, r, 5 / 3 * R, entity.neighbours, rcmdNeighbours);
     $("g.center.isCentralized").remove();
     drawNode(width / 2, height / 2, r, entity.centerNode, true);
     return true;
@@ -291,7 +291,7 @@ function drawNeighbours(centX, centY, r, R, neighbours, startAngle = 0) {
     //let startAngle = 0; //应该是不确定的
     let paths = getPaths(centX, centY, R, r, startAngle, neighbours);
     for (let path of paths) {
-        drawPath(path,centX, centY);
+        drawPath(path, centX, centY);
     }
     let nodes = getNodes(centX, centY, R, startAngle, neighbours);
     for (let node of nodes) {
@@ -307,7 +307,7 @@ function drawRecommendNeighbours(centX, centY, r, R, neighbours, rcmdNeighbours,
     }
     let nodes = getRecommendNodes(centX, centY, R, startAngle, neighbours, rcmdNeighbours);
     for (let node of nodes) {
-        drawNode(node.cx, node.cy, r, node.data,false,false,true);
+        drawNode(node.cx, node.cy, r, node.data, false, false, true);
     }
 }
 
@@ -334,10 +334,10 @@ function getNodes(centX, centY, R, startAngle, neighbours) {
 }
 
 
-function getRecommendNodes(centX, centY, R, startAngle, neighbours,rcmdNeighbours) {
+function getRecommendNodes(centX, centY, R, startAngle, neighbours, rcmdNeighbours) {
     let N = getJsonLength(neighbours);
     let RN = getJsonLength(rcmdNeighbours);
-    let pRN = Math.ceil(RN/N);
+    let pRN = Math.ceil(RN / N);
 
     let nodes = [];
     let i = 0, cx, cy, angle;
@@ -350,7 +350,7 @@ function getRecommendNodes(centX, centY, R, startAngle, neighbours,rcmdNeighbour
             continue;
         }      //如果已经存在就不画
         //angle = 2 * Math.PI * i / N + startAngle;
-        angle = getAngle(N,RN,pRN,i)+startAngle;
+        angle = getAngle(N, RN, pRN, i) + startAngle;
 
         cx = centX + R * Math.cos(angle);
         cy = centY + R * Math.sin(angle);
@@ -395,8 +395,8 @@ function getPathTexts(centX, centY, R, r, startAngle, neighbours) {
 function getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend) {
     let N = getJsonLength(neighbours);  //邻居数
     let RN = getJsonLength(recommend);  //推荐数
-    let pRN = Math.ceil(RN/N);          //每片的推荐数
-    if(N==0) pRN=RN;
+    let pRN = Math.ceil(RN / N);          //每片的推荐数
+    if (N == 0) pRN = RN;
     //alert(N)
     //alert(RN)
     //alert(pRN)
@@ -406,7 +406,7 @@ function getRecommendPaths(centX, centY, R, r, startAngle, neighbours, recommend
     for (let key in recommend) {
         recommend[key].id = key;
         //angle = 2 * Math.PI * i / N + startAngle;
-        angle = getAngle(N,RN,pRN,i)+startAngle;
+        angle = getAngle(N, RN, pRN, i) + startAngle;
         let path = getPath(centX, centY, R, r, angle, recommend[key]);
         paths.push(...path);
         i++;
@@ -450,7 +450,7 @@ function getPath(centX, centY, R, r, angle, node) {
         shiftY = r * Math.sin(verAnglue) / m;
     }
 
-    if(m == n) m = m-1;
+    if (m == n) m = m - 1;
 
     for (let i = 0; i < n; i++) {
         if ($("#" + node.relations[i].id)[0]) { //如果已存在就不画了
@@ -477,17 +477,17 @@ function getPath(centX, centY, R, r, angle, node) {
 
         let data = node.relations[i];
         /*
-        if(instance_model.relations[data.id] != undefined){
-            let roles = instance_model.relations[data.id].roles;
-            if(roles[0].rolename!= "" && roles[1].rolename!= ""){
-                if(roles[1].node_id == node.id){
-                    data.value = roles[0].rolename + "-" + roles[1].rolename;
-                }else{
-                    data.value = roles[1].rolename + "-" + roles[0].rolename;
-                }
-            }
-        }
-        */
+         if(instance_model.relations[data.id] != undefined){
+         let roles = instance_model.relations[data.id].roles;
+         if(roles[0].rolename!= "" && roles[1].rolename!= ""){
+         if(roles[1].node_id == node.id){
+         data.value = roles[0].rolename + "-" + roles[1].rolename;
+         }else{
+         data.value = roles[1].rolename + "-" + roles[0].rolename;
+         }
+         }
+         }
+         */
         //if ((i - m / 2) == -1 && m == n) m = m - 2; //避免双数情况下的中心边
         path.push({
             sx,
@@ -507,7 +507,7 @@ function getPath(centX, centY, R, r, angle, node) {
             ox2,
             oy2,
             data: node.relations[i]
-            ,rotate
+            , rotate
         });
     }
     //console.log(path);
@@ -568,12 +568,12 @@ function getPathText(centX, centY, R, r, angle, node) {
         oy2 = ey - 0.4 * r * Math.sin(angle);
 
         let data = node.relations[i];
-        if(instance_model.relations[node.relations[i].id] != undefined){
+        if (instance_model.relations[node.relations[i].id] != undefined) {
             let roles = instance_model.relations[node.relations[i].id].roles;
-            if(roles[0].rolename!= "" && roles[1].rolename!= ""){
-                if(roles[1].node_id == node.id){
+            if (roles[0].rolename != "" && roles[1].rolename != "") {
+                if (roles[1].node_id == node.id) {
                     data.value = roles[0].rolename + " - " + roles[1].rolename;
-                }else{
+                } else {
                     data.value = roles[1].rolename + " - " + roles[0].rolename;
                 }
             }
@@ -598,7 +598,7 @@ function getPathText(centX, centY, R, r, angle, node) {
             ox2,
             oy2,
             data: node.relations[i]
-            ,rotate
+            , rotate
         });
     }
     //console.log(path);
@@ -606,15 +606,14 @@ function getPathText(centX, centY, R, r, angle, node) {
 }
 
 
-
 function refillNode(data) {
     //svg.select("#" + data.id + " circle")
-    svg.select("[id='" + data.id+"']" + " circle")
+    svg.select("[id='" + data.id + "']" + " circle")
         .attr("fill", "#eee")
         .attr("stroke", "gray")
         .attr("stroke-width", 1);
     //svg.select("#" + data.id + " text")
-    svg.select("[id='" + data.id+"']" + " text")
+    svg.select("[id='" + data.id + "']" + " text")
 
         .text(data.value)
         .attr("font-size", "12px")
@@ -623,36 +622,36 @@ function refillNode(data) {
 }
 
 
-function drawCommons(id1,id2){
+function drawCommons(id1, id2) {
 
     let entity1 = data.getEntity(id1);
     let entity2 = data.getEntity(id2);
 
     let commonIds = [];
-    for(let key in entity1.neighbours){
-        if(entity2.neighbours[key] != undefined){
+    for (let key in entity1.neighbours) {
+        if (entity2.neighbours[key] != undefined) {
             //if(data.isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }
-    let offset = - 2;//-2、2、-3、3 ...
-    let node,paths;
-    for(let n=0;n<commonIds.length;n++){
+    let offset = -2;//-2、2、-3、3 ...
+    let node, paths;
+    for (let n = 0; n < commonIds.length; n++) {
         node = {};
         node[commonIds[n]] = entity1.neighbours[commonIds[n]];
-        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity1.neighbours[commonIds[n]],false);
-        drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","35%");//暂时这么处理吧，不太好看
+        paths = drawCommonRelations(width / 2 - zoomW * R, height / 2, r * zoomR, R * zoomR, 0, zoomH * r * offset, entity1.neighbours[commonIds[n]], false);
+        drawPath(paths[0], width / 2 - zoomW * R, height / 2, "middle", "35%");//暂时这么处理吧，不太好看
 
         node = {};
         node[commonIds[n]] = entity2.neighbours[commonIds[n]];
-        paths = drawCommonRelations(width/2 - zoomW*R, height/2, r*zoomR, R*zoomR, 0, zoomH * r * offset,entity2.neighbours[commonIds[n]],true);
-        drawPath(paths[0],width/2 - zoomW*R, height/2,"middle","65%");//暂时这么处理吧，不太好看
+        paths = drawCommonRelations(width / 2 - zoomW * R, height / 2, r * zoomR, R * zoomR, 0, zoomH * r * offset, entity2.neighbours[commonIds[n]], true);
+        drawPath(paths[0], width / 2 - zoomW * R, height / 2, "middle", "65%");//暂时这么处理吧，不太好看
 
-        drawNode(width/2, height/2 + zoomH * r * offset, r * zoomR, node);
+        drawNode(width / 2, height / 2 + zoomH * r * offset, r * zoomR, node);
     }
 }
 
-function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
+function drawCommonRelations(centX, centY, r, R, shiftX, shiftY, node, reverse = false) {
 
     angle = 0;
     let rotate = angle;
@@ -678,10 +677,10 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
 
 
     //算是偏移后 cx/y1文本起始点，cx/y2文本起终止
-    cx1 = mx1 + shiftX ;
-    cx2 = mx2 + shiftX ;
-    cy1 = my1 + shiftY ;
-    cy2 = my2 + shiftY ;
+    cx1 = mx1 + shiftX;
+    cx2 = mx2 + shiftX;
+    cy1 = my1 + shiftY;
+    cy2 = my2 + shiftY;
 
     //nx/y1,ox/y1起始点三次贝塞尔曲线
     nx1 = cx1 - 0.4 * r * Math.cos(angle);
@@ -695,15 +694,15 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
     oy2 = ey - 0.4 * r * Math.sin(angle);
 
     let data = node.relations[0];
-    let nodeId = data.getEntityIdByValue(node.value,instance_model);
-     if(instance_model.relations[data.id] != undefined){
+    let nodeId = data.getEntityIdByValue(node.value, instance_model);
+    if (instance_model.relations[data.id] != undefined) {
         let roles = instance_model.relations[data.id].roles;
-        if(roles[0].rolename!= "" && roles[1].rolename!= ""){
+        if (roles[0].rolename != "" && roles[1].rolename != "") {
             console.log(roles[1].node_id)
             console.log(nodeId)
-            if(roles[1].node_id == nodeId ^ reverse){
+            if (roles[1].node_id == nodeId ^ reverse) {
                 data.value = roles[0].rolename + "-" + roles[1].rolename;
-            }else{
+            } else {
                 data.value = roles[1].rolename + "-" + roles[0].rolename;
             }
         }
@@ -732,51 +731,50 @@ function drawCommonRelations(centX,centY,r,R,shiftX,shiftY,node,reverse=false) {
 }
 
 
-
-function drawUnique(id1,id2){
+function drawUnique(id1, id2) {
 
     let entity1 = data.getEntity(id1);
     let entity2 = data.getEntity(id2);
 
     let commonIds = [];
     let key;
-    for(let key in entity1.neighbours){
-        if(entity2.neighbours[key] != undefined){
+    for (let key in entity1.neighbours) {
+        if (entity2.neighbours[key] != undefined) {
             //if(data.isEntity(key)) commonIds.push(key);
             commonIds.push(key);
         }
     }
 
-    let commonLength = commonIds.length+1;
+    let commonLength = commonIds.length + 1;
 
     let allLength1 = getJsonLength(entity1.neighbours);
-    let startAngle1 = Math.PI * (commonLength+1) / allLength1;
-    drawUniqueNeighbours(width/2-zoomW*R, height/2, r*zoomR, R*zoomR, entity1.neighbours, [...commonIds,id2], startAngle1);
+    let startAngle1 = Math.PI * (commonLength + 1) / allLength1;
+    drawUniqueNeighbours(width / 2 - zoomW * R, height / 2, r * zoomR, R * zoomR, entity1.neighbours, [...commonIds, id2], startAngle1);
 
     let allLength2 = getJsonLength(entity2.neighbours);
-    let startAngle2 = Math.PI * (commonLength+1) / allLength2;//+Math.PI
-    drawUniqueNeighbours(width/2+zoomW*R, height/2, r*zoomR, R*zoomR, entity2.neighbours, [...commonIds,id1], startAngle2+Math.PI);
+    let startAngle2 = Math.PI * (commonLength + 1) / allLength2;//+Math.PI
+    drawUniqueNeighbours(width / 2 + zoomW * R, height / 2, r * zoomR, R * zoomR, entity2.neighbours, [...commonIds, id1], startAngle2 + Math.PI);
 
     return;
 }
 
 function drawUniqueNeighbours(centX, centY, r, R, neighbours, filterArray, startAngle = 0) {
-    let paths = getUniquePaths(centX, centY, R, r, startAngle, neighbours,filterArray);
+    let paths = getUniquePaths(centX, centY, R, r, startAngle, neighbours, filterArray);
     for (let path of paths) {
-        drawPath(path,centX, centY);
+        drawPath(path, centX, centY);
     }
-    let nodes = getUniqueNodes(centX, centY, R, startAngle, neighbours,filterArray);
+    let nodes = getUniqueNodes(centX, centY, R, startAngle, neighbours, filterArray);
     for (let node of nodes) {
         drawNode(node.cx, node.cy, r, node.data);
     }
 }
 
-function getUniquePaths(centX, centY, R, r, startAngle=0, neighbours,filterArray) {
+function getUniquePaths(centX, centY, R, r, startAngle = 0, neighbours, filterArray) {
     let N = getJsonLength(neighbours);
     let paths = [];
     let i = 0;
     for (let key in neighbours) {
-        if(filterArray.indexOf(key) != -1) continue;
+        if (filterArray.indexOf(key) != -1) continue;
         neighbours[key].id = key;
         angle = 2 * Math.PI * i / N + startAngle;
         let path = getPath(centX, centY, R, r, angle, neighbours[key]);
@@ -789,13 +787,13 @@ function getUniquePaths(centX, centY, R, r, startAngle=0, neighbours,filterArray
 }
 
 
-function getUniqueNodes(centX, centY, R, startAngle, neighbours,filterArray) {
+function getUniqueNodes(centX, centY, R, startAngle, neighbours, filterArray) {
     let N = getJsonLength(neighbours);
     let nodes = [];
     let i = 0, cx, cy, angle;
 
     for (let key in neighbours) {
-        if(filterArray.indexOf(key) != -1) continue;
+        if (filterArray.indexOf(key) != -1) continue;
         let data = {};
         data[key] = neighbours[key]
         if ($("#" + key)[0]) {

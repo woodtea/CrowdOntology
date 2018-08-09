@@ -23,34 +23,34 @@ $(function () {
     })
 
     $(document).on("click", ".btn-group.workspace", function () {
-        if($(this).children(".btn-default").hasClass("off")){
+        if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
-            if($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
 
             $("svg.local").hide()
             network.setData();
             $("div.global").show();
             let item = $(index).find(".active");
             let id = $(item).children(".nodeId").attr("value");
-            detail.drawIndex(instance_model,true,id);
-        }else{
+            detail.drawIndex(instance_model, true, id);
+        } else {
             //局部图谱
             $("div.global").hide()
             //$("svg.local").show()
-            $("svg.local").css("display","block");
+            $("svg.local").css("display", "block");
         }
     })
 
     $(document).on("click", ".btn.recommend", function () {
-        if($(this).hasClass("active")){
+        if ($(this).hasClass("active")) {
             //$(this).removeClass("active");
             let rcmdNode = $(".entity.center.isCentralized");
-            if(!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
-        }else{//推荐时需要显示局部图谱
+            if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
+        } else {//推荐时需要显示局部图谱
             //$(this).addClass("active");
             showLocal();
             let rcmdNode = $(".entity.center.isCentralized");
-            if($(rcmdNode).length) $(".entity.center").trigger("dblclick");
+            if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
 
         }
     })
@@ -66,22 +66,22 @@ $(function () {
     $(document).on("click", '#modalAddEntity .btn-primary', function () {
         //isRefreshSVG = false;
         let item = $("#modalAddEntity .modal-body span");
-        svgPending = item.length-1;//第一个span是x号
-        for(let i=1;i<item.length;i++){
-            detail.classReviseSubmit(item[i],i);
+        svgPending = item.length - 1;//第一个span是x号
+        for (let i = 1; i < item.length; i++) {
+            detail.classReviseSubmit(item[i], i);
         }
         $("#modalAddEntity").modal('hide')
     })
 
     $(document).on("click", '#modalCiteRcmd .btn-primary', function () {
         $("#modalCiteRcmd").modal('hide')
-        for(let i in rcmd_pending.entities){
+        for (let i in rcmd_pending.entities) {
             connection.io_create_insModel_entity(rcmd_pending.entities[i]);
         }
-        if(getJsonLength(rcmd_pending.nodes)>0){
+        if (getJsonLength(rcmd_pending.nodes) > 0) {
             connection.io_create_insModel_node(rcmd_pending.nodes)
         }
-        if(getJsonLength(rcmd_pending.relations)>0){
+        if (getJsonLength(rcmd_pending.relations) > 0) {
             connection.io_create_insModel_relation(rcmd_pending.relations);
         }
     })
@@ -132,16 +132,16 @@ $(function () {
 
         //增加新的active
         let classStr = $(this).attr("class");
-        $(this).attr("class",classStr+" active");
+        $(this).attr("class", classStr + " active");
 
-        $("path[id^='"+relationId+"']").each(function(i){
+        $("path[id^='" + relationId + "']").each(function (i) {
             let str = $(this).attr("class");
-            $(this).attr("class",classStr+" active");
+            $(this).attr("class", classStr + " active");
         })
         //detail部分
         let id = $(this).attr('id');
         //drawRelationDetails(id);
-        let item = $("span.relationId[value^='"+id+"']").parent();
+        let item = $("span.relationId[value^='" + id + "']").parent();
         $("body .graph-row .properties .active").removeClass("active");
         $(item).addClass("active");
 
@@ -179,7 +179,7 @@ $(function () {
 
             let id = $(this).attr("id");
             let ids = id.split("-");
-            let relationId = ids[ids.length-1];
+            let relationId = ids[ids.length - 1];
 
             detail.citeRecommendation(relationId);
         } else {
@@ -189,7 +189,7 @@ $(function () {
                 $(this).trigger("click");
                 $(".btn.recommend").removeClass("active");
                 return;
-            }else{
+            } else {
                 $(".btn.recommend").addClass("active");
                 let nodeId = $(this).attr("id");
                 let node = {}
@@ -209,7 +209,7 @@ $(function () {
         let item = this;
         let id = $(item).attr('id');
         id = id.split("-")[0];
-        $("#"+id).trigger("click");
+        $("#" + id).trigger("click");
         //drawRelationDetails(id);
     })
 
@@ -241,7 +241,7 @@ $(function () {
 
         $(".properties .active").removeClass("active");
 
-        if(faEditClicked) isRevise = true;
+        if (faEditClicked) isRevise = true;
         else isRevise = false;
 
         faEditClicked = false;
@@ -298,10 +298,10 @@ $(function () {
         let relationId = $(item).find(".relationId").attr("value");
         let roles = instance_model.relations[relationId].roles;
 
-        for(let i in roles){
+        for (let i in roles) {
             let tag = roles[i].rolename;
             let id = roles[i].node_id;
-            $('span[value='+tag+']').parent().children(".node").children("input").eq(0).val(instance_model.nodes[id].value);
+            $('span[value=' + tag + ']').parent().children(".node").children("input").eq(0).val(instance_model.nodes[id].value);
         }
         $(item).addClass("active");
     });
@@ -376,7 +376,7 @@ $(function () {
             }
         }
         //更新role信息
-        let subHtml,item;
+        let subHtml, item;
         let centerId = $("g.center").attr("id");
         let entities = getRelationValues(centerId)
         if (relationId != undefined && roles != undefined) {
@@ -385,13 +385,13 @@ $(function () {
                 subHtml = detail.generateRole(roles[i].rolename, "", model.nodes[roles[i].node_id].value, relationId);
                 $("#roles").append(subHtml);
 
-                item=$("#roles").children().last();
-                setRelationRoleValueTypeahead(item,entities,centerId);
+                item = $("#roles").children().last();
+                setRelationRoleValueTypeahead(item, entities, centerId);
             }
         }
         //默认填充当前节点
         let centerTag = instance_model.nodes[centerId].tags[0];
-        let subItem = $('span[value='+centerTag+']').parent().children(".node").children("input").eq(0).val(instance_model.nodes[centerId].value);
+        let subItem = $('span[value=' + centerTag + ']').parent().children(".node").children("input").eq(0).val(instance_model.nodes[centerId].value);
 
         $("#roles").parent().show();
         return;
@@ -399,13 +399,13 @@ $(function () {
 })
 
 /*
-* 右侧区域的绘制
-* */
+ * 右侧区域的绘制
+ * */
 function drawNodeDetails(id) {
     let isEntity = svg.drawEntity(id, instance_model);
     if (isEntity) {
         $("body .graph-row .index .active").removeClass("active");
-        let item = $(".list-group-item.stigmod-hovershow-trig.entity .nodeId[value="+id+"]");
+        let item = $(".list-group-item.stigmod-hovershow-trig.entity .nodeId[value=" + id + "]");
         $(item).parent().addClass("active");
         //处理后面
         detail.rightColumnShow(properties);
@@ -426,7 +426,7 @@ function drawRelationDetails(id) {
 }
 
 
-function drawRecommendDetail(){
+function drawRecommendDetail() {
     //如果是属性
     //如果是节点
 }
@@ -486,9 +486,9 @@ function getRoles(relation) {
     return roles;
 }
 
-function generateFrontNodeID(val,type="e") {
+function generateFrontNodeID(val, type = "e") {
     let n = getJsonLength(instance_model.nodes);
-    if(val) n=val;
+    if (val) n = val;
     let nodeId = "front_n" + type + n;
 
     while (instance_model.nodes[nodeId] != undefined) {
@@ -502,7 +502,7 @@ function generateFrontNodeID(val,type="e") {
 var OperationCounter = 0;
 function generateFrontOperationID() {
 
-    OperationCounter = (OperationCounter+1)%100;
+    OperationCounter = (OperationCounter + 1) % 100;
     //let id = localStorage.mongoMachineId + new Date().valueOf() + OperationCounter;
     let id = hash(user) + new Date().valueOf() + OperationCounter;
     return id;
@@ -510,32 +510,32 @@ function generateFrontOperationID() {
 
 var I64BIT_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-'.split('');
 
-function hash(input){
+function hash(input) {
     var hash = 5381;
     var i = input.length - 1;
 
-    if(typeof input == 'string'){
+    if (typeof input == 'string') {
         for (; i > -1; i--)
             hash += (hash << 5) + input.charCodeAt(i);
     }
-    else{
+    else {
         for (; i > -1; i--)
             hash += (hash << 5) + input[i];
     }
     var value = hash & 0x7FFFFFFF;
 
     var retValue = '';
-    do{
+    do {
         retValue += I64BIT_TABLE[value & 0x3F];
     }
-    while(value >>= 6);
+    while (value >>= 6);
 
     return retValue;
 }
 
-function generateFrontRelationID(shift=0) {
+function generateFrontRelationID(shift = 0) {
     //好像并不能完全解决问题
-    let n = getJsonLength(instance_model.relations)+shift;
+    let n = getJsonLength(instance_model.relations) + shift;
     let relationId = "front_r" + n;
 
     while (instance_model.relations[relationId] != undefined) {
@@ -572,7 +572,7 @@ function checkRecommendation(recommend_model, instance_model) {
 
 function getAngle(N, RN, pRN, i) {
 
-    if(N == 0) return 2 * Math.PI * i/RN;
+    if (N == 0) return 2 * Math.PI * i / RN;
 
     let gap = Math.floor(i / pRN) + 1;
     let angle;
@@ -581,7 +581,7 @@ function getAngle(N, RN, pRN, i) {
     }
     if (gap == N) { //最后一块进行平分
         let resti = i - (gap - 1) * pRN + 1;
-        let restpRN = RN - Math.floor(RN/N)*N;
+        let restpRN = RN - Math.floor(RN / N) * N;
         angle = 2 * Math.PI * (gap - 1) / N + 2 * Math.PI * (resti) / (N * (restpRN + 1));
     }
     angle = 2 * Math.PI * (i + gap) / (N * (pRN + 1));  //test不错处理
@@ -591,18 +591,17 @@ function getAngle(N, RN, pRN, i) {
     return angle;
 }
 
-function getRank(id,entity){
+function getRank(id, entity) {
     let i = 0;
-    for(let key in entity.neighbours){
-        if(key == id) break;
+    for (let key in entity.neighbours) {
+        if (key == id) break;
         i++;
     }
     return i;
 }
 
 
-
-function refreshText(entity){
+function refreshText(entity) {
     $(".textPath").remove();
     let paths = getPathTexts(width / 2, height / 2, R, r, 0, entity.neighbours);
     //console.log(paths);
@@ -612,7 +611,7 @@ function refreshText(entity){
 }
 
 let svgOperation = {
-    clickNode : function(nodeId,model=instance_model){
+    clickNode: function (nodeId, model = instance_model) {
         detail.drawIndex();
         svg.drawEntity(nodeId);
         $("#" + nodeId).click();
@@ -620,65 +619,65 @@ let svgOperation = {
 }
 
 let tagReformat = {
-    value2id : function(msg) {
+    value2id: function (msg) {
         //console.log("******value2id")
         //console.log("beforTrans"+msg)
-        if(msg.nodes){
+        if (msg.nodes) {
             //alert("nodes")
-            for(let nodeId in msg.nodes){
-                if(msg.nodes[nodeId].tags == undefined) msg.nodes[nodeId].tags = ["String"];
+            for (let nodeId in msg.nodes) {
+                if (msg.nodes[nodeId].tags == undefined) msg.nodes[nodeId].tags = ["String"];
                 let tmp = msg.nodes[nodeId].tags;
-                for(let n in tmp){
+                for (let n in tmp) {
                     //if(tmp[n]) alert(getValueId(tmp[n],model.nodes))
-                    tmp[n] = getValueId(tmp[n],model.nodes);
+                    tmp[n] = getValueId(tmp[n], model.nodes);
                 }
             }
         }
-        if(msg.relations){
+        if (msg.relations) {
             //alert(relations)
-            for(let relationId in msg.relations){
+            for (let relationId in msg.relations) {
                 let tmp = msg.relations[relationId].type; //前后不统一
-                msg.relations[relationId].type = getValueId(tmp,model.relations);
+                msg.relations[relationId].type = getValueId(tmp, model.relations);
             }
         }
         //console.log("afterTrans"+msg);
         //console.log("value2id******")
     },
-    id2value : function(msg) {
-        if(msg.nodes){
-            for(let nodeId in msg.nodes){
+    id2value: function (msg) {
+        if (msg.nodes) {
+            for (let nodeId in msg.nodes) {
 
                 let tmp = msg.nodes[nodeId].tags;
                 //临时处理recommend没有tags的问题 - 开始
-                if(tmp == undefined){
-                    if(msg.nodes[nodeId]["value"] == "") {
+                if (tmp == undefined) {
+                    if (msg.nodes[nodeId]["value"] == "") {
                         msg.nodes[nodeId].tags = ["人"]
-                    }else{
+                    } else {
                         msg.nodes[nodeId].tags = ["String"]
                     }
                     continue;
                 }
                 ////临时处理recommend没有tags的问题 - 结束
-                for(let n in tmp){
+                for (let n in tmp) {
                     tmp[n] = model.nodes[tmp[n]].value
                 }
             }
         }
-        if(msg.relations){
-            for(let relationId in msg.relations){
+        if (msg.relations) {
+            for (let relationId in msg.relations) {
                 //alert(msg.relations[relationId].type)//创建操作，因为数据都是前台的所以都是给的type
                 //alert(msg.relations[relationId].tag)//get操作，因为数据是前台的所以是tag
                 let tmp = msg.relations[relationId].tag;    //前台获得情况
-                if(tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
+                if (tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
                 msg.relations[relationId].type = model.relations[tmp].value;
 
                 //临时处理recommend没有tags的问题 - 开始
                 let roles = msg.relations[relationId].roles;
 
-                if(roles[0]["node_id"] == undefined){
+                if (roles[0]["node_id"] == undefined) {
                     msg.relations[relationId].roles = [
-                        {rolename:"",node_id:roles[0]},
-                        {rolename:"",node_id:roles[1]}
+                        {rolename: "", node_id: roles[0]},
+                        {rolename: "", node_id: roles[1]}
                     ]
                 }
                 ////临时处理recommend没有tags的问题 - 结束
@@ -687,57 +686,57 @@ let tagReformat = {
     }
 }
 
-getValueId = function(value,item){
-    for(let key in item){
-        if(item[key]["value"] == value) return key;
+getValueId = function (value, item) {
+    for (let key in item) {
+        if (item[key]["value"] == value) return key;
     }
 }
 
-function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false,showIndex=false){
+function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = false, showIndex = false) {
 
     let hasCenterNode = false, centerNode;
 
-    for(let rId in model["relations"]){
+    for (let rId in model["relations"]) {
         let r = model["relations"][rId];
-        if(keyValueArray.indexOf(r.type) == -1) continue;//不是主属性
+        if (keyValueArray.indexOf(r.type) == -1) continue;//不是主属性
 
-        let nId0,nId1,tags0,tags1;
+        let nId0, nId1, tags0, tags1;
         nId0 = r.roles[0].node_id;
         nId1 = r.roles[1].node_id;
 
         //如果是推荐，好像就会出现id不存在的情况
 
-        if(model["nodes"][nId0] != undefined) {
+        if (model["nodes"][nId0] != undefined) {
             tags0 = model["nodes"][nId0]["tags"];
-        }else{
+        } else {
             console.log("alert");
-            console.log("not found nId0:"+nId0);
-            console.log("model:"+model);
+            console.log("not found nId0:" + nId0);
+            console.log("model:" + model);
             continue;
         }
-        if(model["nodes"][nId1] != undefined) {
+        if (model["nodes"][nId1] != undefined) {
             tags1 = model["nodes"][nId1]["tags"];
-        }else{
+        } else {
             console.log("alert");
-            console.log("not found nId1:"+nId1);
-            console.log("model:"+model);
+            console.log("not found nId1:" + nId1);
+            console.log("model:" + model);
             continue;
         }
 
-        let entityId,valueId;
-        if(tags0 != undefined){
-            if(symbolArray.indexOf(tags0[0]) == -1){   //说明是Entity节点
+        let entityId, valueId;
+        if (tags0 != undefined) {
+            if (symbolArray.indexOf(tags0[0]) == -1) {   //说明是Entity节点
                 entityId = nId0;
                 valueId = nId1;
-            }else{
+            } else {
                 entityId = nId1;
                 valueId = nId0;
             }
-        }else{
-            if(symbolArray.indexOf(tags1[0]) == -1){   //说明是Entity节点
+        } else {
+            if (symbolArray.indexOf(tags1[0]) == -1) {   //说明是Entity节点
                 entityId = nId1;
                 valueId = nId0;
-            }else{
+            } else {
                 entityId = nId0;
                 valueId = nId1;
             }
@@ -746,27 +745,27 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
         model["nodes"][entityId]["value"] = model["nodes"][valueId]["value"];
         model["nodes"][entityId]["dataType"] = r.type;
 
-        data.removeNodeInRecommendIndex(model["nodes"][entityId]["tags"][0],model["nodes"][entityId]["value"]);
+        data.removeNodeInRecommendIndex(model["nodes"][entityId]["tags"][0], model["nodes"][entityId]["value"]);
 
         delete model["nodes"][valueId];
         delete model["relations"][rId];
 
-        if(!hasCenterNode) {//第一个Entity节点作为center节点
+        if (!hasCenterNode) {//第一个Entity节点作为center节点
             hasCenterNode = true;
             centerNode = entityId;
         }
     }
-    if(hasCenterNode && refreshSvg){
+    if (hasCenterNode && refreshSvg) {
         network.setData();
-        detail.drawIndex(instance_model,showIndex);
+        detail.drawIndex(instance_model, showIndex);
         svg.drawEntity(centerNode);
-        if(!$(".btn-group.workspace .btn-default").hasClass("off")){
+        if (!$(".btn-group.workspace .btn-default").hasClass("off")) {
             $("#" + centerNode).delay("10").click();
-        }else{
+        } else {
             drawNodeDetails(centerNode);
         }
         //$("#" + centerNode).delay("500").trigger("dblclick");
-        if(getRcmd){
+        if (getRcmd) {
             isGetRcmd = false;
             $("#" + centerNode).delay("500").trigger("dblclick");
         }
@@ -775,84 +774,87 @@ function prepareNewEntity(model=instance_model,refreshSvg = true,getRcmd = false
     return false;
 }
 
-function getRelations(id1,id2,model=instance_model){
-    let relation,roles,relationArray=[];
-    for(relation in model["relations"]){
+function getRelations(id1, id2, model = instance_model) {
+    let relation, roles, relationArray = [];
+    for (relation in model["relations"]) {
         roles = model["relations"][relation]["roles"];
-        if(roles[0].node_id == id1){
-            if(roles[1].node_id == id2)  relationArray.push(relation);
+        if (roles[0].node_id == id1) {
+            if (roles[1].node_id == id2) relationArray.push(relation);
         }
-        else if(roles[1].node_id == id1){
-            if(roles[0].node_id == id2)  relationArray.push(relation);
+        else if (roles[1].node_id == id1) {
+            if (roles[0].node_id == id2) relationArray.push(relation);
         }
     }
 
     return relationArray;
 }
 
-function isCreationIllegal(type,tag,value,roles){
+function isCreationIllegal(type, tag, value, roles) {
     let hasError;
-    let err="";
-    switch (type){
+    let err = "";
+    switch (type) {
         case "class":
             hasError = true;
-            for(let key in model.nodes){
-                if(model.nodes[key].value == tag) hasError = false;
+            for (let key in model.nodes) {
+                if (model.nodes[key].value == tag) hasError = false;
             }
-            if(tag == "String") hasError = true;
-            if(hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担者";
+            if (tag == "String") hasError = true;
+            if (hasError) err += "创建类型不合法\n 请检查关系类型和对应的承担者";
 
             hasError = false;
-            for(let key in instance_model.nodes){
-                if(data.isEntity(key) && instance_model.nodes[key].value == value) {hasError = true;break;}
+            for (let key in instance_model.nodes) {
+                if (data.isEntity(key) && instance_model.nodes[key].value == value) {
+                    hasError = true;
+                    break;
+                }
             }
-            if(hasError) err +="创建实体已存在\n";
+            if (hasError) err += "创建实体已存在\n";
             break;
         case "attribute":
             hasError = true;
-            for(let key in model.relations){
-                if(model.relations[key].value == tag){
+            for (let key in model.relations) {
+                if (model.relations[key].value == tag) {
                     let roles = model.relations[key].roles;
-                    for(let n in roles){
-                        if(model.nodes[roles[n].node_id].tag == "Symbol"){
+                    for (let n in roles) {
+                        if (model.nodes[roles[n].node_id].tag == "Symbol") {
                             hasError = false;
                             break;
                         }
                     }
                 }
             }
-            if(hasError) err += "创建类型不合法\n";
+            if (hasError) err += "创建类型不合法\n";
 
             hasError = false;
-            for(let key in instance_model.relations){
-                if(instance_model.relations[key].type == tag) {
+            for (let key in instance_model.relations) {
+                if (instance_model.relations[key].type == tag) {
                     let centerId = $("g.center").attr("id");
                     let roles = instance_model.relations[key].roles;
-                    for(let n in roles){
-                        if(roles[n].node_id == centerId){
-                            if(isRevise){
+                    for (let n in roles) {
+                        if (roles[n].node_id == centerId) {
+                            if (isRevise) {
                                 //判断属性是否修改
-                                if(roles[1-n].node_id == data.getEntityIdByValue(value)){
+                                if (roles[1 - n].node_id == data.getEntityIdByValue(value)) {
                                     hasError = true
                                     break;
                                 }
-                            }else{//同名属性
+                            } else {//同名属性
                                 hasError = true
                                 break;
                             }
                         }
                     }
-                    if(hasError) break;
+                    if (hasError) break;
                 }
             }
-            if(hasError) err += "创建属性已存在\n";
+            if (hasError) err += "创建属性已存在\n";
             break;
         case "relation":
             //角色与承担者是否一致
-            for(let i in roles){
-                if(roles[i].nodeId != undefined) {
+            for (let i in roles) {
+                if (roles[i].nodeId != undefined) {
                     if (roles[i].tag != instance_model.nodes[roles[i].nodeId].tags[0]) {
-                        err += "角色\""+roles[i].tag+"\"无法由\""+roles[i].node+"\"承担";
+                        err += "角色\"" + roles[i].tag + "\"无法由\"" + roles[i].node + "\"承担";
                         break
                     }
                 }
@@ -860,82 +862,81 @@ function isCreationIllegal(type,tag,value,roles){
             //关系是否已经存在
             break;
             hasError = true;
-            for(let key in model.relations){
-                if(model.relations[key].value == tag){
+            for (let key in model.relations) {
+                if (model.relations[key].value == tag) {
                     hasError = false;
                     let roles = model.relations[key].roles;
                     //model.nodes[roles[0].node_id].value
                     //model.nodes[roles[1].node_id].value
                     let tags0 = instance_model.nodes[node0Id].tags;
                     let tags1 = instance_model.nodes[node1Id].tags;
-                    if(model.nodes[roles[0].node_id].value != tags0 || model.nodes[roles[1].node_id].value != tags1){
+                    if (model.nodes[roles[0].node_id].value != tags0 || model.nodes[roles[1].node_id].value != tags1) {
                         hasError = true;
                         break;
                     }
-                    if(!hasError) break;
+                    if (!hasError) break;
                 }
             }
-            if(hasError) err += "创建类型不合法\n";
+            if (hasError) err += "创建类型不合法\n";
 
             hasError = false;
             //let centerId = $("g.center").attr("id");
-            for(let key in instance_model.relations){
-                if(instance_model.relations[key].type != tag) continue;
+            for (let key in instance_model.relations) {
+                if (instance_model.relations[key].type != tag) continue;
                 let roles = instance_model.relations[key].roles;
-                if(roles[0].node_id == node0Id && roles[1].node_id == node1Id){
+                if (roles[0].node_id == node0Id && roles[1].node_id == node1Id) {
                     hasError = true
                     break;
                 }
             }
-            if(hasError) err += "创建关系已存在\n";
+            if (hasError) err += "创建关系已存在\n";
             break;
     }
     return err;
 }
 
 
-
-function alert(text){
+function alert(text) {
     $("#modalAlert .modal-body h5").text(text);
     $("#modalAlert").modal("show");
 }
 
 
-copyObj = function(obj1,obj2){
+copyObj = function (obj1, obj2) {
 
-    for(let key in obj2){
+    for (let key in obj2) {
         obj1[key] = obj2[key];
     }
     return;
 }
 
-removeNode = function(nodeId,model=instance_model){
+removeNode = function (nodeId, model = instance_model) {
     /* 是因为早期版本无法进行删除？
-    for(let rel in model["relations"]){
-        for(let n in model["relations"][rel]["roles"]){
-            let tmp = model["relations"][rel]["roles"][n];
-            if(tmp["node_id"] == nodeId)  {
-                if(model.nodes[nodeId].tags != undefined){
-                    alert("存在其他关系，节点无法删除")
-                }
-                return;
-            }
-        }
-    }
-    */
+     for(let rel in model["relations"]){
+     for(let n in model["relations"][rel]["roles"]){
+     let tmp = model["relations"][rel]["roles"][n];
+     if(tmp["node_id"] == nodeId)  {
+     if(model.nodes[nodeId].tags != undefined){
+     alert("存在其他关系，节点无法删除")
+     }
+     return;
+     }
+     }
+     }
+     */
     delete model["nodes"][nodeId];
 }
 
-showLocal = function(){
+showLocal = function () {
     let isGlobal = $(".btn-group.workspace .btn-default").hasClass("off");
-    if(isGlobal){
+    if (isGlobal) {
         $(".btn-group.workspace").children().trigger("click");
     }
 }
 
-showGlogal = function(){
+showGlogal = function () {
     let isGlobal = $(".btn-group.workspace .btn-default").hasClass("off");
-    if(!isGlobal){
+    if (!isGlobal) {
         $(".btn-group.workspace").children().trigger("click");
     }
 }
