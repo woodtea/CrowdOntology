@@ -134,3 +134,15 @@ path.active{
 .popover-title{
     text-align: center;
 }
+
+
+.btn.toggle:focus,
+.btn.toggle.focus {
+    outline: 0px;
+}
+
+.btn.toggle:active,
+.btn.toggle.active {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}

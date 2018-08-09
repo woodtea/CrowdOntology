@@ -25,6 +25,8 @@ $(function () {
     $(document).on("click", ".btn-group.workspace", function () {
         if($(this).children(".btn-default").hasClass("off")){
             //全局图谱
+            if($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+
             $("svg.local").hide()
             network.setData();
             $("div.global").show();
@@ -36,6 +38,20 @@ $(function () {
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display","block");
+        }
+    })
+
+    $(document).on("click", ".btn.recommend", function () {
+        if($(this).hasClass("active")){
+            //$(this).removeClass("active");
+            let rcmdNode = $(".entity.center.isCentralized");
+            if(!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
+        }else{//推荐时需要显示局部图谱
+            //$(this).addClass("active");
+            showLocal();
+            let rcmdNode = $(".entity.center.isCentralized");
+            if($(rcmdNode).length) $(".entity.center").trigger("dblclick");
+
         }
     })
 
@@ -167,15 +183,19 @@ $(function () {
 
             detail.citeRecommendation(relationId);
         } else {
-            if (d3.select(this).classed("isCentralized") == false) {
-                return;
-            }
             clickTimeout.clear();
 
-            let nodeId = $(this).attr("id");
-            let node = {}
-            node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
-            connection.io_recommend_insModel_node(node);
+            if (d3.select(this).classed("isCentralized") == false) {
+                $(this).trigger("click");
+                $(".btn.recommend").removeClass("active");
+                return;
+            }else{
+                $(".btn.recommend").addClass("active");
+                let nodeId = $(this).attr("id");
+                let node = {}
+                node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+                connection.io_recommend_insModel_node(node);
+            }
         }
     })
 
