@@ -4,47 +4,67 @@
 
 //使得提示工具Popover生效
 $('#stigmod-add-left-btn[data-popover="popover"]').popover({
-    "animation":true,
-    "title":"新建",
-    "trigger":"focus",
-    "placement":"bottom",
+    "animation": true,
+    "title": "新建",
+    "trigger": "focus",
+    "placement": "bottom",
     "container": 'body',
-    "html":true,
-    "content":'<div class="btn-group"><button class="btn btn-primary add-class">实体</button><button class="btn btn-success add-relation">关系</button></div>'
+    "html": true,
+    "content": '<div class="btn-group"><button class="btn btn-primary add-class">实体</button><button class="btn btn-success add-relation">关系</button></div>'
     // "content":'<div class="btn-group" data-toggle="buttons"><label class="btn btn-primary active"> <input type="checkbox" autocomplete="off" checked>实体</label><label class="btn btn-primary"><input type="checkbox" autocomplete="off">关系</label></div>'
 })
 
 
-
 $('[data-popover="popover"]').popover()
 
-/*
-$(document).on("mouseover", 'li', function () {
-    console.log($(this));
+
+$(document).on("mouseover", '.showPopover li', function () {
+
+    let nodeId = data.getEntityIdByValue($(this).text());
+    let content = generatePoperContent(nodeId);
+
     $(this).popover({
-        "animation":true,
-        "title":"详情",
-        "trigger":"hover",
-        "placement":"left",
+        "animation": true,
+        "title": "详情",
+        "trigger": "hover",
+        "placement": "left",
         "container": 'body',
-        "html":true,
-        "content":'<p>test1234</p>'
+        "html": true,
+        "content": content
     })
 
     $(this).popover("show")
 })
-*/
+
+$(document).on("mouseover", 'g.entity.isRecommendation', function () {
+
+    let id = $(this).attr('id');
+    id = id.split("-")["0"];
+    let content = generatePoperContent(id);
+
+    $(this).popover({
+        "animation": true,
+        "title": "详情",
+        "trigger": "hover",
+        "placement": "left",
+        "container": 'body',
+        "html": true,
+        "content": content
+    })
+
+    $(this).popover("show")
+})
 
 $(document).on("mouseover", '.rcmdMask', function () {
     console.log($(this));
     $(this).popover({
-        "animation":true,
-        "title":"推荐信息",
-        "trigger":"hover",
-        "placement":"left",
+        "animation": true,
+        "title": "推荐信息",
+        "trigger": "hover",
+        "placement": "left",
         "container": 'body',
-        "html":true,
-        "content":'<p>(双击元素后，添加至当前图谱)</p>'
+        "html": true,
+        "content": '<p>(双击元素后，添加至当前图谱)</p>'
     })
 
     $(this).popover("show")
@@ -59,6 +79,34 @@ $(function () {
     })
 });
 
-//使得提示工具Tooltip生效
-//不再使用
-//$('[data-tooltip="tooltip"]').tooltip()
+generatePoperContent = function (id) {
+    let content = "";
+    //drawTypes
+    content += generatePoperLine("实体 : " + instance_model.nodes[id].tags[0])
+    //drawAttributes
+    content += generatePoperLine(instance_model.nodes[id].dataType + " : " + instance_model.nodes[id].value)//主属性
+
+    entity = data.getEntity(id);
+    let attributes = filterAttributes(entity.neighbours);
+    attributes.forEach(function (attribute,index,array) {//其他属性
+        content += generatePoperLine(attribute.type + " : " + attribute.value)
+    })
+
+    //drawRelations
+    entity = svg.getEntity(id);
+    let relations = detail.filterRelations(entity.relations,id);
+    let relationArray = [];
+    for (let i in relations) {
+        let relation = relations[i];
+        if (relationArray.indexOf(relation.relationId) == -1) {
+            relationArray.push(relation.relationId);
+            content += generatePoperLine(relation.type + " : " + relation.value);
+        }
+    }
+
+    return content;
+}
+
+generatePoperLine = function (text) {
+    return '<p>' + text + '</p>';
+}
