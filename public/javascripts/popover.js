@@ -79,7 +79,7 @@ $(function () {
     })
 });
 
-generatePoperContent = function (id,tmpModel=tmpModel) {
+generatePoperContent = function (id,tmpModel=instance_model) {
     let content = "";
     //drawTypes
     content += generatePoperLine("实体 : " + tmpModel.nodes[id].tags[0])
