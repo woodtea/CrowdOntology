@@ -158,7 +158,7 @@ detailObj.prototype.classRevise = function (item, type = "add") {
     html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
         '<div class="row">' +
         '<div class="col-xs-4" style="padding: 3px"><input type="text" class="stigmod-input type-input" stigmod-inputcheck="class-modify" value="" placeholder="类型"></div>' +
-        '<div class="col-xs-8" style="padding: 3px"><input type="text" class="stigmod-input value-input" stigmod-inputcheck="class-modify" value="" placeholder="名称:String"></div>' +
+        '<div class="col-xs-8 showPopover" style="padding: 3px"><input type="text" class="stigmod-input value-input" stigmod-inputcheck="class-modify" value="" placeholder="名称:String"></div>' +
         '</div></a>';
     $(".properties-revise").find("#class-revise").append(html);
 
