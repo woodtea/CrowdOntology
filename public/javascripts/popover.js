@@ -36,7 +36,7 @@ $(document).on("mouseover", '.showPopover li', function () {
     $(this).popover("show")
 })
 
-$(document).on("mouseover", 'g.entity.isRecommendation', function () {
+$(document).on("mouseover", '.entity.isRecommendation', function () {
 
     let id = $(this).attr('id');
     id = id.split("-")["0"];
