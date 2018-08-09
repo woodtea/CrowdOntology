@@ -284,6 +284,7 @@ detailObj.prototype.classReviseSubmit = function (item, candidate = 0) {
         relationId: generateFrontRelationID(candidate)
     }
 
+    console.log(entity);
     connection.io_create_insModel_entity(entity);
 }
 

@@ -404,8 +404,6 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        console.log(msg);
-        console.log(recommend_model);
 
         let centerId = $("g.center").attr("id");
         recommend_model.nodes[centerId] = instance_model.nodes[centerId];

@@ -23,7 +23,7 @@ var tmpMsg = {type: [], emit: [], on: []};
 var svgPending = 0;
 //colors
 var isColorful = true;
-
+var checkRcmd = false;
 //html
 const properties = $("body .graph-row .properties");
 const propertiesRevise = $("body .graph-row .properties-revise");

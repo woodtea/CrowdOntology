@@ -49,6 +49,7 @@ $(function () {
         } else {//推荐时需要显示局部图谱
             //$(this).addClass("active");
             showLocal();
+            checkRcmd = true;
             let rcmdNode = $(".entity.center.isCentralized");
             if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
 
@@ -101,6 +102,7 @@ $(function () {
 
         svg.svg.selectAll("g.relation").classed("active", false);
         svg.svg.selectAll("path").classed("active", false);
+        $(".btn.recommend").removeClass("active");
 
         let item = this;
         if (d3.select(this).classed("isRecommendation") == true) {
