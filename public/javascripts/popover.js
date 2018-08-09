@@ -40,7 +40,7 @@ $(document).on("mouseover", '.entity.isRecommendation', function () {
 
     let id = $(this).attr('id');
     id = id.split("-")["0"];
-    let content = generatePoperContent(id);
+    let content = generatePoperContent(id,recommend_model);
 
     $(this).popover({
         "animation": true,
