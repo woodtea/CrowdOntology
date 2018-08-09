@@ -56,7 +56,6 @@ $(document).on("mouseover", '.entity.isRecommendation', function () {
 })
 
 $(document).on("mouseover", '.rcmdMask', function () {
-    console.log($(this));
     $(this).popover({
         "animation": true,
         "title": "推荐信息",
@@ -88,9 +87,6 @@ generatePoperContent = function (id,tmpModel=instance_model) {
 
     entity = data.getEntity(id,tmpModel);
     let attributes = filterAttributes(entity.neighbours,tmpModel);
-    console.log(tmpModel)
-    console.log(entity)
-    console.log(attributes)
 
     attributes.forEach(function (attribute,index,array) {//其他属性
         content += generatePoperLine(attribute.type + " : " + attribute.value)
