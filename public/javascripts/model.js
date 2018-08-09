@@ -14,9 +14,9 @@ function modelObj(svg = "") {
 }
 
 
-modelObj.prototype.getEntity = function (id, model = instance_model) {
+modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
     //判断是否是实体
-    if (!this.isEntity(id)) return;
+    if (!this.isEntity(id,tmpModel)) return;
     //包括自己和邻接信息
     let entity = {
         centerNode: {},
@@ -24,55 +24,55 @@ modelObj.prototype.getEntity = function (id, model = instance_model) {
     }
     //处理自己的事件
     entity.centerNode[id] = {
-        "value": model.nodes[id].value,
-        "tages": model.nodes[id].tags,
-        "dataType": model.nodes[id].dataType
+        "value": tmpModel.nodes[id].value,
+        "tages": tmpModel.nodes[id].tags,
+        "dataType": tmpModel.nodes[id].dataType
     }
     //处理邻接信息
-    for (let relationId in model.relations) {
+    for (let relationId in tmpModel.relations) {
         let isRelated = false;
         let centerIndex;
         let centerRolename;
-        for (let roleIndex in model.relations[relationId].roles) {
-            if (id == model.relations[relationId].roles[roleIndex].node_id) {
+        for (let roleIndex in tmpModel.relations[relationId].roles) {
+            if (id == tmpModel.relations[relationId].roles[roleIndex].node_id) {
                 isRelated = true;
                 centerIndex = roleIndex;
-                centerRolename = model.relations[relationId].roles[roleIndex].rolename;
+                centerRolename = tmpModel.relations[relationId].roles[roleIndex].rolename;
             }
         }
         if (isRelated) {
-            for (let roleIndex in model.relations[relationId].roles) {
+            for (let roleIndex in tmpModel.relations[relationId].roles) {
                 //节点为当前节点
                 if (roleIndex == centerIndex) continue;
                 //当前跳过了指向自己的情况
-                let neighbourID = model.relations[relationId].roles[roleIndex].node_id;
+                let neighbourID = tmpModel.relations[relationId].roles[roleIndex].node_id;
                 if (id == neighbourID) continue;
                 //判断是否存在，如果尚未存在则初始化
                 if (entity.neighbours[neighbourID] == undefined) {
-                    if (model.nodes[neighbourID] == undefined) {
+                    if (tmpModel.nodes[neighbourID] == undefined) {
                         alert("Not found!" + neighbourID);
                         console.log("alert notfound in getEntity");
                         console.log(neighbourID);
-                        console.log(model);
+                        console.log(tmpModel);
                         continue;
                     }
                     entity.neighbours[neighbourID] = {
-                        "value": model.nodes[neighbourID].value,
+                        "value": tmpModel.nodes[neighbourID].value,
                         "relations": []
                     }
-                    if (model.nodes[neighbourID].tags != undefined) entity.neighbours[neighbourID].tags = model.nodes[neighbourID].tags;
-                    if (model.nodes[neighbourID].dataType != undefined) entity.neighbours[neighbourID].dataType = model.nodes[neighbourID].dataType;
+                    if (tmpModel.nodes[neighbourID].tags != undefined) entity.neighbours[neighbourID].tags = tmpModel.nodes[neighbourID].tags;
+                    if (tmpModel.nodes[neighbourID].dataType != undefined) entity.neighbours[neighbourID].dataType = tmpModel.nodes[neighbourID].dataType;
                 }
                 //插入关系
                 let relation = {
                     "id": relationId,
-                    "value": model.relations[relationId].type,
+                    "value": tmpModel.relations[relationId].type,
                     "roleIndex": roleIndex,
-                    "name": centerRolename + " - " + model.relations[relationId].roles[roleIndex].rolename,
+                    "name": centerRolename + " - " + tmpModel.relations[relationId].roles[roleIndex].rolename,
                     "label": centerIndex + "-" + roleIndex
                 }
                 if (centerRolename == "") {
-                    relation.name = model.relations[relationId].roles[roleIndex].rolename;
+                    relation.name = tmpModel.relations[relationId].roles[roleIndex].rolename;
                 }
                 entity.neighbours[neighbourID].relations.push(relation);
             }

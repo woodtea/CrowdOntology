@@ -3,11 +3,11 @@
  */
 
 
-function svgObj(svg = "") {
+function svgObj(svg=""){
 
-    if (svg == "") {
+    if(svg == ""){
         this.svg = d3.select("body .graph-row .middle-content svg")
-    } else {
+    }else{
         this.svg = svg
     }
 
@@ -22,7 +22,7 @@ function svgObj(svg = "") {
     }
 }
 
-svgObj.prototype.initSVG = function () {//好像从来没用过
+svgObj.prototype.initSVG = function(){//好像从来没用过
 
     let tmp = $("#modalWorkspace svg");
     $(tmp).width(this.width);
@@ -33,7 +33,7 @@ svgObj.prototype.initSVG = function () {//好像从来没用过
     $(tmp).height(this.height);
 
     tmp = $(tmp).parent().parent();
-    $(tmp).width(this.width + 30);
+    $(tmp).width(this.width+30);
 
 }
 
@@ -45,32 +45,32 @@ svgObj.prototype.setSize = function () {
     //this.height = 550;
 
     this.width = $(tmp).parent().width();//减去上檐
-    this.height = $(tmp).parent().height() - 70;
+    this.height = $(tmp).parent().height()-70;
 
     this.ratio = 1;
-    if (this.height < this.width) {
-        this.ratio = 1 > this.height / 600 ? 1 : this.height / 600;
+    if(this.height<this.width){
+        this.ratio =  1>this.height/600?1:this.height/600;
     }
 
     //this.r =  30;
     this.r = this.ratio * 30;
     this.R = 4 * this.r; //5 * r;
-    this.R2 = 2 * this.R;
+    this.R2 = 2 * this.R ;
 
     this.zoomR = 0.75
     this.zoomW = 1.25;
     this.zoomH = 1.75;
 }
 
-svgObj.prototype.drawEntity = function (id, tmpModel = instance_model) {
+svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
 
     this.centerNode = {
         id: id,
-        x: this.width / 2,
-        y: this.height / 2
+        x: this.width/2,
+        y: this.height/2
     }
 
     this.svg.selectAll("*").remove()
@@ -85,7 +85,7 @@ svgObj.prototype.drawEntity = function (id, tmpModel = instance_model) {
     return true;
 }
 
-svgObj.prototype.drawRecommendation = function (id, rcmdModel = recommend_model, tmpModel = instance_model) {
+svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
     let entity1 = this.getEntity(id, rcmdModel);
     if (entity1 == undefined) return false;  //如果不是实体的话
@@ -93,7 +93,7 @@ svgObj.prototype.drawRecommendation = function (id, rcmdModel = recommend_model,
     let entity2 = this.getEntity(id, tmpModel);
     if (entity2 == undefined) return false;  //如果不是实体的话
 
-    if (getJsonLength(entity1.relations) == 0) {
+    if(getJsonLength(entity1.relations)==0){
         alert("当前图谱信息较少，无推荐信息。");
     }
 
@@ -105,13 +105,13 @@ svgObj.prototype.drawRecommendation = function (id, rcmdModel = recommend_model,
         drawRcmd: false,
         tmpLen: tmpLen,
         rcmdLen: rcmdLen,
-        wholeLen: tmpLen + rcmdLen,
+        wholeLen: tmpLen+rcmdLen,
     }
 
     this.centerNode = {
         id: id,
-        x: this.width / 2,
-        y: this.height / 2
+        x: this.width/2,
+        y: this.height/2
     }
 
     this.svg.selectAll("*").remove()
@@ -134,68 +134,68 @@ svgObj.prototype.drawRecommendation = function (id, rcmdModel = recommend_model,
     return true;
 }
 
-svgObj.prototype.drawRelations = function (centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model) {
-    let N = 0, i = 0;
-    if (this.rcmd.isRcmd == false) {
+svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model){
+    let N=0, i=0;
+    if(this.rcmd.isRcmd == false){
         N = getJsonLength(relations);
-    } else {
+    }else{
         N = this.rcmd.wholeLen;
     }
 
-    if (this.rcmd.drawRcmd == true) {
+    if(this.rcmd.drawRcmd == true){
         i = this.rcmd.wholeLen - this.rcmd.rcmdLen;
     }
 
     for (let key in relations) {
-        this.drawRelation(centX, centY, r, R, relations[key], startAngle, i, N, tmpModel)
+        this.drawRelation(centX,centY,r,R,relations[key],startAngle,i,N,tmpModel)
         i++;
     }
 }
 
-svgObj.prototype.drawRelation = function (centX, centY, r, R, relation, startAngle, iR, N, tmpModel = instance_model) {
+svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngle, iR, N, tmpModel = instance_model){
     //暂时没有处理一个实体承担多个角色的问题
     let rAngle = 2 * Math.PI * iR / N + startAngle;
     let rX = centX + R * Math.cos(rAngle);
     let rY = centY + R * Math.sin(rAngle);
 
-    let path, paths = [];
-    let node, nodes = [];
+    let path,paths=[];
+    let node,nodes=[];
     let nAngle;
-    let length = relation.roles.length - 1;
+    let length = relation.roles.length-1;
     let shift = 0;
-    for (let i in relation.roles) {
+    for(let i in relation.roles){
         let pData = {
-            "id": relation.id,
-            "label": i,
-            "name": relation.roles[i].rolename
+            "id":relation.id,
+            "label":i,
+            "name":relation.roles[i].rolename
         }
         let nData = {};
         //path
-        if (relation.roles[i].node_id == this.centerNode.id) {
-            path = this.getPath(rX, rY, R, r, rAngle + Math.PI, pData);
+        if(relation.roles[i].node_id == this.centerNode.id){
+            path = this.getPath(rX, rY, R, r, rAngle+Math.PI, pData);
             paths.push(...path);
             shift++;
-        } else {
-            nAngle = this.getAngle(i - shift, length, N, rAngle)
+        }else{
+            nAngle = this.getAngle(i-shift,length,N,rAngle)
             path = this.getPath(rX, rY, R, r, nAngle, pData);
             paths.push(...path);
         }
         //node
-        if (relation.roles[i].node_id == this.centerNode.id) {
+        if(relation.roles[i].node_id == this.centerNode.id){
             //if(relation.roles.length < 3) continue;
             nData = {
                 id: relation.id,
                 dataType: relation.type,
                 tags: [relation.tag],
                 value: relation.type,
-                type: "relation"
+                type:"relation"
             }
             node = this.getNode(rX, rY, 0, 0, nData);
             node.type = "relation";
             nodes.push(node);
-        } else {
+        }else{
             nData = tmpModel.nodes[relation.roles[i].node_id];
-            nData.id = relation.roles[i].node_id + "-" + relation.id;
+            nData.id = relation.roles[i].node_id+"-"+relation.id;
             nData.type = "entity";
 
             node = this.getNode(rX, rY, R, nAngle, nData);//明明应该是对象，为什么return的是数组
@@ -204,17 +204,17 @@ svgObj.prototype.drawRelation = function (centX, centY, r, R, relation, startAng
         }
     }
 
-    for (let i in paths) {
-        this.drawPath(paths[i], rX, rY);
+    for(let i in paths){
+        this.drawPath(paths[i],rX, rY);
     }
 
     let isRecommendation = false;
-    if (this.rcmd.drawRcmd == true) {
+    if(this.rcmd.drawRcmd == true){
         isRecommendation = true;
     }
 
-    for (let i in nodes) {
-        this.drawNode(nodes[i].cx, nodes[i].cy, r, nodes[i].data, nodes[i].type, false, false, isRecommendation);
+    for(let i in nodes){
+        this.drawNode(nodes[i].cx, nodes[i].cy, r, nodes[i].data, nodes[i].type,false,false,isRecommendation);
     }
 
     return true;
@@ -222,7 +222,7 @@ svgObj.prototype.drawRelation = function (centX, centY, r, R, relation, startAng
 
 
 //基础图元绘制
-svgObj.prototype.drawCircle = function (centX, centY, R) {
+svgObj.prototype.drawCircle = function(centX, centY, R) {
     this.svg
         .append("circle")
         .classed("auxiliary", true)
@@ -235,8 +235,8 @@ svgObj.prototype.drawCircle = function (centX, centY, R) {
         .attr("stroke-width", 1);
 }
 
-svgObj.prototype.drawNode = function (centX, centY, r, node, type, isCenter = false, isCentralized = false, isRecommendation = false) {
-    let id, data;
+svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = false, isCentralized = false, isRecommendation = false) {
+    let id,data;
     for (let tmpid in node) {
         id = tmpid;
         data = {
@@ -251,11 +251,11 @@ svgObj.prototype.drawNode = function (centX, centY, r, node, type, isCenter = fa
         data["dataType"] = node[id].dataType;
     }
 
-    if (isColorful) {//采用network中的配色
+    if(isColorful){//采用network中的配色
         if (node[id].dataType) {
-            if (network.network.groups.groups[data["tags"][0]] != undefined) {
+            if(network.network.groups.groups[data["tags"][0]] != undefined){
                 fillColor = network.network.groups.groups[data["tags"][0]].color.background
-            } else {
+            }else{
                 //fillColor = network.network.groups.groups["__relation"].color.background
                 fillColor = "#D2E5FF"
             }
@@ -279,21 +279,21 @@ svgObj.prototype.drawNode = function (centX, centY, r, node, type, isCenter = fa
             if (data.dataType) dataType = data.dataType;
             return dataType
         })
-    //.append("circle")
-    //.attr("r", r)
+        //.append("circle")
+        //.attr("r", r)
     //绘制图元
-    if (type == "relation") {
-        this.svg.select("[id='" + data.id + "']")
+    if(type == "relation"){
+        this.svg.select("[id='"+data.id+"']")
             .append("rect")
-            .attr("x", -r / 2)
-            .attr("y", -r / 2)
+            .attr("x", -r/2)
+            .attr("y", -r/2)
             .attr("width", r)
             .attr("height", r)
             .attr("fill", fillColor)
             .attr("stroke-dasharray", "1,0") //虚线宽度
             .attr("transform", "rotate(45)")
-    } else {
-        this.svg.select("[id='" + data.id + "']")
+    }else{
+        this.svg.select("[id='"+data.id+"']")
             .append("circle")
             .attr("r", r)
             .attr("fill", fillColor)
@@ -302,21 +302,21 @@ svgObj.prototype.drawNode = function (centX, centY, r, node, type, isCenter = fa
             .attr("stroke-width", 1)
     }
     //添加文本
-    if (type == "relation" && data.value.length > 2) {
-        this.svg.select("[id='" + data.id + "']")
+    if(type=="relation" && data.value.length>2) {
+        this.svg.select("[id='" + data.id+"']")
             .append("text")
-            .text(data.value[0] + data.value[1])
+            .text(data.value[0]+data.value[1])
             .attr("font-size", "12px")
             .attr("text-anchor", "middle")
             .attr("dy", "0em");
-        this.svg.select("[id='" + data.id + "']")
+        this.svg.select("[id='" + data.id+"']")
             .append("text")
             .text("...")
             .attr("font-size", "12px")
             .attr("text-anchor", "middle")
             .attr("dy", "1em");
-    } else {
-        this.svg.select("[id='" + data.id + "']")
+    }else{
+        this.svg.select("[id='" + data.id+"']")
             .append("text")
             .text(data.value)
             .attr("font-size", "12px")
@@ -325,36 +325,36 @@ svgObj.prototype.drawNode = function (centX, centY, r, node, type, isCenter = fa
     }
     //核心节点
     if (isCenter) {
-        this.svg.select("[id='" + data.id + "']")
+        this.svg.select("[id='" + data.id+"']")
             .classed("center", true);
         /*
-         this.svg.select("[id='" + data.id+"']")
-         .select("circle")
-         .attr("fill", "#F8F8F8")
-         .attr("stroke", "#00008B");
-         */
+        this.svg.select("[id='" + data.id+"']")
+            .select("circle")
+            .attr("fill", "#F8F8F8")
+            .attr("stroke", "#00008B");
+        */
     }
     //以Entity方式显示时作为中心，用于判断是否可以进行推荐（区别于Relation下isCenter存在多个）
     if (isCentralized) {
-        this.svg.select("[id='" + data.id + "']")
+        this.svg.select("[id='" + data.id+"']")
             .classed("isCentralized", true);
     }
     //节点处于推荐状态
     if (isRecommendation) {
-        this.svg.select("[id='" + data.id + "']")
-            .classed("isRecommendation", true);
+        this.svg.select("[id='" + data.id+"']")
+            .classed("isRecommendation",true);
     }
 }
 
-svgObj.prototype.drawEntityNode = function (centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false) {
+svgObj.prototype.drawEntityNode = function(centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false){
     this.drawNode(centX, centY, r, node, "entity", isCenter = false, isCentralized = false, isRecommendation = false);
 }
-svgObj.prototype.drawRelationNode = function (centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false) {
+svgObj.prototype.drawRelationNode = function(centX, centY, r, node, isCenter = false, isCentralized = false, isRecommendation = false){
     this.drawNode(centX, centY, r, node, "relation", isCenter = false, isCentralized = false, isRecommendation = false);
 }
 
 //复合操作
-svgObj.prototype.getRelation = function (id, model = instance_model) {
+svgObj.prototype.getRelation = function(id, model = instance_model) {
     //包括自己和邻接信息
     let relation = {
         centerNode: {},
@@ -367,8 +367,8 @@ svgObj.prototype.getRelation = function (id, model = instance_model) {
 
     //处理邻接信息
     let roles = model.relations[id].roles;
-    for (let i = 0; i < roles.length; i++) {
-        if (relation.neighbours[roles[i].node_id] == undefined) {
+    for(let i=0;i<roles.length;i++){
+        if(relation.neighbours[roles[i].node_id]==undefined){
             relation.neighbours[roles[i].node_id] = model.nodes[roles[i].node_id];
             relation.neighbours[roles[i].node_id].id = roles[i].node_id;
             relation.neighbours[roles[i].node_id].relations = []
@@ -386,7 +386,7 @@ svgObj.prototype.getRelation = function (id, model = instance_model) {
 }
 
 //
-svgObj.prototype.getNode = function (centX, centY, R, angle, data) {
+svgObj.prototype.getNode = function(centX, centY, R, angle, data) {
 
     cx = centX + R * Math.cos(angle);
     cy = centY + R * Math.sin(angle);
@@ -394,14 +394,14 @@ svgObj.prototype.getNode = function (centX, centY, R, angle, data) {
     let node = {
         cx,
         cy,
-        data: {}
+        data:{}
     }
     node.data[data.id] = data;
     return node;
 }
 
 
-svgObj.prototype.getNodes = function (centX, centY, R, startAngle, neighbours) {
+svgObj.prototype.getNodes = function(centX, centY, R, startAngle, neighbours) {
     let N = getJsonLength(neighbours);
     let nodes = [];
     let i = 0, cx, cy, angle;
@@ -422,9 +422,9 @@ svgObj.prototype.getNodes = function (centX, centY, R, startAngle, neighbours) {
     return nodes;
 }
 
-svgObj.prototype.getEntity = function (id, model = instance_model) {
+svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
     //判断是否是实体
-    if (!data.isEntity(id)) return;
+    if (!data.isEntity(id,tmpModel)) return;
     //包括自己和邻接信息
     let entity = {
         centerNode: {},
@@ -433,16 +433,16 @@ svgObj.prototype.getEntity = function (id, model = instance_model) {
     }
     //处理自己的事件
     entity.centerNode[id] = {
-        "id": id,
-        "value": model.nodes[id].value,
-        "tags": model.nodes[id].tags,
-        "dataType": model.nodes[id].dataType
+        "id":id,
+        "value": tmpModel.nodes[id].value,
+        "tags": tmpModel.nodes[id].tags,
+        "dataType": tmpModel.nodes[id].dataType
     }
     //处理邻接信息
-    for (let relationId in model.relations) {
-        for (let roleIndex in model.relations[relationId].roles) {
-            if (id == model.relations[relationId].roles[roleIndex].node_id) {
-                entity.relations[relationId] = model.relations[relationId]
+    for (let relationId in tmpModel.relations) {
+        for (let roleIndex in tmpModel.relations[relationId].roles) {
+            if (id == tmpModel.relations[relationId].roles[roleIndex].node_id) {
+                entity.relations[relationId] = tmpModel.relations[relationId]
                 entity.relations[relationId].id = relationId;
                 break;
             }
@@ -451,7 +451,7 @@ svgObj.prototype.getEntity = function (id, model = instance_model) {
     return entity;
 }
 
-svgObj.prototype.getPaths = function (centX, centY, R, r, startAngle, relations) {
+svgObj.prototype.getPaths = function(centX, centY, R, r, startAngle, relations) {
     let N = getJsonLength(relations);
     let paths = [];
     let i = 0;
@@ -466,19 +466,19 @@ svgObj.prototype.getPaths = function (centX, centY, R, r, startAngle, relations)
 }
 
 
-svgObj.prototype.getPath = function (centX, centY, R, r, angle, data) {
+svgObj.prototype.getPath = function(centX, centY, R, r, angle, data) {
 
     let rotate = angle;
     angle = 0; //2018.2.26更新，angle变为rotate处理
 
     let verAnglue = angle + Math.PI / 2; //angle的垂直方向
     let path = [];
-    /*
-     if ($("#" + node.id)[0]) {    //isRelation则变大
-     r = 3 * r;
-     R = zoomW * 2 * R / zoomR;
-     }
-     */
+/*
+    if ($("#" + node.id)[0]) {    //isRelation则变大
+        r = 3 * r;
+        R = zoomW * 2 * R / zoomR;
+    }
+*/
     //sx/y起始点、ex/y终止点
     sx = centX;
     sy = centY;
@@ -502,15 +502,15 @@ svgObj.prototype.getPath = function (centX, centY, R, r, angle, data) {
         shiftY = r * Math.sin(verAnglue) / m;
     }
 
-    if (m == n) m = m - 1;
+    if(m == n) m = m-1;
 
     for (let i = 0; i < n; i++) {
         /*
-         if ($("#" + node.relations[i].id)[0]) { //如果已存在就不画了
-         //i++;
-         continue;
-         }
-         */
+        if ($("#" + node.relations[i].id)[0]) { //如果已存在就不画了
+            //i++;
+            continue;
+        }
+        */
         //算是偏移后 cx/y1文本起始点，cx/y2文本起终止
         cx1 = mx1 + shiftX * (i - m / 2);
         cx2 = mx2 + shiftX * (i - m / 2);
@@ -567,12 +567,12 @@ svgObj.prototype.getPath = function (centX, centY, R, r, angle, data) {
     return path;
 }
 
-svgObj.prototype.drawPath = function (path, centX = this.width / 2, centY = this.height / 2, textAnchor = "middle", startOffset = "50%") {
+svgObj.prototype.drawPath = function(path,centX=this.width/2, centY=this.height/2,textAnchor="middle",startOffset="50%") {
     this.svg
         .append("path")
         .style("fill", "none")
 
-        .attr("id", path.data.id + "-" + path.data.label)
+        .attr("id", path.data.id+"-"+path.data.label)
         .attr("d", function (d) {
             if (path.cx1 == undefined) {
                 return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
@@ -593,49 +593,49 @@ svgObj.prototype.drawPath = function (path, centX = this.width / 2, centY = this
             }
         });
 
-    let originPosition = "" + centX + "px " + centY + "px";
-    let rotateAngle = (path.rotate / (2 * Math.PI) * 360) % 360;
-    $("#" + path.data.id + "-" + path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
+    let originPosition = ""+centX+"px "+centY+"px";
+    let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
+    $("#"+path.data.id+"-"+path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
 
-    this.drawPathText(path, textAnchor, startOffset);
+    this.drawPathText(path,textAnchor,startOffset);
 }
 
-svgObj.prototype.drawPathText = function (path, textAnchor = "middle", startOffset = "50%") {
+svgObj.prototype.drawPathText = function(path,textAnchor="middle",startOffset="50%") {
     this.svg
         .append("text")
         .attr("text-anchor", textAnchor)
         .attr("dy", "-5")
         .append("textPath")
         .attr("href", "#" + path.data.id)
-        .attr("href", "#" + path.data.id + "-" + path.data.label)
+        .attr("href", "#" + path.data.id+"-"+path.data.label)
         .attr("startOffset", startOffset)
         .style('font-size', '10px')
         .classed("textPath", true)
         .text(path.data.name);
 }
 //
-svgObj.prototype.svgBringAllToFront = function () {
+svgObj.prototype.svgBringAllToFront = function() {
     let that = this;
-    this.svg.selectAll("g").each(function (d, i) {
+    this.svg.selectAll("g").each(function(d,i){
         that.svgBringToFront($(this));
     })
 }
 
-svgObj.prototype.svgBringToFront = function (item) {
+svgObj.prototype.svgBringToFront = function(item) {
     var parent = $(item).parent();
     $(item).remove();
     $(parent).append(item);
 }
 
-svgObj.prototype.getAngle = function (index, nLength, rLength, startAngle) {
-    let per = (nLength + rLength) * 0.75;
-    if (per < 4) per = 4;
+svgObj.prototype.getAngle = function(index,nLength,rLength,startAngle){
+    let per = (nLength+rLength)*0.75;
+    if(per<4) per=4;
 
-    let m = (nLength - 1) / 2;
-    return startAngle + Math.PI / per * (index - m);
+    let m = (nLength - 1)/2;
+    return startAngle + Math.PI/per*(index - m);
 }
 
-svgObj.prototype.transAnimation = function (centerID, neighbourID, relationId, model) {
+svgObj.prototype.transAnimation = function(centerID,neighbourID,relationId,model) {
     //未使用
     return;
     //获取新增节点信息
@@ -645,7 +645,7 @@ svgObj.prototype.transAnimation = function (centerID, neighbourID, relationId, m
     let neighbours = getJsonLength(entity.neighbours);
     let relations = getJsonLength(entity.neighbours[neighbourID].relations);
     //如果是两个节点间形成多个关系，则直接重绘
-    if (relations > 1) {
+    if(relations>1) {
         $("#" + centerID).click();
         return;
     }
@@ -653,30 +653,30 @@ svgObj.prototype.transAnimation = function (centerID, neighbourID, relationId, m
     //画出新增节点
     let tmpNode = {};
     tmpNode[neighbourID] = entity.neighbours[neighbourID];
-    drawNeighbours(width / 2, height / 2, r, R, entity.neighbours, 2 * Math.PI * getRank(neighbourID, entity) / neighbours);//不知道为什么要+1
+    drawNeighbours(width / 2, height / 2, r, R, entity.neighbours,2 * Math.PI * getRank(neighbourID,entity)/neighbours);//不知道为什么要+1
 
-    let n, tmpNodeID, tmpRelationID, tmpItem;
-    let originPosition, rotateAngle;
-    for (tmpNodeID in entity.neighbours) {
-        tmpItem = $("#" + tmpNodeID)
-        let angle = 2 * Math.PI * getRank(tmpNodeID, entity) / neighbours + 0;
-        cx = width / 2 + R * Math.cos(angle);
-        cy = height / 2 + R * Math.sin(angle);
-        $(tmpItem).transition({x: cx, y: cy});
+    let n,tmpNodeID,tmpRelationID,tmpItem;
+    let originPosition,rotateAngle;
+    for(tmpNodeID in entity.neighbours){
+        tmpItem = $("#"+tmpNodeID)
+        let angle = 2 * Math.PI * getRank(tmpNodeID,entity) / neighbours + 0;
+        cx = width/2 + R * Math.cos(angle);
+        cy = height/2 + R * Math.sin(angle);
+        $(tmpItem).transition({x:cx,y:cy});
         //旋转关系反转比较麻烦
-        for (n in entity.neighbours[tmpNodeID].relations) {//旋转关系
+        for(n in entity.neighbours[tmpNodeID].relations){//旋转关系
             tmpRelationID = entity.neighbours[tmpNodeID].relations[n].id;
-            tmpItem = $("#" + tmpRelationID);
-            originPosition = "" + width / 2 + "px " + height / 2 + "px";
+            tmpItem = $("#"+tmpRelationID);
+            originPosition = ""+width/2+"px "+height/2+"px";
             //rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours - (getRank(tmpNodeID,entity)-1) / (neighbours-1)))%360;
-            rotateAngle = (360 * (getRank(tmpNodeID, entity) / neighbours )) % 360;
+            rotateAngle = (360 * (getRank(tmpNodeID,entity) / neighbours ))%360;
             $(tmpItem).transition({rotate: rotateAngle}).end(refreshText(entity));
             //$(tmpItem).next()
             //d3.select("#"+tmpRelationID).transition().style("rotate",rotateAngle).on( "start", function() {
-            d3.select("[id='" + tmpRelationID + "']").transition().style("rotate", rotateAngle).on("start", function () {
+            d3.select("[id='" + tmpRelationID+"']").transition().style("rotate",rotateAngle).on( "start", function() {
                 mutex++;
-            }).on("end", function () {
-                if (--mutex === 0) {
+            }).on( "end", function() {
+                if( --mutex === 0 ) {
                     refreshText(entity);   //更新pathText
                 }
             });
@@ -684,7 +684,7 @@ svgObj.prototype.transAnimation = function (centerID, neighbourID, relationId, m
 
     }
     //将圆圈更新到前面
-    this.svgBringToFront($("#" + centerID));
+    this.svgBringToFront($("#"+centerID));
     //更新详细栏目信息
     if (entity) {
         //处理后面
@@ -698,7 +698,7 @@ svgObj.prototype.transAnimation = function (centerID, neighbourID, relationId, m
     return true;
 }
 
-svgObj.prototype.rcmdDestroy = function () {
+svgObj.prototype.rcmdDestroy = function(){
     this.rcmd = {
         isRcmd: false,      //true时表示要处理rcmd
         drawRcmd: false,    //true时表示当前绘制的是rcmd
@@ -708,20 +708,20 @@ svgObj.prototype.rcmdDestroy = function () {
     }
 }
 
-svgObj.prototype.drawMask = function (centX = this.width / 2, centY = this.height / 2) {
+svgObj.prototype.drawMask = function(centX=this.width/2, centY=this.height/2){
 
 
     let that = this;
-    let startAngle, stopAngle;
+    let startAngle,stopAngle;
 
-    if (this.rcmd.tmpLen == 0) {
+    if(this.rcmd.tmpLen == 0){
         this.rcmd.tmpLen = 0.0001;
     }
 
-    if (this.rcmd.wholeLen == 0) {
+    if(this.rcmd.wholeLen == 0) {
         startAngle = 0;
         stopAngle = 2 * Math.PI;
-    } else {
+    }else{
         startAngle = 2 * Math.PI * (this.rcmd.tmpLen - 0.5) / this.rcmd.wholeLen;
         stopAngle = 2 * Math.PI * (this.rcmd.wholeLen - 0.5) / this.rcmd.wholeLen;
     }
@@ -737,21 +737,21 @@ svgObj.prototype.drawMask = function (centX = this.width / 2, centY = this.heigh
     let isDrawLarge = 0;
     let isClockWise = 1;
 
-    if ((stopAngle - startAngle) > Math.PI) {
+    if((stopAngle-startAngle)>Math.PI){
         isDrawLarge = 1;
     }
 
 
     this.svg
-    //.append("mask")
-    //.attr("id", "123")
+        //.append("mask")
+        //.attr("id", "123")
         .append("path")
         .classed("rcmdMask", true)
         .style("fill", "#333")
-        .style("opacity", 0.2)
+        .style("opacity",0.2)
         .attr("d", function (d) {
             let str = "M" + startX + "," + startY +
-                "A" + that.R2 + " " + that.R2 + "," + rotation + "," + isDrawLarge + "," + isClockWise + "," + stopX + " " + stopY +
+                "A" + that.R2 + " " + that.R2 + "," + rotation + "," + isDrawLarge + "," + isClockWise + "," + stopX +  " " + stopY +
                 "L" + centX + "," + centY +
                 "Z";
             return str;

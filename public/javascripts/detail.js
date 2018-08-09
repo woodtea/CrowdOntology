@@ -577,7 +577,7 @@ detailObj.prototype.rightColumnShow = function (item) {
     $(item).show();
 }
 
-detailObj.prototype.filterRelations = function (rawRelations,centerId) {
+detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=instance_model) {
 
     let relations = []
     for (let id in rawRelations) {
@@ -593,7 +593,7 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId) {
             for (let role of rawRelation.roles) {
                 if (role.node_id != centerId || mutex) {
                     nodeId.push(role.node_id)
-                    value.push(instance_model.nodes[role.node_id].value)
+                    value.push(tmpModel.nodes[role.node_id].value)
                 } else {
                     mutex++;
                 }

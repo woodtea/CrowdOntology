@@ -437,18 +437,18 @@ function getJsonLength(json) {
     return length;
 }
 
-function filterAttributes(neighbours) {
+function filterAttributes(neighbours,tmpModel=instance_model) {
 
     let attributes = []
     for (let id in neighbours) {
-        if (!data.isEntity(id)) {
+        if (!data.isEntity(id,tmpModel)) {
             //此时属于attribute
             for (let relation of neighbours[id].relations) {
                 attributes.push({
                     relationId: relation.id,
                     nodeId: id,
                     type: relation.value,
-                    value: instance_model.nodes[id].value
+                    value: tmpModel.nodes[id].value
                 })
             }
         }
