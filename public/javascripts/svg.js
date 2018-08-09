@@ -93,6 +93,10 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     let entity2 = this.getEntity(id, tmpModel);
     if (entity2 == undefined) return false;  //如果不是实体的话
 
+    if(getJsonLength(entity1.relations)==0){
+        alert("当前图谱信息较少，无推荐信息。");
+    }
+
     let rcmdLen = getJsonLength(entity1.relations);
     let tmpLen = getJsonLength(entity2.relations);
 
