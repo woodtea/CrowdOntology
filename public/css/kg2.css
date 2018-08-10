@@ -146,3 +146,17 @@ path.active{
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px;
 }
+
+.middle-content,
+.right-content
+{
+    min-height:600px;
+    height: calc(100vh - 200px);
+}
+
+.index.list-group,
+.properties.list-group,
+.properties-revise.list-group{
+    min-height:599px;
+    height: calc(100vh - 201px);
+}
