@@ -82,6 +82,10 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
     return entity;
 }
 
+modelObj.prototype.getAttrTags = function (nodeId, attribute) {
+    return ["String"];
+}
+
 modelObj.prototype.isEntity = function (id, model = instance_model) {
 
     if (model.nodes[id] == undefined) {

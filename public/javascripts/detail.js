@@ -316,13 +316,15 @@ detailObj.prototype.attributeReviseSubmit = function (item) {
     //生成节点
     let nodes = {};
     let nodeId = generateFrontNodeID(value)
+    let tags = data.getAttrTags(type)
     nodes[nodeId] = {
         "dataType": type,
+        "tags": tags,
         "value": value
     }
     connection.io_create_insModel_node(nodes)
     //生成关系
-    let centerId = $(".graph .center").attr("id");
+    let centerId = $(".entity.center").attr("id");
     let relationId = generateFrontRelationID();
     let relations = {};
     relations[relationId] = {
@@ -337,14 +339,14 @@ detailObj.prototype.attributeReviseSubmit = function (item) {
 }
 
 detailObj.prototype.attributeRemoveSubmit = function (item) {
-    let centerID = $(".graph .center").attr("id");
+
+    let centerID = $(".entity.center").attr("id");
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeId").attr("value");
     let origRelation = $(origItem).find(".relationId").attr("value");
-    //console.log(origNode)
-    //console.log(origRelation)
+
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         alert("remove relation!")
         connection.io_remove_insModel_relation(origRelation);
@@ -354,7 +356,7 @@ detailObj.prototype.attributeRemoveSubmit = function (item) {
         connection.io_remove_insModel_node(origNode);
     } else {//则当前节点为中心节点
         alert("remove center node!")
-        connection.io_remove_insModel_node($(".graph .center").attr("id"));
+        connection.io_remove_insModel_node($(".entity.center").attr("id"));
     }
     //更新页面
     $("#" + centerID).click();  //这个在逻辑上有问题
@@ -421,7 +423,7 @@ detailObj.prototype.relationReviseSubmit = function (item) {
     }
 
     //生成关系
-    let centerId = $(".graph .center").attr("id");
+    let centerId = $(".entity.center").attr("id");
     let relationId = generateFrontRelationID();
     let relations = {};
     relations[relationId] = {
@@ -440,7 +442,7 @@ detailObj.prototype.relationReviseSubmit = function (item) {
 }
 
 detailObj.prototype.relationRemoveSubmit = function (item) {
-    let centerID = $(".graph .center").attr("id");
+    let centerID = $(".entity.center").attr("id");
 
     //删除旧的关系
     let origItem = $(".properties").find(".active");
