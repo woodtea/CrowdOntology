@@ -32,6 +32,9 @@ $(function () {
             $("div.global").show();
             let item = $(index).find(".active");
             let id = $(item).children(".nodeId").attr("value");
+            if(id!=undefined){
+                network.focusNode(id);
+            }
             detail.drawIndex(instance_model, true, id);
         } else {
             //局部图谱
@@ -936,7 +939,7 @@ showLocal = function () {
     }
 }
 
-showGlogal = function () {
+showGlobal = function () {
     let isGlobal = $(".btn-group.workspace .btn-default").hasClass("off");
     if (!isGlobal) {
         $(".btn-group.workspace").children().trigger("click");

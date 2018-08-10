@@ -279,7 +279,7 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
         prepareNewEntity();
         //prepareNewEntity(instance_model,false);
         //detail.drawIndex();
-        showGlogal();//不知道为什么，动态宽高后，直接显示network不正常。
+        showGlobal();//不知道为什么，动态宽高后，直接显示network不正常。
         detail.rightColumnShow(index);
     }
 }

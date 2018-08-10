@@ -6,6 +6,8 @@ function networkObj() {
     this.network = new vis.Network(that.getContainer(), that.getData(), that.getOptions());
 
     this.network.on("click", function (params) {
+        console.log(that.network.body.data.nodes);
+
         if (params.nodes.length == 1) {
             let item = $(index).find(".nodeId[value^='" + params.nodes[0] + "']")
             $(index).find(".active").removeClass("active");
@@ -158,3 +160,8 @@ networkObj.prototype.uniqueEdges = function (edges) {
         }
     }
 }
+
+networkObj.prototype.focusNode = function (id) {
+    this.network.selectNodes([id])
+}
+
