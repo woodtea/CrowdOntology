@@ -116,6 +116,6 @@ popoverHide = function(){
     $('.entity.isRecommendation').popover("hide");
 }
 
-$(document).on("mouseover", '.popover', function () {
+$(document).on("click", '.popover', function () {
     $(this).hide();
 })
