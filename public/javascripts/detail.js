@@ -616,6 +616,8 @@ detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recomm
     isGetRcmd = true;
     svgPending = 0;
 
+    popoverHide();
+
     if (tmpModel.relations[relationId] == undefined) {
         console.log("citeRecommendation error!");
         return;

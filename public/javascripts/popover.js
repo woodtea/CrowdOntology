@@ -110,3 +110,12 @@ generatePoperContent = function (id,tmpModel=instance_model) {
 generatePoperLine = function (text) {
     return '<p>' + text + '</p>';
 }
+
+popoverHide = function(){
+    $('.rcmdMask').popover("hide");
+    $('.entity.isRecommendation').popover("hide");
+}
+
+$(document).on("mouseover", '.popover', function () {
+    $(this).hide();
+})
