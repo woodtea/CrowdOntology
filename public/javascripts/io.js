@@ -300,7 +300,6 @@ ioObj.prototype.io_create_insModel_node_done = function (msg) {
         }
         if (msg.migrate[nodeId]) nodeId = msg.migrate[nodeId];
         this.migrate(msg.migrate);
-        //svgOperation.clickNode(nodeId)
         return;
     }
 }
@@ -310,9 +309,12 @@ ioObj.prototype.io_remove_insModel_node_done = function (msg) {
         return;
     } else {
         let node = this.tmpMsgPop(msg.operationId).nodes;
+        console.log("io_remove_insModel_node_done");
+        console.log(node);
         let nodeId;
         for (nodeId in node) break;
-        removeNode(nodeId);
+        console.log(nodeId);
+        data.removeNode(nodeId);
         return;
     }
 }
@@ -344,7 +346,6 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
 
         //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
         if (!prepareNewEntity(instance_model, !svgPending, isGetRcmd)) {
-            console.log(svgPending)
             let notRecommendation = $("g.center.isCentralized").attr("id");
             if (svgPending > 0) {
                 svgPending--;

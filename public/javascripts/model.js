@@ -82,6 +82,19 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
     return entity;
 }
 
+modelObj.prototype.removeNode = function (nodeId, tmpModel = instance_model) {
+    console.log(nodeId);
+    console.log("removeNode");
+    let entity = svg.getEntity(nodeId);
+    console.log(entity);
+    delete tmpModel.nodes[nodeId];
+    for(let relationId in entity.relations){
+        delete tmpModel.relations[relationId];
+    }
+    network.setData();
+    return;
+}
+
 modelObj.prototype.getAttrTags = function (nodeId, attribute) {
     return ["String"];
 }

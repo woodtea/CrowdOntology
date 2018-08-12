@@ -117,11 +117,11 @@ $(function () {
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
                 id = id.split("-")["0"];
-                if (instance_model.nodes[id] == undefined) {
+                if (instance_model.nodes[id] == undefined) {//这个是要干嘛??
                     $(".properties-revise .button-left").click();
                     $(properties).children().remove();
                     detail.drawIndex();
-                    svg.drawEntity(nodeId);
+                    svg.drawEntity(id);
                 } else {
                     drawNodeDetails(id);
                 }
@@ -913,23 +913,6 @@ copyObj = function (obj1, obj2) {
         obj1[key] = obj2[key];
     }
     return;
-}
-
-removeNode = function (nodeId, model = instance_model) {
-    /* 是因为早期版本无法进行删除？
-     for(let rel in model["relations"]){
-     for(let n in model["relations"][rel]["roles"]){
-     let tmp = model["relations"][rel]["roles"][n];
-     if(tmp["node_id"] == nodeId)  {
-     if(model.nodes[nodeId].tags != undefined){
-     alert("存在其他关系，节点无法删除")
-     }
-     return;
-     }
-     }
-     }
-     */
-    delete model["nodes"][nodeId];
 }
 
 showLocal = function () {

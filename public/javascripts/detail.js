@@ -288,6 +288,53 @@ detailObj.prototype.classReviseSubmit = function (item, candidate = 0) {
     connection.io_create_insModel_entity(entity);
 }
 
+detailObj.prototype.classKeyReviseSubmit = function (item) {
+
+    let centerId = $(".entity.center").attr("id");
+    let entity = svg.getEntity(centerId);
+    let value = entity.centerNode[centerId].value;
+    let newValue = $(item).find(".value-input").val();
+
+    let relationShift = 0;
+    //删除旧节点
+    connection.io_remove_insModel_node(centerId);
+    //生成新节点
+    let newEntityId = generateFrontNodeID(value);
+    let newEntity = {
+        tags: entity.centerNode[centerId].tags,
+        value: newValue,
+        nodeId: newEntityId,
+        valueId: generateFrontNodeID(value, "v"),
+        relationId: generateFrontRelationID(relationShift++)
+    }
+    connection.io_create_insModel_entity(newEntity);
+
+    //生成新关系
+    let newRelationObj,newRelationId;
+    for(let relationId in entity.relations){
+        newRelationObj = {};
+        newRelationId = generateFrontRelationID(relationShift++);
+        newRelationObj[newRelationId] = $.extend(true, {}, entity.relations[relationId]);
+        let relation = newRelationObj[newRelationId];
+        newRelationObj[newRelationId].id = newRelationId;//因为原来的关系并没有删除，所以不能用原来的关系
+        for(let i in relation.roles){
+            if(relation.roles[i].node_id==centerId) relation.roles[i].node_id = newEntityId;
+        }
+        connection.io_create_insModel_relation(newRelationObj);
+    }
+
+}
+
+detailObj.prototype.classRemoveSubmit = function (item) {
+    let centerId = $(".entity.center").attr("id");
+
+    connection.io_remove_insModel_node(centerId);
+    let $alternate = $(".entity").not("#"+centerId);
+    if($alternate.length) {
+        $alternate.eq(0).trigger("click")
+    }
+}
+
 detailObj.prototype.attributeReviseSubmit = function (item) {
 
     let type = $(item).find(".type-input").val();
@@ -306,8 +353,11 @@ detailObj.prototype.attributeReviseSubmit = function (item) {
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
         connection.io_remove_insModel_relation(origRelation);
     }
-    if (!(origNode != "" || origRelation == undefined)) {
+    if (!(origNode == "" || origNode == undefined)) {
         connection.io_remove_insModel_node(origNode);
+    } else {//则当前节点为中心节点
+        this.classKeyReviseSubmit(item);
+        return;
     }
     //else{//则当前节点为中心节点
     //    connection.io_remove_insModel_node($(".graph .center").attr("id"));
@@ -348,15 +398,13 @@ detailObj.prototype.attributeRemoveSubmit = function (item) {
     let origRelation = $(origItem).find(".relationId").attr("value");
 
     if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
-        alert("remove relation!")
         connection.io_remove_insModel_relation(origRelation);
     }
     if (!(origNode == "" || origNode == undefined)) {
-        alert("remove node!")
         connection.io_remove_insModel_node(origNode);
     } else {//则当前节点为中心节点
-        alert("remove center node!")
-        connection.io_remove_insModel_node($(".entity.center").attr("id"));
+        this.classRemoveSubmit();
+        return;
     }
     //更新页面
     $("#" + centerID).click();  //这个在逻辑上有问题

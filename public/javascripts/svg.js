@@ -202,7 +202,11 @@ svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngl
             nData.type = "entity";
 
             node = this.getNode(rX, rY, R, nAngle, nData);//明明应该是对象，为什么return的是数组
-            node.type = "entity";
+            if(data.isEntity(nData.id.split("-")[0],tmpModel)){
+                node.type = "entity";
+            }else{
+                node.type = "symbol";
+            }
             nodes.push(node);
         }
     }
