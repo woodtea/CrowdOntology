@@ -136,13 +136,20 @@ modelObj.prototype.getEntityIdByRelation = function (relationId, index0, index1,
     return nodeIds;
 }
 
-modelObj.prototype.getEntityIdByValue = function (value, model = instance_model) {
-    for (let id in model.nodes) {
-        if (model.nodes[id].value == value) {
-            return id;
+modelObj.prototype.getEntityIdByValue = function (value, tmpModel = instance_model, type) {
+
+    let ids = [];
+
+    for (let id in tmpModel.nodes) {
+        if (tmpModel.nodes[id].value == value) {
+            if(type!=undefined){
+                if(type != tmpModel.nodes[id].tags[0]) continue;
+            }
+            ids.push(id);
         }
     }
-    return;
+
+    return ids;
 }
 
 modelObj.prototype.getKeyAttribute = function (entityIdArray) {
@@ -235,7 +242,7 @@ modelObj.prototype.isCreationIllegal = function (type, tag, value, roles) {
                         if (roles[n].node_id == centerId) {
                             if (isRevise) {
                                 //判断属性是否修改
-                                if (roles[1 - n].node_id == data.getEntityIdByValue(value)) {
+                                if (roles[1 - n].node_id == data.getEntityIdByValue(value)[0]) {
                                     hasError = true
                                     break;
                                 }

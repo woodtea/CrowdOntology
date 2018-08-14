@@ -20,7 +20,7 @@ $('[data-popover="popover"]').popover()
 
 $(document).on("mouseover", '.showPopover li', function () {
 
-    let nodeId = data.getEntityIdByValue($(this).text());
+    let nodeId = data.getEntityIdByValue($(this).text())[0];
     let content = generatePoperContent(nodeId);
 
     $(this).popover({
@@ -64,6 +64,44 @@ $(document).on("mouseover", '.rcmdMask', function () {
         "container": 'body',
         "html": true,
         "content": '<p>(双击元素后，添加至当前图谱)</p>'
+    })
+
+    $(this).popover("show")
+})
+
+$(document).on("mouseover", '#modalRevise .revise-helper', function () {
+
+    let content = "<p><b>直接修改:</b>直接修改实体名称</p>" +
+        "<p><b>替换实体:</b>使用修改实体替换行内实体，行内实体相关的属性和关系被删除</p>" +
+        "<p><b>融合实体:</b>修改实体与行内实体进行融合，用修改实体补充行内实体，行内实体原有的施行和关系不变</p>"
+
+
+    $(this).popover({
+        "animation": true,
+        "title": "帮助",
+        "trigger": "hover",
+        "placement": "right",
+        "container": 'body',
+        "html": true,
+        "content": content
+    })
+
+    $(this).popover("show")
+})
+
+$(document).on("mouseover", '.duplicated-item', function () {
+
+    let nodeId = $(this).find(".nodeId").attr("value");
+    let content = generatePoperContent(nodeId);
+
+    $(this).popover({
+        "animation": true,
+        "title": "详情",
+        "trigger": "hover",
+        "placement": "left",
+        "container": 'body',
+        "html": true,
+        "content": content
     })
 
     $(this).popover("show")

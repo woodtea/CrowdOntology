@@ -13,6 +13,18 @@ var rcmd_pending = {
     "relations": {}
 }
 
+var revise_pending = {
+    "remove":{
+        "entities": [],
+        "relations": []
+    },
+    "add":{
+        "entities": [],
+        "nodes": {},
+        "relations": {}
+    }
+}
+
 var symbolArray = [];
 var keyValueArray = [];
 var relationTypeArray = [];

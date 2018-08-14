@@ -288,26 +288,40 @@ detailObj.prototype.classReviseSubmit = function (item, candidate = 0) {
     connection.io_create_insModel_entity(entity);
 }
 
-detailObj.prototype.classKeyReviseSubmit = function (item) {
+detailObj.prototype.classKeyReviseSubmit = function (item, tmpModel = instance_model, checkDulp = true) {
 
     let centerId = $(".entity.center").attr("id");
     let entity = svg.getEntity(centerId);
     let value = entity.centerNode[centerId].value;
     let newValue = $(item).find(".value-input").val();
 
+    revise_pending = {
+        "remove":{
+            "entities": [],
+            "relations": []
+        },
+        "add":{
+            "entities": [],
+            "nodes": [],
+            "relations": []
+        }
+    }
+
     let relationShift = 0;
     //删除旧节点
-    connection.io_remove_insModel_node(centerId);
+    //connection.io_remove_insModel_node(centerId);
+    revise_pending.remove.entities.push(centerId);
     //生成新节点
-    let newEntityId = generateFrontNodeID(value);
+    let newEntityId = generateFrontNodeID(newValue);
     let newEntity = {
         tags: entity.centerNode[centerId].tags,
         value: newValue,
         nodeId: newEntityId,
-        valueId: generateFrontNodeID(value, "v"),
+        valueId: generateFrontNodeID(newValue, "v"),
         relationId: generateFrontRelationID(relationShift++)
     }
-    connection.io_create_insModel_entity(newEntity);
+    //connection.io_create_insModel_entity(newEntity);
+    revise_pending.add.entities.push(newEntity);
 
     //生成新关系
     let newRelationObj,newRelationId;
@@ -320,9 +334,47 @@ detailObj.prototype.classKeyReviseSubmit = function (item) {
         for(let i in relation.roles){
             if(relation.roles[i].node_id==centerId) relation.roles[i].node_id = newEntityId;
         }
-        connection.io_create_insModel_relation(newRelationObj);
+        //connection.io_create_insModel_relation(newRelationObj);
+        revise_pending.add.relations.push(newRelationObj);
     }
 
+    if(checkDulp){
+        let ids = data.getEntityIdByValue(newValue,tmpModel,newEntity.tags[0]);
+        if(ids.length>0){
+            $("#modalRevise .modal-body").children().remove();
+
+            let buttonGroup = '<span class="btn-group">' +
+                '<button type="button" class="btn btn-sm btn-warning replace">替换实体</button>' +
+                '<button type="button" class="btn btn-sm btn-success merge">融合实体</button>' +
+                '</span>'
+            let string = "";
+
+            for(let i=0;i<ids.length;i++){
+                string += '<div class="stigmod-rcmd-title row" style="width: 60%;margin: auto">' +
+                '<span class="col-xs-6 duplicated-item" style="text-align: right;padding:5px">' + tmpModel.nodes[ids[i]].tags[0] + ' : ' + tmpModel.nodes[ids[i]].value + '<span style="display: none" class="nodeId" value='+ ids[i] +'></span></span>' +
+                '<span class="col-xs-6" style="text-align: left">' + buttonGroup + '</span>' +
+                '</div>'
+            }
+
+            let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+            html += '<h4>当前图谱中存在同名元素</h4>';
+            html += '<h5>请选择处理方式 <span class="glyphicon glyphicon-question-sign revise-helper"></span></h5>';
+            html += '<br/>';
+            html += string
+            html += '<br/>';
+
+            $("#modalRevise .modal-body").append(html)
+            $("#modalRevise").modal("show");
+            return;
+        }
+        if(data.getEntityIdByValue(newValue,tmpModel).length>0){
+            alert("由于后台限制，当前无法创建同名不同类型元素");
+            return;
+        }
+    }
+
+    $('#modalRevise .revise-directly').trigger("click");
+    return;
 }
 
 detailObj.prototype.classRemoveSubmit = function (item) {
@@ -350,18 +402,25 @@ detailObj.prototype.attributeReviseSubmit = function (item) {
     let origItem = $(".properties").find(".active");
     let origNode = $(origItem).find(".nodeId").attr("value");
     let origRelation = $(origItem).find(".relationId").attr("value");
-    if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
-        connection.io_remove_insModel_relation(origRelation);
-    }
-    if (!(origNode == "" || origNode == undefined)) {
-        connection.io_remove_insModel_node(origNode);
-    } else {//则当前节点为中心节点
-        this.classKeyReviseSubmit(item);
+    let origValue = $(origItem).find(".value").attr("value");
+
+    if(value == origValue){//未修改
+        $(item).find(".button-cancel").trigger("click");
         return;
     }
-    //else{//则当前节点为中心节点
-    //    connection.io_remove_insModel_node($(".graph .center").attr("id"));
-    //}
+
+    if(origItem.length>0){//为修改
+        if (!(origRelation == "" || origRelation == undefined)) {   //好像肯定是有的，只是没有值而已
+            connection.io_remove_insModel_relation(origRelation);
+        }
+        if (!(origNode == "" || origNode == undefined)) {
+            connection.io_remove_insModel_node(origNode);
+        } else {//则当前节点为中心节点
+            this.classKeyReviseSubmit(item);
+            return;
+        }
+    }
+    //else为创建
 
     //生成节点
     let nodes = {};
@@ -422,7 +481,7 @@ detailObj.prototype.relationReviseSubmit = function (item) {
     for (let i = 0; i < length; i++) {
         //判断承担者是否存在
         let node = $("#roles").children().find(".node input").eq(i).val();
-        let nodeId = data.getEntityIdByValue(node, instance_model);
+        let nodeId = data.getEntityIdByValue(node, instance_model)[0];
         if (nodeId == undefined) {
             notExistArray.push({node: node, tag: $("#roles").children().find(".tag").eq(i).attr("value")})
         }

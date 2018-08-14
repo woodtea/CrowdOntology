@@ -694,7 +694,7 @@ function drawCommonRelations(centX, centY, r, R, shiftX, shiftY, node, reverse =
     oy2 = ey - 0.4 * r * Math.sin(angle);
 
     let data = node.relations[0];
-    let nodeId = data.getEntityIdByValue(node.value, instance_model);
+    let nodeId = data.getEntityIdByValue(node.value, instance_model)[0];
     if (instance_model.relations[data.id] != undefined) {
         let roles = instance_model.relations[data.id].roles;
         if (roles[0].rolename != "" && roles[1].rolename != "") {

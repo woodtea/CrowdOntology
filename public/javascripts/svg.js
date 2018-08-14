@@ -253,13 +253,15 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
     }
     let fillColor = "white";
     if (node[id].tags) data["tags"] = node[id].tags;
-    if (node[id].dataType) {//当为实体时
+    //if (node[id].dataType) {//当为实体时
+    if (type != "symbol") {//当为实体时
         fillColor = "#eee"
         data["dataType"] = node[id].dataType;
     }
 
     if(isColorful){//采用network中的配色
-        if (node[id].dataType) {
+        //if (node[id].dataType) {
+        if (type != "symbol") {
             if(network.network.groups.groups[data["tags"][0]] != undefined){
                 fillColor = network.network.groups.groups[data["tags"][0]].color.background
             }else{

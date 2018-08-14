@@ -11,7 +11,7 @@ $(function () {
 
     $(document).on("click", '#stigmod-search-left-btn', function () {
         let value = $(this).parent().parent().children("input[type=text]").val();
-        let nodeId = data.getEntityIdByValue(value, instance_model);
+        let nodeId = data.getEntityIdByValue(value, instance_model)[0];
         if (nodeId != undefined) {
             showLocal();
             svg.drawEntity(nodeId, instance_model); //画出中心区域
@@ -88,6 +88,43 @@ $(function () {
         if (getJsonLength(rcmd_pending.relations) > 0) {
             connection.io_create_insModel_relation(rcmd_pending.relations);
         }
+    })
+
+    $(document).on("click", '#modalRevise button', function () {
+
+        if($(this).hasClass("revise")){//直接修改
+            alert("由于后台限制，当前无法使用")
+            return;
+        }else if($(this).hasClass("replace")){//直接修改
+            let id = $(this).parent().parent().parent().find(".nodeId").attr("value");
+            revise_pending.remove.entities.push(id);
+        }else if($(this).hasClass("merge")){//直接修改
+            let id = $(this).parent().parent().parent().find(".nodeId").attr("value");
+            reviseMergeFilter(id);
+        }else if($(this).hasClass("cancel")){//直接修改
+            return;
+        }
+
+        $("#modalRevise").modal('hide')
+
+        //操作
+        for (let i in revise_pending.remove.entities) {
+            connection.io_remove_insModel_node(revise_pending.remove.entities[i]);
+        }
+        for (let i in revise_pending.remove.relations) {
+            connection.io_remove_insModel_relation(revise_pending.remove.relations[i]);
+        }
+        //add
+        for (let i in revise_pending.add.entities) {
+            connection.io_create_insModel_entity(revise_pending.add.entities[i]);
+        }
+        for (let i in revise_pending.add.nodes) {
+            connection.io_create_insModel_node(revise_pending.add.nodes[i])
+        }
+        for (let i in revise_pending.add.relations) {
+            connection.io_create_insModel_relation(revise_pending.add.relations[i]);
+        }
+
     })
 
     /*
@@ -839,7 +876,7 @@ function isCreationIllegal(type, tag, value, roles) {
                         if (roles[n].node_id == centerId) {
                             if (isRevise) {
                                 //判断属性是否修改
-                                if (roles[1 - n].node_id == data.getEntityIdByValue(value)) {
+                                if (roles[1 - n].node_id == data.getEntityIdByValue(value)[0]) {
                                     hasError = true
                                     break;
                                 }
@@ -927,4 +964,55 @@ showGlobal = function () {
     if (!isGlobal) {
         $(".btn-group.workspace").children().trigger("click");
     }
+}
+
+reviseMergeFilter = function (newId,tmpModel=instance_model) {
+    let entity = svg.getEntity(newId, instance_model);
+    let obj = revise_pending.add;
+    let roles,relationId;
+    //revise all ids
+    let oldId = obj.entities[0].nodeId;
+    obj.entities[0].nodeId = newId;
+    for(let i in obj.relations){
+        for(relationId in obj.relations[i]){
+            roles = obj.relations[i][relationId].roles
+        }
+        for(let j in roles){
+            if(roles[j].node_id == oldId) {
+                roles[j].node_id = newId;
+            }
+        }
+        console.log(entity);
+        if(relationCompare(entity.relations,obj.relations[i][relationId])){
+            console.log("xxx"+i);
+            obj.relations.splice(i,1);
+        }
+    }
+    return;
+}
+
+relationCompare = function (relations,relation){
+    console.log(relations);
+    console.log(relation);
+    let cpObj = {};
+    let flag = false;
+    for(let id in relations){
+        if(relations[id].type == relation.type){
+            if(relationTypeArray.indexOf(relation.type)!=-1){
+                flag = true;
+                //关系
+                for(let i in relation.roles){
+                    cpObj[relation.roles[i].node_id] = relation.roles[i].rolename;
+                }
+                for(let i in relations[id].roles){
+                    let role = relations[id].roles[i];
+                    if(cpObj[role.node_id] != role.rolename) flag = false;
+                }
+            }else{
+                flag = true;
+            }
+        }
+    }
+
+    return flag;
 }
