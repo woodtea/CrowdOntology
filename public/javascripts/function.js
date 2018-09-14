@@ -737,6 +737,8 @@ getValueId = function (value, item) {
 function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = false, showIndex = false) {
 
     let hasCenterNode = false, centerNode;
+    let deleteArray = [];
+
 
     for (let rId in model["relations"]) {
         let r = model["relations"][rId];
@@ -789,13 +791,18 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
 
         data.removeNodeInRecommendIndex(model["nodes"][entityId]["tags"][0], model["nodes"][entityId]["value"]);
 
-        delete model["nodes"][valueId];
-        delete model["relations"][rId];
+        //delete model["nodes"][valueId];
+        //delete model["relations"][rId];
+        deleteArray.push({valueId,rId})//因为一个值节点可能出现在多个关系中
 
         if (!hasCenterNode) {//第一个Entity节点作为center节点
             hasCenterNode = true;
             centerNode = entityId;
         }
+    }
+    for(let i in deleteArray){
+        delete model["nodes"][deleteArray[i].valueId];
+        delete model["relations"][deleteArray[i].rId];
     }
     if (hasCenterNode && refreshSvg) {
         network.setData();
