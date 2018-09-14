@@ -211,7 +211,7 @@ modelObj.prototype.isCreationIllegal = function (type, tag, value, roles) {
 
             hasError = false;
             for (let key in instance_model.nodes) {
-                if (data.isEntity(key) && instance_model.nodes[key].value == value) {
+                if (data.isEntity(key) && instance_model.nodes[key].value == value && instance_model.nodes[key].tags[0] == tag) {
                     hasError = true;
                     break;
                 }
