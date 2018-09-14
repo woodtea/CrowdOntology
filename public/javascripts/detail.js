@@ -367,10 +367,12 @@ detailObj.prototype.classKeyReviseSubmit = function (item, tmpModel = instance_m
             $("#modalRevise").modal("show");
             return;
         }
+        /* 测试了下应该可以
         if(data.getEntityIdByValue(newValue,tmpModel).length>0){
             alert("由于后台限制，当前无法创建同名不同类型元素");
             return;
         }
+        */
     }
 
     $('#modalRevise .revise-directly').trigger("click");
