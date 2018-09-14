@@ -768,7 +768,7 @@ detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recomm
             } else {//不是实体节点，需要创建节点信息
                 let value = recommend_model["nodes"][nodeId].value
                 let nodes = {};
-                let nodeId = generateFrontNodeID(value);
+                //let nodeId = generateFrontNodeID(value);
                 nodes[nodeId] = {
                     "dataType": recommend_model["nodes"][nodeId].tags,
                     "value": value
