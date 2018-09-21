@@ -23,6 +23,9 @@ ioObj.prototype.init = function () {
             case 'save':
                 that.io_save_model_done(msg);
                 break;
+            case 'mcreate_relation':
+                //that.io_mcreate_relation_done(msg);
+                break;
         }
     });
 
@@ -107,6 +110,12 @@ ioObj.prototype.io_save_model = function (user_id, projectId, model) {
     let msg = this.generate_msg_base(user_id, projectId, 'save');
     msg["nodes"] = model["nodes"];
     msg["relations"] = model["relations"];
+    this.socketEmitArray('model', msg);
+}
+
+ioObj.prototype.io_create_model_relation = function (relations) {
+    let msg = this.emitMsgHeader('mcreate_relation');
+    msg["relations"] = relations;
     this.socketEmitArray('model', msg);
 }
 

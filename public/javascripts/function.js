@@ -408,6 +408,10 @@ $(function () {
         //读取类型
         let type = $(this).val();
 
+        let centerId = $("g.center").attr("id");
+        let array = getRelationTypes(centerId);
+        if(array.indexOf(type) == -1) return;
+
         //查找model，找到对应的角色名
         let relationId, roles;
         for (let key in model.relations) {
@@ -419,7 +423,7 @@ $(function () {
         }
         //更新role信息
         let subHtml, item;
-        let centerId = $("g.center").attr("id");
+        //let centerId = $("g.center").attr("id");
         let entities = getRelationValues(centerId)
         if (relationId != undefined && roles != undefined) {
             $("#roles").children().remove();
@@ -732,6 +736,7 @@ getValueId = function (value, item) {
     for (let key in item) {
         if (item[key]["value"] == value) return key;
     }
+    return value;//可能会出问题
 }
 
 function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = false, showIndex = false) {

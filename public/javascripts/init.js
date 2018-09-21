@@ -31,7 +31,6 @@ var relationTypeArray = [];
 var isGetRcmd = false;
 
 //io
-var tmpMsg = {type: [], emit: [], on: []};
 var svgPending = 0;
 //colors
 var isColorful = true;
@@ -46,15 +45,7 @@ const data = new modelObj();
 const svg = new svgObj(d3.select("body .graph-row .middle-content svg"));
 const detail = new detailObj();
 const network = new networkObj();
-//const model = new modelObj();
 const connection = new ioObj();
-
-//modal
-/*
- $("#modalNetwork").on('shown.bs.modal',function(){
- network.setData();
- })
- */
 
 connection.init();
 io_test2 = function (msg = "hello") {
