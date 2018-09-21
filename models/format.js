@@ -6,6 +6,9 @@ formatExchange.prototype.web2Server = function(msg,type=""){
     console.log(msg);
     let newMsg;
     switch (msg.operation){
+        case 'mcreate_relation':
+            newMsg = format_create_model_relation(msg);
+            break;
         case 'get':
             newMsg = format_get_insModel(msg);
             break;
@@ -73,6 +76,24 @@ reformat_basic = function (msg,M=1) {
     if(M){
         newMsg.operation.shift();
     }
+    return newMsg;
+}
+
+format_create_model_relation = function (msg) {
+    //丢失了节点类型,节点类型一般是数组
+    //nodes前台用的是对象不用数据
+    let newMsg ;
+    let frontId;
+    for(frontId in msg["relations"]) break;
+
+    newMsg = format_basic(msg,0);
+    //newMsg.operation = newMsg.operation+"_proxy";   //临时
+
+    newMsg["relations"]=[{
+        "front_id" : frontId,
+        "value" : msg["relations"][frontId].type,
+        "roles": msg["relations"][frontId].roles
+    }];
     return newMsg;
 }
 

@@ -49,6 +49,14 @@ function ioConfig(server){
                         socket.emit("model",rep);
                     });
                     break;
+                case 'mcreate_relation':
+                    emitMsg = io_create_insModel_relation(msg,function(emitMsg){
+                        //console.log(emitMsg);
+                        logger.info(JSON.stringify(emitMsg))
+                        socket.emit('model',emitMsg);
+                    });
+                    break;
+
             }
         })
 
@@ -425,8 +433,12 @@ function ioConfig(server){
                 init_project();
             }else if(msg=="mcreate_hlm"){
                 mcreate_hlm_project();
+            }else if(msg=="mcreate_hlm2"){
+                mcreate_hlm2_project();
             }else if(msg=="mcreate_movie"){
                 mcreate_movie_project();
+            }else if(msg=="mcreate_movie_rzdf"){
+                mcreate_movie_project_rzdf();
             }else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
@@ -696,6 +708,129 @@ function mcreate_hlm_project(){
     return;
 }
 
+function mcreate_hlm2_project(){
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: '红楼梦人物关系图谱'
+    };
+    var humanId,movieId,roleId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "人", "红楼梦人物关系图谱"), function (rep) {
+            for (let key in rep.migrate) humanId = rep.migrate[key];
+            dm.handle(mcreate_node("Symbol", "String", "红楼梦人物关系图谱"), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                //创建属性
+                let roles;
+                roles = [{rolename : "", node_id : humanId}, {rolename : "姓名", node_id : symbolId}]
+                dm.handle(mcreate_relation(value="姓名",roles,project_id="红楼梦人物关系图谱"),function(rep){
+                    let relationId;
+                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                    dm.handle(madd_key_attr(node_id=humanId,[relationId],user_id="",project_id="红楼梦人物关系图谱"),function(rep){});
+                });
+                roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
+                dm.handle(mcreate_relation("性别",roles,project_id="红楼梦人物关系图谱"),function(rep){});
+                roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
+                dm.handle(mcreate_relation("出生年份",roles,project_id="红楼梦人物关系图谱"),function(rep){});
+                //创建关系
+                //夫妻间
+                roles = [
+                    {rolename : "丈夫", node_id : humanId},
+                    {rolename : "妻子", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("夫妻", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "丈夫", node_id : humanId},
+                    {rolename : "小妾", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("夫妾", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                //父子间
+                roles = [
+                    {rolename : "父亲", node_id : humanId},
+                    {rolename : "儿子", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("父子", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "母亲", node_id : humanId},
+                    {rolename : "儿子", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("母子", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "父亲", node_id : humanId},
+                    {rolename : "女儿", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("父女", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "母亲", node_id : humanId},
+                    {rolename : "女儿", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("母女", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                //婆媳间
+                roles = [
+                    {rolename : "公公", node_id : humanId},
+                    {rolename : "媳妇", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("公媳", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "婆婆", node_id : humanId},
+                    {rolename : "媳妇", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("婆媳", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "岳父", node_id : humanId},
+                    {rolename : "女婿", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("翁婿", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "岳母", node_id : humanId},
+                    {rolename : "女婿", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("姑婿", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                //同辈间
+                roles = [
+                    {rolename : "哥哥", node_id : humanId},
+                    {rolename : "弟弟", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("兄弟", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "哥哥", node_id : humanId},
+                    {rolename : "妹妹", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("兄妹", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "姐姐", node_id : humanId},
+                    {rolename : "弟弟", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("姐弟", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+                roles = [
+                    {rolename : "姐姐", node_id : humanId},
+                    {rolename : "妹妹", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("姐妹", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+
+                roles = [
+                    {rolename : "主人", node_id : humanId},
+                    {rolename : "奴仆", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("主仆", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+
+                roles = [
+                    {rolename : "主人", node_id : humanId},
+                    {rolename : "丫鬟", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("主人丫鬟", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+
+                roles = [
+                    {rolename : "君主", node_id : humanId},
+                    {rolename : "臣子", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("君臣", roles, project_id = "红楼梦人物关系图谱"), function (rep) {});
+            });
+        });
+    });
+    return;
+}
+
 function mcreate_movie_project(){
     msg1 = {
         operation: 'create_project',
@@ -758,6 +893,180 @@ function mcreate_movie_project(){
                             {rolename : "演员", node_id : humanId}
                             ]
                         dm.handle(mcreate_relation("出演", roles, project_id = "电影人物关系图谱"), function (rep) {});
+                    });
+                });
+            });
+        });
+    });
+    return;
+}
+
+function mcreate_movie_project_rzdf(){
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: '让子弹飞-电影人物关系图谱'
+    };
+    var humanId,movieId,roleId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "人", "让子弹飞-电影人物关系图谱"), function (rep) {
+            for (let key in rep.migrate) humanId = rep.migrate[key];
+            dm.handle(mcreate_node("Entity", "电影", "让子弹飞-电影人物关系图谱"), function (rep) {
+                for (let key in rep.migrate) movieId = rep.migrate[key];
+                dm.handle(mcreate_node("Entity", "电影人物", "让子弹飞-电影人物关系图谱"), function (rep) {
+                    for (let key in rep.migrate) roleId = rep.migrate[key];
+                    dm.handle(mcreate_node("Symbol", "String", "让子弹飞-电影人物关系图谱"), function (rep) {
+                        for (let key in rep.migrate) symbolId = rep.migrate[key];
+                        //创建属性
+                        let roles;
+                        roles = [{rolename : "", node_id : humanId}, {rolename : "姓名", node_id : symbolId}]
+                        dm.handle(mcreate_relation(value="姓名",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=humanId,[relationId],user_id="",project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+                        });
+                        roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
+                        dm.handle(mcreate_relation("性别",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+                        roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
+                        dm.handle(mcreate_relation("出生年份",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+
+                        roles = [{rolename : "", node_id : movieId}, {rolename : "片名", node_id : symbolId}]
+                        dm.handle(mcreate_relation("片名",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=movieId,[relationId],user_id="",project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+                        });
+                        roles = [{rolename : "", node_id : movieId}, {rolename : "上映日期", node_id : symbolId}]
+                        dm.handle(mcreate_relation("上映日期",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+
+                        roles = [{rolename : "", node_id : roleId}, {rolename : "名称", node_id : symbolId}]
+                        dm.handle(mcreate_relation("名称",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){
+                            let relationId;
+                            for (let key in rep.migrate) relationId = rep.migrate[key];
+                            dm.handle(madd_key_attr(node_id=roleId,[relationId],user_id="",project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+                        });
+                        roles = [{rolename : "", node_id : roleId}, {rolename : "性别", node_id : symbolId}]
+                        dm.handle(mcreate_relation("性别",roles,project_id="让子弹飞-电影人物关系图谱"),function(rep){});
+                        //创建关系
+                        roles = [
+                            {rolename : "电影", node_id : movieId},
+                            {rolename : "导演", node_id : humanId}
+                        ]
+                        dm.handle(mcreate_relation("导演", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "电影", node_id : movieId},
+                            {rolename : "编剧", node_id : humanId}
+                        ]
+                        dm.handle(mcreate_relation("编剧", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+
+                        roles = [
+                            {rolename : "电影", node_id : movieId},
+                            {rolename : "角色", node_id : roleId},
+                            {rolename : "演员", node_id : humanId}
+                        ]
+                        dm.handle(mcreate_relation("出演", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        //
+                        //爱情
+                        roles = [
+                            {rolename : "丈夫", node_id : roleId},
+                            {rolename : "妻子", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("夫妻", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "男友", node_id : roleId},
+                            {rolename : "女友", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("情侣", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "爱慕者", node_id : roleId},
+                            {rolename : "被爱慕者", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("爱慕", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        //亲情
+                        roles = [
+                            {rolename : "父亲", node_id : roleId},
+                            {rolename : "儿子", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("父子", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "母亲", node_id : roleId},
+                            {rolename : "儿子", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("母子", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "父亲", node_id : roleId},
+                            {rolename : "女儿", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("父女", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "母亲", node_id : roleId},
+                            {rolename : "女儿", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("母女", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        //婆媳间
+                        roles = [
+                            {rolename : "公公", node_id : roleId},
+                            {rolename : "媳妇", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("公媳", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "婆婆", node_id : roleId},
+                            {rolename : "媳妇", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("婆媳", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "岳父", node_id : roleId},
+                            {rolename : "女婿", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("翁婿", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "岳母", node_id : roleId},
+                            {rolename : "女婿", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("姑婿", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        //同辈间
+                        roles = [
+                            {rolename : "哥哥", node_id : roleId},
+                            {rolename : "弟弟", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("兄弟", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "哥哥", node_id : roleId},
+                            {rolename : "妹妹", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("兄妹", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "姐姐", node_id : roleId},
+                            {rolename : "弟弟", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("姐弟", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "姐姐", node_id : roleId},
+                            {rolename : "妹妹", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("姐妹", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        //友情
+                        roles = [
+                            {rolename : "朋友", node_id : roleId},
+                            {rolename : "朋友", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("朋友", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "师父", node_id : roleId},
+                            {rolename : "徒弟", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("师徒", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "仇人", node_id : roleId},
+                            {rolename : "报仇", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("仇恨", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+                        roles = [
+                            {rolename : "恩人", node_id : roleId},
+                            {rolename : "报恩", node_id : roleId}
+                        ]
+                        dm.handle(mcreate_relation("恩情", roles, project_id = "让子弹飞-电影人物关系图谱"), function (rep) {});
+
                     });
                 });
             });
