@@ -236,6 +236,7 @@ detailObj.prototype.relationRevise = function (item, type = "add") {
     //提交按钮
     html = this.generateSubmitLogo(isRevise);
     $(".properties-revise").find("#relation-revise").append(html);
+    $(".properties-revise").find("#relation-revise").find(".button-ok").children().attr("disabled", true);
 
     //自动填充
     let centerId = $("g.center").attr("id");

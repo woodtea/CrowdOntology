@@ -402,15 +402,68 @@ $(function () {
         $(this).parent().parent().trigger("dblclick");
     })
 
+    $(document).on("change keyup", "#class-revise .stigmod-input.type-input", function () {
+        let type = $(this).val();
+        let array = getEntityTypes();
+        if (array.indexOf(type) == -1) {
+            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+                let content = '<p>是否新建实体类型?</p>';
+                content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
+                    '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >否</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '</div>';
+                $(this).popover({
+                    "animation": true,
+                    "title": "未找到输入实体类型",
+                    "trigger": "manual",
+                    "placement": "bottom",
+                    "container": 'body',
+                    "html": true,
+                    "content": content
+                })
+                $(this).popover("show");
+            }
+        } else {
+            $(this).popover("hide")
+        }
+    });
 
     //关系修改时触发时间
     $(document).on("change keyup", "#relation-revise .stigmod-input.type-input", function () {
         //读取类型
         let type = $(this).val();
-
+        //处理不匹配情况
         let centerId = $("g.center").attr("id");
         let array = getRelationTypes(centerId);
-        if(array.indexOf(type) == -1) return;
+        if (array.indexOf(type) == -1) {
+            $("#roles").parent().hide();
+            //$("#relation-revise .button-ok").parent().hide();
+            $(".properties-revise").find("#relation-revise").find(".button-ok").children().attr("disabled", true);
+            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+                let content = '<p>是否新建关系类型?</p>';//type+'"</p>';
+                content += '<div href="#" style="text-align: center" class="addRelInModel">' +
+                    '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >否</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '</div>';
+                $(this).popover({
+                    "animation": true,
+                    "title": "未找到输入关系类型",
+                    "trigger": "manual",
+                    "placement": "bottom",
+                    "container": 'body',
+                    "html": true,
+                    "content": content
+                })
+                $(this).popover("show");
+            }
+            return;
+        } else {
+            $(this).popover("hide")
+        }
 
         //查找model，找到对应的角色名
         let relationId, roles;
@@ -440,8 +493,95 @@ $(function () {
         let subItem = $('span[value=' + centerTag + ']').parent().children(".node").children("input").eq(0).val(instance_model.nodes[centerId].value);
 
         $("#roles").parent().show();
+        //$("#relation-revise .button-ok").parent().show();
+        $(".properties-revise").find("#relation-revise").find(".button-ok").children().attr("disabled", false);
         return;
     })
+
+
+
+    $(document).on("click",".addRelInModel .button-ok",function(){
+        $("#modalAddRelInModel").modal("show");
+
+        //中间区域修改
+        html = detail.generateTitle("关系", "relation-add");
+        let item = $("#modalAddRelInModel .modal-body")
+        $(item).children().remove();
+        $(item).append(html);
+
+        html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
+            '<div class="row">' +
+            '<div class="col-xs-12"><input type="text" class="stigmod-input type-input typeahead" stigmod-inputcheck="relation-modify" value="" placeholder="关系" style="text-align:center;"></div>' +
+            '</div></a>';
+        $(item).find("#relation-add").append(html);
+
+
+
+        //显示关系
+        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+            '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+            '<div class="stigmod-rcmd-title row">' +
+            '<span class="col-xs-4">' + "角色" + '</span>' +
+            '<span class="col-xs-8">' + "承担者" + '</span>' +
+            '</div>' +
+            '</div>' +
+            '<div class="list-group roles">' +
+            '</div>' +
+            '</div>';
+        $(item).find("#relation-add").append(html);
+
+        $(item).find("#relation-add .type-input").val($("#relation-revise .stigmod-input.type-input").val());
+
+        //提交按钮
+        let content = '<div style="text-align: center;padding: 0px;margin: 0px;" class="addRelRolesInModel">' +
+            '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >+</button></span>' +
+            '</div>';
+        $(item).find("#relation-add").append(detail.generatePlusLogo("relRole"));
+
+        //自动填充
+        let centerId = $("g.center").attr("id");
+        $(item).find("#relation-add .roles").append(generateNewRole("",instance_model.nodes[centerId].value,instance_model.nodes[centerId].tags[0],"",false));
+        setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
+        $(item).find("#relation-add .roles").append(generateNewRole("","","","",false));
+        setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
+
+        //显示描述
+        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+            '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+            '<div class="stigmod-rcmd-title row">' +
+            '<span class="col-xs-12">' + "描述" + '</span>' +
+            '</div>' +
+            '</div>' +
+            '<div class="list-group description">' +
+            '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-12  vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead desc-input" placeholder="请用一句话描述当前关系，包含关系中的各承担者"></input></span>' +
+            '<span class="col-xs-12  vcenter desc-text" style="padding-top: 10px"></span>' +
+            '</div>'+
+            '</div>'+
+            '</div>';
+        $(item).find("#relation-add").append(html);
+        //提示
+        html = '<div class="alert"></div>';
+        $(item).append(html);
+    })
+
+    $(document).on("click",".addRelInModel .button-cancel",function(){
+        $("#relation-add .stigmod-input.type-input").popover("hide")
+    })
+
+
+
+
+    function generateNewRole(role, node, tag, relationId,needTrash=true){
+        let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+            '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+        if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
+        html+= '<span class="tag" style="display: none" value=' + tag + '>' +
+            '<span class="relation" style="display: none" value=' + relationId + '>' +
+            '</div>';
+        return html;
+    }
 })
 
 /*

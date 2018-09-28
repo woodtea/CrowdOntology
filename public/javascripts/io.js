@@ -23,8 +23,11 @@ ioObj.prototype.init = function () {
             case 'save':
                 that.io_save_model_done(msg);
                 break;
+            case 'mcreate_node':
+                //that.io_mcreate_node_done(msg);
+                break;
             case 'mcreate_relation':
-                //that.io_mcreate_relation_done(msg);
+                that.io_create_model_relation_done(msg);
                 break;
         }
     });
@@ -113,10 +116,73 @@ ioObj.prototype.io_save_model = function (user_id, projectId, model) {
     this.socketEmitArray('model', msg);
 }
 
+
+ioObj.prototype.io_create_moodel_entity = function (entity) {
+
+    //生成Entity节点
+    let entityNode = {};
+    entityNode[entity.nodeId] = {
+        "tags": entity.tags,
+        "value": ""
+    }
+    this.io_create_insModel_node(entityNode);
+
+    //生成Value节点
+    let valueNode = {};
+    valueNode[entity.valueId] = {
+        "tags": ["String"], //默认
+        "value": entity.value
+    }
+    this.io_create_insModel_node(valueNode)
+
+    //生成关系
+    let relations = {};
+    let keyAttribute = data.getKeyAttribute(entity.tags);
+    relations[entity.relationId] = {
+        "type": keyAttribute,
+        "roles": [
+            {"rolename": "", "node_id": entity.nodeId},
+            {"rolename": keyAttribute, "node_id": entity.valueId}
+        ]
+    }
+    this.io_create_insModel_relation(relations);
+}
+
+ioObj.prototype.io_create_model_node = function (relations) {
+    let msg = this.emitMsgHeader('create_node');
+    msg["nodes"] = nodes;
+    this.socketEmitArray('insModel', msg);
+}
+
 ioObj.prototype.io_create_model_relation = function (relations) {
     let msg = this.emitMsgHeader('mcreate_relation');
     msg["relations"] = relations;
     this.socketEmitArray('model', msg);
+}
+
+ioObj.prototype.io_create_model_relation_done = function (msg) {
+    if (msg.error) {
+        return;
+    } else {
+        this.migrateEmitMsg(msg.migrate);
+        let curMsg = this.tmpMsgPop(msg.operationId);
+        let relation = curMsg.relations;
+        //console.log(curMsg);
+
+        for (relationId in relation) {
+            if(relation[relationId].value == undefined){
+                relation[relationId].value = relation[relationId].type;
+                delete relation[relationId].type;
+            }
+            model.relations[relationId] = relation[relationId];
+            break;
+        }
+        if(data.pendingInsRel.length>0){
+            let insRelations = data.pendingInsRel.pop();
+            connection.io_create_insModel_relation(insRelations);
+        }
+        return;
+    }
 }
 
 /* insModel */

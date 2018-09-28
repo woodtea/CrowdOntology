@@ -6,6 +6,9 @@ formatExchange.prototype.web2Server = function(msg,type=""){
     console.log(msg);
     let newMsg;
     switch (msg.operation){
+        case 'mcreate_node':
+            newMsg = format_create_model_node(msg);
+            break;
         case 'mcreate_relation':
             newMsg = format_create_model_relation(msg);
             break;
@@ -79,6 +82,19 @@ reformat_basic = function (msg,M=1) {
     return newMsg;
 }
 
+format_create_model_node = function(msg){
+    let newMsg ;
+    let frontId;
+    for(frontId in msg["nodes"]) break;
+
+    newMsg = format_basic(msg,1);
+    newMsg["nodes"]=[{
+        "front_id" : frontId,
+        "tag" : "Entity",
+        "value" : msg["nodes"][frontId].value
+    }];
+}
+
 format_create_model_relation = function (msg) {
     //丢失了节点类型,节点类型一般是数组
     //nodes前台用的是对象不用数据
@@ -95,19 +111,6 @@ format_create_model_relation = function (msg) {
         "roles": msg["relations"][frontId].roles
     }];
     return newMsg;
-}
-
-format_create_model_node = function(msg){
-    let newMsg ;
-    let frontId;
-    for(frontId in msg["nodes"]) break;
-
-    newMsg = format_basic(msg,1);
-    newMsg["nodes"]=[{
-        "front_id" : frontId,
-        "tag" : "Entity",
-        "value" : msg["nodes"][frontId].value
-    }];
 }
 
 format_create_insModel_node = function (msg) {

@@ -11,6 +11,7 @@ function modelObj(svg = "") {
      this.keyValueArray = ["姓名","名字","名称","片名"];
      this.isGetRcmd = false;
      */
+    this.pendingInsRel = [];
 }
 
 

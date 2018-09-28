@@ -49,9 +49,14 @@ function ioConfig(server){
                         socket.emit("model",rep);
                     });
                     break;
+                case 'mcreate_node':
+                    emitMsg = io_create_insModel_node(msg,function(emitMsg){
+                        logger.info(JSON.stringify(emitMsg))
+                        socket.emit('model',emitMsg);
+                    });
+                    break;
                 case 'mcreate_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
-                        //console.log(emitMsg);
                         logger.info(JSON.stringify(emitMsg))
                         socket.emit('model',emitMsg);
                     });
@@ -496,10 +501,6 @@ function emitMsgHeader(rcvMsg,err,msg){
 function io_create_insModel_node(rcvMsg,callback){
 
     let newMsg = formatExchange.web2Server(rcvMsg);
-
-    console.log("\n******")
-    console.log(newMsg)
-    console.log("******\n")
 
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);

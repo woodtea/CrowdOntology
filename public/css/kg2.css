@@ -160,3 +160,12 @@ path.active{
     min-height:599px;
     height: calc(100vh - 201px);
 }
+
+#modalAddRelInModel .panel:first-child{
+    width: 95%;
+    margin:auto;
+}
+
+.row .col-xs-3.right-content{
+    padding: 0px;
+}
