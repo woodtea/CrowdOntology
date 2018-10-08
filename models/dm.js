@@ -358,6 +358,7 @@ msg : {
         {
             front_id:'',
             value: '',
+            desc: '',
             roles:[
                 {
                 rolename : 'r1',
@@ -384,7 +385,7 @@ DataManager.prototype.mCreateRelation = function (msg, callback) {
         role_str += 'CREATE (r)-[:has_role {name:\'' + role.rolename + '\'}]->(role' + i.toString() + ') ';
     }
     var cypher = start_str + 'MATCH (p:Project {name: {pname}})\
-    CREATE (p)-[:has]->(r:Relation {value: {rname}})' + role_str +
+    CREATE (p)-[:has]->(r:Relation {value: {rname}, desc: {desc}})' + role_str +
         'RETURN id(r) AS relationId, r AS relation';
 
     var resp = extractBasic(msg);
@@ -393,7 +394,8 @@ DataManager.prototype.mCreateRelation = function (msg, callback) {
     session
         .run(cypher, {
             pname: msg.project_id,
-            rname: relation.value
+            rname: relation.value,
+            desc: relation.desc == undefined?'empty':relation.desc
         })
         .then(function (res) {
             var relationId = res.records[0].get('relationId').toString(); //获取id
@@ -427,7 +429,7 @@ DataManager.prototype.mGet = function (msg, callback) {
     var relationCypher = 'MATCH (p:Project {name: {pname}})\
         MATCH (p)-[:has]->(r:Relation)\
         MATCH (r)-[hr:has_role]->(tgt)\
-        RETURN id(r) AS relationId, r.value AS value, hr.name AS roleName, id(tgt) AS roleId';
+        RETURN id(r) AS relationId, r.value AS value, r.desc AS desc, hr.name AS roleName, id(tgt) AS roleId';
 
     var resp = extractBasic(msg);
     resp.error = false;
@@ -458,12 +460,14 @@ DataManager.prototype.mGet = function (msg, callback) {
                         var rec = res.records[i];
                         var relationId = rec.get('relationId').toString();
                         var relationName = rec.get('value');
+                        var relationDesc = rec.get('desc');
                         var roleName = rec.get('roleName');
                         var roleId = rec.get('roleId').toString();
 
                         if (relations[relationId] == undefined) {
                             relations[relationId] = {
                                 value: relationName,
+                                desc: relationDesc,
                                 roles: []
                             };
                         }
@@ -563,9 +567,21 @@ DataManager.prototype.createNodeProxy = function (msg, callback) {
             for (k in info) {
                 var ik = info[k];
                 var tmpTags = [];
+                // var has_node = false;
                 for (t in ik) {
+                    //如果这个节点已经被当前用户引用，则这个节点不会被引用
+                    // var user_list = ik[t];
+                    // for (var i in user_list){
+                    //     var u = user_list[i];
+                    //     if (u == msg.user_id){
+                    //         has_node = true;
+                    //         break;
+                    //     }
+                    // }
                     tmpTags.push(t);
                 }
+                // if (has_node == true)
+                //     continue;
                 var eq = is_eq(tmpTags, tags);
                 if (eq) {
                     sameNode = k;
@@ -936,7 +952,7 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
             MATCH (u:User {name: {uname}})\n\
             MATCH (val) WHERE id(val)={value_id}\n\
             MATCH (i)<-[:has_role]-(rel:RelInst)-[:has_role]->(val) \n\
-            MATCH (rel)-[:from]->(iof:inst_of)-[:to]->(tag) WHERE id(tag)={tag_id}\n\
+            MATCH (ou:User)-[:refer]->(rel)-[:from]->(iof:inst_of)-[:to]->(tag) WHERE id(tag)={tag_id} AND ou.name <> {uname}\n\
             RETURN id(i) AS iid, id(rel) AS relid'.format({
                             value_id: value_id,
                             tag_id: relation.tag
