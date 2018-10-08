@@ -569,9 +569,6 @@ $(function () {
         $("#relation-add .stigmod-input.type-input").popover("hide")
     })
 
-
-
-
     function generateNewRole(role, node, tag, relationId,needTrash=true){
         let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
             '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +

@@ -110,6 +110,9 @@ format_create_model_relation = function (msg) {
         "value" : msg["relations"][frontId].type,
         "roles": msg["relations"][frontId].roles
     }];
+    if(msg["relations"][frontId].desc != undefined && msg["relations"][frontId].desc != ""){
+        newMsg["relations"][0].desc = msg["relations"][frontId].desc;
+    }
     return newMsg;
 }
 

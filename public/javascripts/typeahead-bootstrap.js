@@ -204,6 +204,14 @@ function setRelationTypeTypeahead(array) {
     });
 }
 
+function setRawRelationRoleValueTypeahead(item,tmpModel = instance_model){
+    $(item).find("input").last().typeahead({
+        source: getIndexArray(tmpModel),
+        minLength: 0,
+        showHintOnFocus: true,
+        fitToElement: true,
+        autoSelect: true
+    });}
 
 //
 function getRelationValues(nodeId) {

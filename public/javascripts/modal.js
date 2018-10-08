@@ -65,6 +65,7 @@ $(function () {
                 }
                 relations[relationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityTypeId},)
             }
+            if(rel.desc!=undefined&&rel.desc!="") relations[relationId].desc = rel.desc;
             connection.io_create_model_relation(relations);
             $("#modalAddRelInModel").modal("hide");
 
@@ -161,6 +162,9 @@ $(function () {
         for(let i=0;i<$(inputs).length/2;i++){
             rel.roles.push([$(inputs).eq(i*2).val(),$(inputs).eq(i*2+1).val()]);
         }
+
+        let desc = $("#modalAddRelInModel .description input").val();
+        if(desc!=""&&desc!=undefined) rel.desc = desc;
         return rel;
     }
 
