@@ -554,8 +554,11 @@ $(function () {
             '</div>' +
             '<div class="list-group description">' +
             '<div class="list-group-item stigmod-hovershow-trig row ">' +
-            '<span class="col-xs-12  vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead desc-input" placeholder="请用一句话描述当前关系，包含关系中的各承担者"></input></span>' +
-            '<span class="col-xs-12  vcenter desc-text" style="padding-top: 10px"></span>' +
+            '<span class="col-xs-12 input-group" style="padding: 0px">' +
+                '<span class="input-group-addon"><input type="checkbox"></span>' +
+                '<input type="text" class="stigmod-input typeahead desc-input" placeholder="请用一句话描述当前关系，包含关系中的各承担者"></input>' +
+                '<span class="vcenter desc-text" style="display: none;border: 1px solid #ccc;background-color:#eee;width: 100%"></span>' +
+            '</span>' +
             '</div>'+
             '</div>'+
             '</div>';
@@ -568,17 +571,6 @@ $(function () {
     $(document).on("click",".addRelInModel .button-cancel",function(){
         $("#relation-add .stigmod-input.type-input").popover("hide")
     })
-
-    function generateNewRole(role, node, tag, relationId,needTrash=true){
-        let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
-            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
-            '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
-        if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
-        html+= '<span class="tag" style="display: none" value=' + tag + '>' +
-            '<span class="relation" style="display: none" value=' + relationId + '>' +
-            '</div>';
-        return html;
-    }
 })
 
 /*
@@ -1057,4 +1049,15 @@ relationCompare = function (relations,relation){
     }
 
     return flag;
+}
+
+function generateNewRole(role, node, tag, relationId,needTrash=true){
+    let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+        '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+    if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
+    html+= '<span class="tag" style="display: none" value=' + tag + '>' +
+        '<span class="relation" style="display: none" value=' + relationId + '>' +
+        '</div>';
+    return html;
 }

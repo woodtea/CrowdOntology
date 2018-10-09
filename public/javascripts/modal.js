@@ -1,5 +1,6 @@
 $(function () {
     //modalAddRelInModel
+    /*
     $(document).on("change keyup", "#modalAddRelInModel .desc-input", function () {
 
         clickTimeout.clear();
@@ -23,6 +24,43 @@ $(function () {
                 $("#modalAddRelInModel .modal-body .desc-text").append(descF);
             }
         });
+    })
+    */
+    /*
+    $(document).on("blur", "#modalAddRelInModel .desc-input", function () {
+        let item = $("#modalAddRelInModel input[type='checkbox']");
+        if($(item).prop("checked") == false){
+            $("#modalAddRelInModel input[type='checkbox']").trigger("click");
+        }
+    });
+    */
+
+    $(document).on("click", "#modalAddRelInModel input[type='checkbox']", function () {
+        if($(this).prop("checked")){    //checked
+            let that = $("#modalAddRelInModel .desc-input");
+
+            let desc = $(that).val();
+            let rel = fetchNewRel();
+            let err,str;
+            [err,str] = checkNewRel(rel);
+
+            $("#modalAddRelInModel .modal-body .alert").children().remove();
+            $("#modalAddRelInModel .modal-body .desc-text").children().remove();
+            if(err){
+                //处理提示
+                let html = '<div class="alert alert-danger alert-dismissible"><p>'+str+'</p></div>';
+                $("#modalAddRelInModel .modal-body .alert").append(html);
+            }else{
+                //处理文字v
+                let descF = formatDesc(desc,rel)
+                $("#modalAddRelInModel .modal-body .desc-text").html(descF);
+                $("#modalAddRelInModel .modal-body .desc-text").show();
+                $("#modalAddRelInModel .modal-body .desc-input").hide();
+            }
+        }else{  //unchecked
+            $("#modalAddRelInModel .modal-body .desc-text").hide();
+            $("#modalAddRelInModel .modal-body .desc-input").show();
+        }
     })
 
     $(document).on("click","#modalAddRelInModel .fa-plus",function(){
@@ -111,7 +149,7 @@ $(function () {
                 end--;
             }
         }
-        html = "<p>"+parts[0]+"</p>";
+        html = "<p style='margin: 5px;'>"+parts[0]+"</p>";
         return html;
     }
 
@@ -167,5 +205,4 @@ $(function () {
         if(desc!=""&&desc!=undefined) rel.desc = desc;
         return rel;
     }
-
 })
