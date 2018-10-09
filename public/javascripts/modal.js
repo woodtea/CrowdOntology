@@ -26,14 +26,18 @@ $(function () {
         });
     })
     */
-    /*
+
     $(document).on("blur", "#modalAddRelInModel .desc-input", function () {
         let item = $("#modalAddRelInModel input[type='checkbox']");
         if($(item).prop("checked") == false){
+            if($(this).val().replace(/\s/g,"") == ""){
+                $(this).val("");
+                return;
+            }
             $("#modalAddRelInModel input[type='checkbox']").trigger("click");
         }
     });
-    */
+
 
     $(document).on("click", "#modalAddRelInModel input[type='checkbox']", function () {
         if($(this).prop("checked")){    //checked
