@@ -668,6 +668,10 @@ function init_project(){
         dm.handle(mcreate_user("zhangzf@pku.edu.cn"), function (rep) {});
         dm.handle(mcreate_user("zhangmy@pku.edu.cn"), function (rep) {});
         dm.handle(mcreate_user("zhangw@sei.pku.edu.cn"), function (rep) {});
+
+        dm.handle(mcreate_user("luoyx@pku.edu.cn"), function (rep) {});
+        dm.handle(mcreate_user("guojm@pku.edu.cn"), function (rep) {});
+        dm.handle(mcreate_user("qiaoxh@pku.edu.cn"), function (rep) {});
     });
 }
 
