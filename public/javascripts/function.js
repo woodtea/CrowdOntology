@@ -571,6 +571,10 @@ $(function () {
     $(document).on("click",".addRelInModel .button-cancel",function(){
         $("#relation-add .stigmod-input.type-input").popover("hide")
     })
+
+    $(document).on("click","#modalAlert .modal-footer .refresh",function(){
+        window.location.reload()
+    })
 })
 
 /*
@@ -844,6 +848,11 @@ let tagReformat = {
                 //alert(msg.relations[relationId].tag)//get操作，因为数据是前台的所以是tag
                 let tmp = msg.relations[relationId].tag;    //前台获得情况
                 if (tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
+
+                if(model.relations[tmp]==undefined){
+                    alert("存在未知的数据错误，请刷新后重试.","refresh");
+                    return;
+                }
                 msg.relations[relationId].type = model.relations[tmp].value;
 
                 //临时处理recommend没有tags的问题 - 开始
@@ -972,8 +981,12 @@ function getRelations(id1, id2, model = instance_model) {
     return relationArray;
 }
 
-function alert(text) {
+function alert(text,type="alert") {
     $("#modalAlert .modal-body h5").text(text);
+    if(type=="refresh"){
+        $("#modalAlert .modal-footer .close").hide();
+        $("#modalAlert .modal-footer .refresh").show();
+    }
     $("#modalAlert").modal("show");
 }
 
