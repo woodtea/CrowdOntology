@@ -403,6 +403,7 @@ $(function () {
     })
 
     $(document).on("change keyup", "#class-revise .stigmod-input.type-input", function () {
+        return;
         let type = $(this).val();
         let array = getEntityTypes();
         if (array.indexOf(type) == -1) {
