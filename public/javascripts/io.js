@@ -24,7 +24,10 @@ ioObj.prototype.init = function () {
                 that.io_save_model_done(msg);
                 break;
             case 'mcreate_node':
-                //that.io_mcreate_node_done(msg);
+                that.io_create_model_node_done(msg);
+                break;
+            case 'madd_key_attr':
+                that.io_create_model_keyAttr_done(msg);
                 break;
             case 'mcreate_relation':
                 that.io_create_model_relation_done(msg);
@@ -148,10 +151,93 @@ ioObj.prototype.io_create_moodel_entity = function (entity) {
     this.io_create_insModel_relation(relations);
 }
 
-ioObj.prototype.io_create_model_node = function (relations) {
-    let msg = this.emitMsgHeader('create_node');
+ioObj.prototype.io_create_model_node = function (nodes) {
+    let msg = this.emitMsgHeader('mcreate_node');
     msg["nodes"] = nodes;
-    this.socketEmitArray('insModel', msg);
+    this.socketEmitArray('model', msg);
+}
+
+ioObj.prototype.io_create_model_keyAttr = function (array) {
+    let msg = this.emitMsgHeader('madd_key_attr');
+    msg["keyAttr"] = array;
+    this.socketEmitArray('model', msg);
+}
+
+
+ioObj.prototype.io_create_model_entity = function (entity) {
+
+    //生成Entity节点
+    let entityNode = {};
+    entityNode[entity.nodeId] = {
+        "tag": entity.tag,
+        "value": entity.value
+    }
+    this.io_create_model_node(entityNode);
+
+/*
+    //生成Value节点
+    let valueNode = {};
+    valueNode[entity.valueId] = {
+        "tags": ["String"], //默认
+        "value": entity.value
+    }
+    this.io_create_insModel_node(valueNode)
+*/
+    //生成关系
+    let relations = {};
+    relations[entity.relationId] = {
+        "type": entity.keyAttr,
+        "roles": [
+            {"rolename": "", "node_id": entity.nodeId},
+            {"rolename": entity.keyAttr, "node_id": entity.valueId}
+        ]
+        //desc
+    }
+    this.io_create_model_relation(relations);
+
+
+    let array = [{
+        id:entity.nodeId,
+        keyAttr:entity.relationId
+    }];
+    this.io_create_model_keyAttr(array);
+
+}
+
+ioObj.prototype.io_create_model_node_done = function (msg) {
+    if (msg.error) {
+        return;
+    } else {
+        this.migrateEmitMsg(msg.migrate);
+        let curMsg = this.tmpMsgPop(msg.operationId);
+
+        let node = curMsg.nodes //tmpMsg.emit.nodes;
+        let nodeId;
+        for (nodeId in node) {
+            model.nodes[nodeId] = node[nodeId];
+            delete model.nodes[nodeId].tags;
+            break;
+        }
+        return;
+    }
+}
+
+ioObj.prototype.io_create_model_keyAttr_done = function (msg) {
+    if (msg.error) {
+        return;
+    } else {
+        this.migrateEmitMsg(msg.migrate);
+        let curMsg = this.tmpMsgPop(msg.operationId);
+
+        let array = curMsg.keyAttr //tmpMsg.emit.nodes;
+        for(let i in array){
+            model.nodes[array[i].id].key_attr_list = [array[i].keyAttr];
+        }
+        
+        this.prepareModel();
+        alert("成功添加实体");
+        return;
+    }
 }
 
 ioObj.prototype.io_create_model_relation = function (relations) {
@@ -288,32 +374,7 @@ ioObj.prototype.io_get_model_done = function (msg) {
             "nodes": msg.nodes,
             "relations": msg.relations
         }
-        symbolArray = [];
-        keyValueArray = [];
-        let key_attr_list;
-        for (let key in model.nodes) {
-            if (model.nodes[key].tag == "Symbol") symbolArray.push(model.nodes[key].value)
-            if (model.nodes[key].tag == "Entity") {
-                key_attr_list = model.nodes[key].key_attr_list;
-                for (let i in key_attr_list) {
-                    keyValueArray.push(model.relations[key_attr_list[i]].value);
-                }
-            }
-        }
-
-        relationTypeArray = [];
-        for (let key in model.relations) {
-            let count = 0;
-            for (let role of model.relations[key].roles) {
-                if (model.nodes[role.node_id].tag == "Entity") {
-                    count++;
-                    if (count > 1) {
-                        relationTypeArray.push(model.relations[key].value);
-                        break;
-                    }
-                }
-            }
-        }
+        this.prepareModel();
 
         let msg2 = {
             operation: 'get',
@@ -614,6 +675,16 @@ ioObj.prototype.migrateEmitMsg = function (obj) {
                     }
                 }
             }
+            if (tmpMsp["keyAttr"]) {
+                for(let i in tmpMsp["keyAttr"]){
+                    if(tmpMsp["keyAttr"][i].id == key){
+                        tmpMsp["keyAttr"][i].id = obj[key];
+                    }
+                    if(tmpMsp["keyAttr"][i].keyAttr == key){
+                        tmpMsp["keyAttr"][i].keyAttr = obj[key];
+                    }
+                }
+            }
         }
         //}
         //if(key.indexOf("front_r")!=-1){
@@ -653,4 +724,33 @@ ioObj.prototype.tmpMsgPop = function (operationId) {
         this.socket_mutex = false
     }
     return tmpObj;
+}
+
+ioObj.prototype.prepareModel = function (){
+    symbolArray = [];
+    keyValueArray = [];
+    let key_attr_list;
+    for (let key in model.nodes) {
+        if (model.nodes[key].tag == "Symbol") symbolArray.push(model.nodes[key].value)
+        if (model.nodes[key].tag == "Entity") {
+            key_attr_list = model.nodes[key].key_attr_list;
+            for (let i in key_attr_list) {
+                keyValueArray.push(model.relations[key_attr_list[i]].value);
+            }
+        }
+    }
+
+    relationTypeArray = [];
+    for (let key in model.relations) {
+        let count = 0;
+        for (let role of model.relations[key].roles) {
+            if (model.nodes[role.node_id].tag == "Entity") {
+                count++;
+                if (count > 1) {
+                    relationTypeArray.push(model.relations[key].value);
+                    break;
+                }
+            }
+        }
+    }
 }

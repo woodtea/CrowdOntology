@@ -9,6 +9,9 @@ formatExchange.prototype.web2Server = function(msg,type=""){
         case 'mcreate_node':
             newMsg = format_create_model_node(msg);
             break;
+        case 'madd_key_attr':
+            newMsg = format_create_model_keyAttr(msg);
+            break;
         case 'mcreate_relation':
             newMsg = format_create_model_relation(msg);
             break;
@@ -87,12 +90,24 @@ format_create_model_node = function(msg){
     let frontId;
     for(frontId in msg["nodes"]) break;
 
-    newMsg = format_basic(msg,1);
+    newMsg = format_basic(msg,0);
     newMsg["nodes"]=[{
         "front_id" : frontId,
         "tag" : "Entity",
         "value" : msg["nodes"][frontId].value
     }];
+
+    return newMsg;
+}
+
+format_create_model_keyAttr = function (msg) {
+    let newMsg = format_basic(msg,0);
+
+    newMsg["nodes"] = [];
+    for(let i in msg["keyAttr"]){
+        newMsg["nodes"].push({id:msg["keyAttr"][i].id,key_attr_list:[msg["keyAttr"][i].keyAttr]});
+    }
+    return newMsg;
 }
 
 format_create_model_relation = function (msg) {

@@ -403,7 +403,6 @@ $(function () {
     })
 
     $(document).on("change keyup", "#class-revise .stigmod-input.type-input", function () {
-        return;
         let type = $(this).val();
         let array = getEntityTypes();
         if (array.indexOf(type) == -1) {
@@ -429,6 +428,36 @@ $(function () {
         } else {
             $(this).popover("hide")
         }
+    });
+
+    $(document).on("click",".addEntityInModel .button-ok",function(){
+
+        $("#modalAddEntityInModel input.type").val($("#class-revise .stigmod-input.type-input").val());
+        $("#modalAddEntityInModel input.attr").val("");
+        $("#modalAddEntityInModel").modal("show");
+        return;
+    })
+
+    $(document).on("click","#modalAddEntityInModel .btn-primary",function(){
+        let type = $("#modalAddEntityInModel input.type").val();
+        let attr = $("#modalAddEntityInModel input.attr").val();
+
+        let valueId;
+        for(let key in model.nodes){
+            if(model.nodes[key].tag == "Symbol"){
+                valueId = key;
+                break;
+            }
+        }
+        let entity = {
+            "nodeId": generateFrontNodeID(),
+            "relationId": generateFrontRelationID(),
+            "valueId": valueId,
+            "tag": "Entity",
+            "value": type,
+            "keyAttr": attr
+        };
+        connection.io_create_model_entity(entity)
     });
 
     //关系修改时触发时间
@@ -985,8 +1014,11 @@ function getRelations(id1, id2, model = instance_model) {
 function alert(text,type="alert") {
     $("#modalAlert .modal-body h5").text(text);
     if(type=="refresh"){
-        $("#modalAlert .modal-footer .close").hide();
+        $("#modalAlert .modal-footer .dismiss").hide();
         $("#modalAlert .modal-footer .refresh").show();
+    }else{
+        $("#modalAlert .modal-footer .dismiss").show();
+        $("#modalAlert .modal-footer .refresh").hide();
     }
     $("#modalAlert").modal("show");
 }

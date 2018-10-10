@@ -122,6 +122,34 @@
   </div>
 </div>
 
+<div class="modal fade bs-example-modal-sm" id="modalAddEntityInModel" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">创建新的实体类型</h4>
+      </div>
+      <div class="modal-body" style="text-align: center">
+        <div class="panel panel-default list-group-item showPopover" style="">
+            <div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">
+                <div class="stigmod-rcmd-title row"><span class="col-xs-5">类型</span><span class="col-xs-7">主属性名</span></div>
+            </div>
+            <div class="list-group" id="roles">
+                <div class="list-group-item stigmod-hovershow-trig row ">
+                    <span class="col-xs-5" style="padding: 0px;"><input type="text" class="stigmod-input type" value="" placeholder="类型"></span>
+                    <span class="col-xs-7" style="padding: 0px;"><input type="text" class="stigmod-input attr" placeholder="如：名称、姓名等，主属性会显示在图谱中"value=""></span>
+                 </div>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">创建</button>
+        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade bs-example-modal-sm" id="modalAddRelInModel" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -178,7 +206,8 @@
         <h5></h5>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-sm btn-default dismiss" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-sm btn-default refresh" data-dismiss="modal" style="display: none">刷新</button>
       </div>
     </div>
   </div>

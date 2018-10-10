@@ -55,6 +55,12 @@ function ioConfig(server){
                         socket.emit('model',emitMsg);
                     });
                     break;
+                case 'madd_key_attr'://both node and key attribute
+                    emitMsg = io_create_model_keyAttr(msg,function(emitMsg){
+                        logger.info(JSON.stringify(emitMsg))
+                        socket.emit('model',emitMsg);
+                    });
+                    break;
                 case 'mcreate_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
                         logger.info(JSON.stringify(emitMsg))
@@ -513,16 +519,22 @@ function io_create_insModel_node(rcvMsg,callback){
     });
 
     return;
-/*
-    //forTest
-    let emitMsg = emitMsgHeader(rcvMsg,null,null);
-    for(let key in rcvMsg.nodes){
-        emitMsg.migrate[key] = "back_"+key.slice(6);
-        break;
-    }
-    return emitMsg;
-    */
 }
+
+function io_create_model_keyAttr(rcvMsg,callback) {
+    let newMsg = formatExchange.web2Server(rcvMsg);
+
+    dm.handle(newMsg, function(rep){
+        let emitMsg = emitMsgHeader(rcvMsg,null,null);
+        emitMsg.migrate = rep.migrate;
+        console.log('[CALLBACK]')
+        console.log(rep);
+        callback(emitMsg);
+    });
+
+    return;
+}
+
 
 function io_remove_insModel_node(rcvMsg,callback){
     let newMsg = formatExchange.web2Server(rcvMsg);
