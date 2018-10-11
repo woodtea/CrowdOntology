@@ -78,7 +78,10 @@ networkObj.prototype.getOptions = function () {
                 highlight: '#f0ad4e'//#eea236
             }
         },
-        groups: {}
+        groups: {},
+        layout:{
+            improvedLayout:false
+        }
     };
 
     let i = 0;
