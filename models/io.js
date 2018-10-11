@@ -18,7 +18,7 @@ function ioConfig(server){
     io.on('connection', function(socket) {
         //socket建立连接
         console.log('a user connected');
-        socket.emit('data', db)
+        //socket.emit('data', db)
         //socket断开连接
         socket.on('disconnect', function () {
             console.log('user disconnected');
@@ -29,7 +29,7 @@ function ioConfig(server){
             //console.log(msg);
             db["instance_model"][msg.user] = msg.instance_model;
             //data.instance_model = msg.instance_model;
-            //socket.emit('chat message',msg)
+            //return socket.emit('chat message',msg)
             console.log(db);
         })
         socket.on('model', function(msg){
@@ -40,31 +40,31 @@ function ioConfig(server){
                 case 'mget':
                     /*
                     emitMsg = io_get_model(msg,function(emitMsg){
-                        socket.emit('model',emitMsg);
+                        return socket.emit('model',emitMsg);
                     });*/
                     dm.handle(msg, function(rep){
                         console.log("model")
                         console.log(rep)
                         logger.trace(JSON.stringify(rep))
-                        socket.emit("model",rep);
+                        return socket.emit("model",rep);
                     });
                     break;
                 case 'mcreate_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('model',emitMsg);
+                        return socket.emit('model',emitMsg);
                     });
                     break;
                 case 'madd_key_attr'://both node and key attribute
                     emitMsg = io_create_model_keyAttr(msg,function(emitMsg){
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('model',emitMsg);
+                        return socket.emit('model',emitMsg);
                     });
                     break;
                 case 'mcreate_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('model',emitMsg);
+                        return socket.emit('model',emitMsg);
                     });
                     break;
 
@@ -80,41 +80,41 @@ function ioConfig(server){
                 case 'get':
                     /*
                     emitMsg = io_get_insModel(msg,function(emitMsg){
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });*/
                     console.log("insModel")
                     dm.handle(msg, function(rep){
                         console.log(rep)
                         logger.trace(JSON.stringify(rep))
-                        socket.emit("insModel",rep);
+                        return socket.emit("insModel",rep);
                     });
                     break;
                 case 'create_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'remove_node':
                     emitMsg = io_remove_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'create_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
                         //console.log(emitMsg);
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'remove_relation':
                     emitMsg = io_remove_insModel_relation(msg,function(emitMsg){
                         //console.log(emitMsg);
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'revise_relation':
@@ -129,25 +129,25 @@ function ioConfig(server){
                 case 'rcmd':
                     emitMsg = io_recommend_insModel(msg,function(emitMsg){
                         logger.info(JSON.stringify(emitMsg))
-                        socket.emit('insModel',emitMsg);
+                        return socket.emit('insModel',emitMsg);
                     });
                     break;
                 case 'rcmdIndex':
                     dm.handle(msg, function(rep){
                         logger.trace(JSON.stringify(rep))
-                        socket.emit("insModel",rep);
+                        return socket.emit("insModel",rep);
                     });
                     break;
                 case 'rcmd_entity':
                     dm.handle(msg, function(rep){
                         console.log(rep);
                         logger.trace(JSON.stringify(rep))
-                        socket.emit("insModel",rep);
+                        return socket.emit("insModel",rep);
                     });
                     break;
             }
             //console.log(emitMsg);
-            //socket.emit('insModel',emitMsg);
+            //return socket.emit('insModel',emitMsg);
         });
 
         //先不管。。。我也不知道写的什么
@@ -156,7 +156,7 @@ function ioConfig(server){
 
         socket.on('revise',function(msg){
             [type,reply] = reviseMsg(msg);
-            socket.emit(type,reply);
+            return socket.emit(type,reply);
         })
 
         socket.on('recommend',function(msg){
@@ -457,7 +457,7 @@ function ioConfig(server){
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
                     console.log(rep);
-                    socket.emit('iotest_back', rep);
+                    return socket.emit('iotest_back', rep);
                 });
             }
         })
