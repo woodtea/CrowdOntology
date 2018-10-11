@@ -38,6 +38,14 @@ function networkObj() {
             }
         }
     });
+
+    this.network.on("beforeDrawing", function(params) {
+        that.loading("show");
+    });
+
+    this.network.on("afterDrawing", function() {
+        that.loading("hide");
+    });
 }
 
 networkObj.prototype.setData = function () {
@@ -164,5 +172,22 @@ networkObj.prototype.uniqueEdges = function (edges) {
 
 networkObj.prototype.focusNode = function (id) {
     this.network.selectNodes([id])
+}
+
+networkObj.prototype.loading = function(type){
+    switch(type){
+        case "show":
+            //$("body").loading({overlay: $("#custom-overlay")});
+            $("#custom-overlay").show();
+            break;
+        case "hide":
+            //$("body").loading("stop");
+            $("#custom-overlay").hide();
+            break;
+        default://toogle
+            //$("body").loading("toggle");
+            $("#custom-overlay").toggle();
+            break;
+    }
 }
 
