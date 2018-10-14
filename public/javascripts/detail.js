@@ -384,9 +384,28 @@ detailObj.prototype.classRemoveSubmit = function (item) {
     let centerId = $(".entity.center").attr("id");
 
     connection.io_remove_insModel_node(centerId);
-    let $alternate = $(".entity").not("#"+centerId);
+    let $alternate = $(".middle-content .entity").not("#"+centerId);
     if($alternate.length) {
-        $alternate.eq(0).trigger("click")
+        detail.drawIndex(instance_model);
+        $alternate.eq(0).delay("300").trigger("click")
+    }else{
+        for(let key in instance_model.nodes){
+            if(key != centerId){
+                network.setData();
+                detail.drawIndex(instance_model);
+                svg.drawEntity(key);
+                if (!$(".btn-group.workspace .btn-default").hasClass("off")) {
+                    $("#" + key).delay("10").click();
+                } else {
+                    drawNodeDetails(key);
+                }
+                return;
+            }
+        }
+        //如果没有东西了
+        detail.rightColumnShow(properties);
+        $(properties).children().remove();
+        detail.drawPropertyTitle();
     }
 }
 

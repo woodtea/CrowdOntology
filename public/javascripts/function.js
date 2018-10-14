@@ -403,7 +403,6 @@ $(function () {
     })
 
     $(document).on("change keyup", "#class-revise .stigmod-input.type-input", function () {
-        return;
 
         let type = $(this).val();
         let array = getEntityTypes();
@@ -444,6 +443,20 @@ $(function () {
         let type = $("#modalAddEntityInModel input.type").val();
         let attr = $("#modalAddEntityInModel input.attr").val();
 
+        let array = getEntityTypes();
+        if (array.indexOf(type) != -1) {
+            alert("实体类型名称已经存在!");
+            return;
+        }
+        if(type.replace(/\s/g,"")==""){
+            alert("实体类型名称不能为空!");
+            return;
+        }
+        if(attr.replace(/\s/g,"")==""){
+            alert("主属性不能为空!");
+            return;
+        }
+
         let valueId;
         for(let key in model.nodes){
             if(model.nodes[key].tag == "Symbol"){
@@ -462,6 +475,87 @@ $(function () {
         connection.io_create_model_entity(entity)
     });
 
+    //属性处理
+    $(document).on("change keyup", "#attribute-revise .stigmod-input.type-input", function () {
+
+        let type = $(this).val();
+        let centerId = $("g.center").attr("id");
+
+        let array = getAttributeTypes(centerId);
+        if (array.indexOf(type) == -1) {
+            if (($(this).parent().children("ul").css("display") == 'none' || array.length == 0)&& $(this).is(":focus")) {
+                let content = '<p>是否新建属性类型?</p>';
+                content += '<div href="#" style="text-align: center" class="addAttrInModel">' +
+                    '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '<span class="button-cancel" type="cancel"><button class="btn btn-default btn-sm" type="button" >否</button></span>' +
+                    '<span>&nbsp;</span>' +
+                    '</div>';
+                $(this).popover({
+                    "animation": true,
+                    "title": "未找到输入属性类型",
+                    "trigger": "manual",
+                    "placement": "bottom",
+                    "container": 'body',
+                    "html": true,
+                    "content": content
+                })
+                $(this).popover("show");
+            }
+        } else {
+            $(this).popover("hide")
+        }
+    });
+
+    $(document).on("click",".addAttrInModel .button-ok",function(){
+        $("#modalAddAttrInModel input.attr").val($("#attribute-revise .stigmod-input.type-input").val());
+        $("#modalAddAttrInModel input.type").val("String");
+        $("#modalAddAttrInModel input.type").attr("disabled","disabled");
+        $("#modalAddAttrInModel").modal("show");
+        return;
+    })
+
+    $(document).on("click","#modalAddAttrInModel .btn-primary",function(){
+        let attr = $("#modalAddAttrInModel input.attr").val();
+        let type = $("#modalAddAttrInModel input.type").val();
+
+        let centerId = $("g.center").attr("id");
+        let array = getAttributeTypes(centerId);
+        if (array.indexOf(attr) != -1) {
+            alert("属性类型已经存在!");
+            return;
+        }
+        if(type.replace(/\s/g,"")==""){
+            alert("属性对象类型不能为空!");
+            return;
+        }
+
+        let classId,attributeId;
+        let entityType = instance_model.nodes[centerId].tags[0];
+        for(let key in model.nodes){
+            if(model.nodes[key].value == entityType){
+                classId = key;
+                break;
+            }
+        }
+        for(let key in model.nodes){
+            if(model.nodes[key].tag == "Symbol"){
+                attributeId = key;
+                break;
+            }
+        }
+        let relationId = generateFrontRelationID();
+        let relations = {};
+        relations[relationId] = {
+            "type":attr,
+            "roles": [
+                {"rolename": "", "node_id": classId},
+                {"rolename": attr, "node_id": attributeId}
+            ],
+        }
+        connection.io_create_model_relation(relations);
+    });
+
     //关系修改时触发时间
     $(document).on("change keyup", "#relation-revise .stigmod-input.type-input", function () {
         //读取类型
@@ -473,7 +567,7 @@ $(function () {
             $("#roles").parent().hide();
             //$("#relation-revise .button-ok").parent().hide();
             $(".properties-revise").find("#relation-revise").find(".button-ok").children().attr("disabled", true);
-            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+            if (($(this).parent().children("ul").css("display") == 'none'|| array.length == 0) && $(this).is(":focus")) {
                 let content = '<p>是否新建关系类型?</p>';//type+'"</p>';
                 content += '<div href="#" style="text-align: center" class="addRelInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +

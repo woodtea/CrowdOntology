@@ -235,7 +235,7 @@ ioObj.prototype.io_create_model_keyAttr_done = function (msg) {
         }
         
         this.prepareModel();
-        alert("成功添加实体");
+        alert("成功添加实体类型");
         return;
     }
 }
@@ -266,6 +266,29 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
         if(data.pendingInsRel.length>0){
             let insRelations = data.pendingInsRel.pop();
             connection.io_create_insModel_relation(insRelations);
+        }
+        //处理Attribute的情况
+        let classId;
+        let centerId = $("g.center").attr("id");
+        let entityType = instance_model.nodes[centerId].tags[0];
+        for(let key in model.nodes){
+            if(model.nodes[key].value == entityType){
+                classId = key;
+                break;
+            }
+        }
+        for (relationId in relation) {
+            for(let i in relation[relationId].roles){
+                console.log(centerId);
+                console.log(relation[relationId].roles[i].node_id)
+                console.log(relation[relationId].roles[i].rolename)
+                if(relation[relationId].roles[i].node_id == classId && relation[relationId].roles[i].rolename == ""){
+                    let array = getAttributeTypes(centerId);
+                    setAttributeTypeTypeahead(array);
+                    alert("成功添加属性类型");
+                }
+                break;
+            }
         }
         return;
     }
