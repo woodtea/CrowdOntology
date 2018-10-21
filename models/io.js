@@ -452,6 +452,14 @@ function ioConfig(server){
                 mcreate_movie_project_rzdf();
             }else if(msg=="mcreate_movie_dhxy"){
                 mcreate_movie_project_with_name("大话西游-电影人物关系图谱");
+            }else if(msg=="mcreate_movie_ws"){
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-群体");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-yuxiaz");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-symbolk");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-guoliang72");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-lbybob");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-weiyuhanb");
+                mcreate_movie_project_with_name("无双-电影人物关系图谱-qiaoxiaohe");
             }else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){

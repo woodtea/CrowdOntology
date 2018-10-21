@@ -1,4 +1,58 @@
 $(function () {
+
+    $(document).on("click", '#stigmod-fullscreen-btn .glyphicon-fullscreen', function () {
+        let docElm = document.documentElement;
+        if(docElm.requestFullscreen) {//W3C
+            docElm.requestFullscreen();
+        }else if(docElm.mozRequestFullScreen) {//FireFox
+            docElm.mozRequestFullScreen();
+        }else if(docElm.webkitRequestFullScreen) {//Chrome等
+            docElm.webkitRequestFullScreen();
+        }else if  (docElm.msRequestFullscreen) {//IE
+            docElm.msRequestFullscreen();
+        }
+    })
+
+    $(document).on("click", '#stigmod-fullscreen-btn .glyphicon-resize-small', function () {
+        console.log("cancle");
+        let docElm = document;
+        console.log(docElm.exitFullscreen)
+        console.log(docElm.mozCancelFullScreen)
+        console.log(docElm.webkitCancelFullScreen)
+        console.log(docElm.msExitFullscreen)
+        if(docElm.exitFullscreen) {//W3C
+            docElm.cancelFullscreen();
+        }else if(docElm.mozCancelFullScreen) {//FireFox
+            docElm.mozCancelFullScreen();
+        }else if(docElm.webkitCancelFullScreen) {//Chrome等
+            console.log("bbb");
+            docElm.webkitCancelFullScreen();
+        }else if  (docElm.msExitFullscreen) {//IE
+            docElm.msExitFullscreen();
+        }
+    })
+
+    document.addEventListener("webkitfullscreenchange", function(e) {
+        var isFull = document.fullscreenEnabled || window.fullScreen || document.webkitIsFullScreen || document.msFullscreenEnabled;
+        if (isFull === undefined) {isFull = false;}
+
+        if(isFull){
+            $("#stigmod-fullscreen-btn .glyphicon-fullscreen").addClass("glyphicon-resize-small");
+            $("#stigmod-fullscreen-btn .glyphicon-fullscreen").removeClass("glyphicon-fullscreen");
+            $(".navbar-fixed-top").hide();
+            $(".graph-row").children(".col-xs-3").hide();
+            $(".graph-row").children(".col-xs-9").addClass("col-xs-12");
+            $(".graph-row").children(".col-xs-9").removeClass("col-xs-9");
+        }else{
+            $("#stigmod-fullscreen-btn .glyphicon-resize-small").addClass("glyphicon-fullscreen")
+            $("#stigmod-fullscreen-btn .glyphicon-resize-small").removeClass("glyphicon-resize-small");
+            $(".navbar-fixed-top").show();
+            $(".graph-row").children(".col-xs-3").show();
+            $(".graph-row").children(".col-xs-12").addClass("col-xs-9");
+            $(".graph-row").children(".col-xs-12").removeClass("col-xs-12");
+        }
+    });
+
     //modalAddRelInModel
     $(document).on("blur", "#modalAddRelInModel .desc-input", function () {
         let item = $("#modalAddRelInModel input[type='checkbox']");
