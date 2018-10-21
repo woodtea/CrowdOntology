@@ -6,3 +6,4 @@ logs/*
 fetchlog.sh
 serverLogs/
 package-lock.json
+public/webpack/
