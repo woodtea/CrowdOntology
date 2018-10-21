@@ -1627,7 +1627,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
             var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
             MATCH (i) WHERE id(i) in {id_list} \n\
-            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT (i)<-[:refer]-(u)\n\
+            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT (rel)<-[:refer]-(u)\n\
             MATCH (rel)-[hr:has_role]->(role)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({
