@@ -11,8 +11,9 @@ function wushuangProject() {
     let endTimeI = new Date("2018-10-24 22:00");
 
 
-    wushuangC = ["jiangy", "ciecwch", "wxmin", "luoyx", "zhangmy", "zhut", "464408345", "zxycs",]
-    wushuangI = ["yuxiaz", "symbolk", "liberion", "weiyh", "guoliang72", "qiaoxiaohe"]
+
+    wushuangC = ["jiangy", "ciecwch", "wxmin", "luoyx", "zhangmy", "zhut", "464408345", "zhangxy",]
+    wushuangI = ["yuxiaz", "symbolk", "liberion", "weiyh", "guojm", "2217496259"]
 
     if (wushuangC.indexOf(user) != -1) {
         if(startTimeC<=curTime && curTime<=endTimeC){
@@ -20,9 +21,10 @@ function wushuangProject() {
         }
     }
     if (wushuangI.indexOf(user) != -1) {
-        //if(startTimeI<=curTime && curTime<=endTimeI) {
+        if(user=="2217496259") user="qiaoxh";
+        if(startTimeI<=curTime && curTime<=endTimeI) {
             $("#stigmod-model-info-container").append(generateProject("无双-电影人物关系图谱-" + user, "中文", "无双-电影人物关系图谱", "Updated on " + curTime.toLocaleString()));
-        //}
+        }
     }
 
     function generateProject(name, language, description, updateTime) {
