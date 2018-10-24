@@ -7,7 +7,7 @@ function wushuangProject() {
     let startTimeC = new Date("2018-10-21 18:00");
     let endTimeC = new Date("2018-10-21 22:00");
 
-    let startTimeI = new Date("2018-10-24 21:00");
+    let startTimeI = new Date("2018-10-24 20:00");
     let endTimeI = new Date("2018-10-24 22:00");
 
 
