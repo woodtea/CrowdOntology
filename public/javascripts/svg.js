@@ -575,35 +575,41 @@ svgObj.prototype.getPath = function(centX, centY, R, r, angle, data) {
     }
     return path;
 }
-
+svgObj.prototype.calPath = function(path,rot){
+    if ((path.ex - path.sx) * Math.cos(rot * Math.PI / 180) < 0) {
+        return "M" + path.ex + "," + path.ey + "L" + path.sx + "," + path.sy;
+    } else {
+        return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
+    }
+}
 svgObj.prototype.drawPath = function(path,centX=this.width/2, centY=this.height/2,textAnchor="middle",startOffset="50%") {
+    let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
     this.svg
         .append("path")
         .style("fill", "none")
 
         .attr("id", path.data.id+"-"+path.data.label)
-        .attr("d", function (d) {
-            if (path.cx1 == undefined) {
-                return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
-            } else {
-                let str;
-                if (path.sx < path.ex) {
-                    str = "M" + path.sx + "," + path.sy +
-                        "C" + path.ox1 + "," + path.oy1 + "," + path.nx1 + "," + path.ny1 + "," + path.cx1 + "," + path.cy1 +
-                        "L" + path.cx2 + "," + path.cy2 +
-                        "C" + path.nx2 + "," + path.ny2 + "," + path.ox2 + "," + path.oy2 + "," + path.ex + "," + path.ey;
-                } else {
-                    str = "M" + path.ex + "," + path.ey +
-                        "Q" + path.nx2 + "," + path.ny2 + "," + path.cx2 + "," + path.cy2 +
-                        "L" + path.cx1 + "," + path.cy1 +
-                        "Q" + path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
-                }
-                return str;
-            }
-        });
-
+        .attr("d", this.calPath(path,rotateAngle))
+        // .attr("d", function (d) {
+        //     if (path.cx1 == undefined) {
+        //         return "M" + path.sx + "," + path.sy + "L" + path.ex + "," + path.ey;
+        //     } else {
+        //         let str;
+        //         if (path.sx < path.ex) {
+        //             str = "M" + path.sx + "," + path.sy +
+        //                 "C" + path.ox1 + "," + path.oy1 + "," + path.nx1 + "," + path.ny1 + "," + path.cx1 + "," + path.cy1 +
+        //                 "L" + path.cx2 + "," + path.cy2 +
+        //                 "C" + path.nx2 + "," + path.ny2 + "," + path.ox2 + "," + path.oy2 + "," + path.ex + "," + path.ey;
+        //         } else {
+        //             str = "M" + path.ex + "," + path.ey +
+        //                 "Q" + path.nx2 + "," + path.ny2 + "," + path.cx2 + "," + path.cy2 +
+        //                 "L" + path.cx1 + "," + path.cy1 +
+        //                 "Q" + path.nx1 + "," + path.ny1 + "," + path.sx + "," + path.sy;
+        //         }
+        //         return str;
+        //     }
+        // });
     let originPosition = ""+centX+"px "+centY+"px";
-    let rotateAngle = (path.rotate/(2*Math.PI)*360)%360;
     $("#"+path.data.id+"-"+path.data.label).css({transformOrigin: originPosition}).css({rotate: rotateAngle});
 
     this.drawPathText(path,textAnchor,startOffset);
