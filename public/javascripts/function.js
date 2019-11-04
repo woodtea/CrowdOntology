@@ -59,6 +59,25 @@ $(function () {
         }
     })
 
+    $(document).on("click", ".btn.filter-apply", function () {
+        svg.valuelist.fresh = false;
+        svg.valuelist.showValue = new Set();
+        $(".filter-checkbox:checkbox").each(function(){
+            if($(this).prop("checked")){
+                svg.valuelist.showValue.add($(this).attr("value"));
+            }
+        });
+        let centerNode = $(".entity.center");
+        let id= centerNode.attr("id");
+        if($(".btn.recommend").hasClass("active"))
+        {
+            svg.drawRecommendation(id);
+        }else{
+            svg.drawEntity(id);
+        }
+        svg.valuelist.fresh=true;
+    })
+
 
     $(document).on("click", '#modalSearch .btn-primary', function () {
         $("#modalSearch").modal("hide");
@@ -143,7 +162,6 @@ $(function () {
         svg.svg.selectAll("g.relation").classed("active", false);
         svg.svg.selectAll("path").classed("active", false);
         $(".btn.recommend").removeClass("active");
-
         let item = this;
         if (d3.select(this).classed("isRecommendation") == true) {
             clickTimeout.set(function () {
@@ -159,7 +177,7 @@ $(function () {
                     $(properties).children().remove();
                     detail.drawIndex();
                     svg.drawEntity(id);
-                } else {
+                } else {//大多数时候执行这个
                     drawNodeDetails(id);
                 }
             });

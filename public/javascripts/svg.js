@@ -20,10 +20,15 @@ function svgObj(svg=""){
         rcmdLen: 0,         //推荐中，节点连接关系的个数
         wholeLen: 0,        //=tmpLen+rcmdLen
     }
+
+    this.valuelist = {//表示当前要显示的元素的列表
+        fresh: true, //true时表示要刷新过滤列表
+        showValue: new Set()
+    }
+
 }
 
 svgObj.prototype.initSVG = function(){//好像从来没用过
-
     let tmp = $("#modalWorkspace svg");
     $(tmp).width(this.width);
     $(tmp).height(this.height);
@@ -57,15 +62,19 @@ svgObj.prototype.setSize = function () {
     this.R = 4 * this.r; //5 * r;
     this.R2 = 2 * this.R ;
 
-    this.zoomR = 0.75
+    this.zoomR = 0.75;
     this.zoomW = 1.25;
     this.zoomH = 1.75;
 }
 
 svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
+    if(this.valuelist.fresh) this.valuelist.showValue = new Set();
+
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
+
+    if(this.valuelist.fresh) this.freshFilter();
 
     this.centerNode = {
         id: id,
@@ -87,11 +96,15 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
 svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
+    if(this.valuelist.fresh) this.valuelist.showValue = new Set();
+
     let entity1 = this.getEntity(id, rcmdModel);
     if (entity1 == undefined) return false;  //如果不是实体的话
 
     let entity2 = this.getEntity(id, tmpModel);
     if (entity2 == undefined) return false;  //如果不是实体的话
+
+    if(this.valuelist.fresh) this.freshFilter();
 
     if(checkRcmd){
         checkRcmd = false;
@@ -135,6 +148,20 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     this.rcmdDestroy();
 
     return true;
+}
+
+svgObj.prototype.freshFilter = function(){
+    let temp=$(".filter-panel");
+    temp.empty();
+    for(let value of this.valuelist.showValue)
+    {
+        temp.append("<div class=\"checkbox\">\n" +
+            "          <label>\n" +
+            "            <input class=\"filter-checkbox\" type=\"checkbox\" value=\""+value+"\" checked>"+value +"\n" +
+            "          </label>\n" +
+            "        </div>")
+
+    }
 }
 
 svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model){
@@ -451,12 +478,32 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
     for (let relationId in tmpModel.relations) {
         for (let roleIndex in tmpModel.relations[relationId].roles) {
             if (id == tmpModel.relations[relationId].roles[roleIndex].node_id) {
-                entity.relations[relationId] = tmpModel.relations[relationId]
-                entity.relations[relationId].id = relationId;
+                //Edited by Cui on 2019/10/22 对显示列表的相关处理
+                let toShow = false;
+                for (let roleIndex1 in tmpModel.relations[relationId].roles) {
+                    if(roleIndex1 == roleIndex) continue; //对除去中心节点本身的节点进行处理
+                    let tmpRole = tmpModel.relations[relationId].roles[roleIndex1];
+                    if(data.isEntity(tmpRole.node_id,tmpModel)){
+                        if(this.valuelist.fresh) {
+                            this.valuelist.showValue.add(tmpModel.nodes[tmpRole.node_id].value);
+                        }
+                        else{
+                            if(this.valuelist.showValue.has(tmpModel.nodes[tmpRole.node_id].value)){
+                                toShow = true;
+                            }
+                        }
+                    }
+                    // console.log(tmpModel.nodes[tmpModel.relations[relationId].roles[roleIndex1].node_id]);
+                }
+                if(this.valuelist.fresh||toShow){
+                    entity.relations[relationId] = tmpModel.relations[relationId]
+                    entity.relations[relationId].id = relationId;
+                }
                 break;
             }
         }
     }
+    //console.log(this.valuelist.showValue);
     return entity;
 }
 
