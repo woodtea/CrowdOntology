@@ -23,7 +23,12 @@ function svgObj(svg=""){
 
     this.valuelist = {//表示当前要显示的元素的列表
         fresh: true, //true时表示要刷新过滤列表
-        showValue: new Set()
+        entity: new Set(),
+        relation: new Set(),
+        init: function(){
+            this.entity= new Set();
+            this.relation = new Set();
+        }
     }
 
 }
@@ -69,7 +74,7 @@ svgObj.prototype.setSize = function () {
 
 svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
-    if(this.valuelist.fresh) this.valuelist.showValue = new Set();
+    if(this.valuelist.fresh) this.valuelist.init();
 
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
@@ -96,7 +101,7 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
 svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
-    if(this.valuelist.fresh) this.valuelist.showValue = new Set();
+    if(this.valuelist.fresh) this.valuelist.init();
 
     let entity1 = this.getEntity(id, rcmdModel);
     if (entity1 == undefined) return false;  //如果不是实体的话
@@ -153,15 +158,32 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
 svgObj.prototype.freshFilter = function(){
     let temp=$(".filter-panel");
     temp.empty();
-    for(let value of this.valuelist.showValue)
+    let list=$("<ul></ul>");
+    let entityList=$("<ul></ul>");
+    let relationList=$("<ul></ul>");
+    let entities=$("<li></li>");
+    let relations=$("<li></li>");
+    list.addClass("list-unstyled");
+    list.append(entities).append(relations);
+    entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+        "            <scan>实体</scan>").append(entityList);
+    relations.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+        "            <scan>关系</scan>").append(relationList);
+    for(let value of this.valuelist.entity)
     {
-        temp.append("<div class=\"checkbox\">\n" +
-            "          <label>\n" +
-            "            <input class=\"filter-checkbox\" type=\"checkbox\" value=\""+value+"\" checked>"+value +"\n" +
-            "          </label>\n" +
-            "        </div>")
-
+        entityList.append("<li>\n" +
+            "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+            "                <scan>"+value+"</scan>\n" +
+            "            </li>")
     }
+    for(let value of this.valuelist.relation)
+    {
+        relationList.append("<li>\n" +
+            "                <input class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+            "                <scan>"+value+"</scan>\n" +
+            "            </li>")
+    }
+    temp.append(list);
 }
 
 svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model){
@@ -477,25 +499,33 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
     //处理邻接信息
     for (let relationId in tmpModel.relations) {
         for (let roleIndex in tmpModel.relations[relationId].roles) {
+            //console.log(tmpModel.relations[relationId]);
             if (id == tmpModel.relations[relationId].roles[roleIndex].node_id) {
                 //Edited by Cui on 2019/10/22 对显示列表的相关处理
-                let toShow = false;
+                let toShowE = false,toShowR = false;
+                if(this.valuelist.fresh) {
+                    this.valuelist.relation.add(tmpModel.relations[relationId].type);
+                }
+                else if(this.valuelist.relation.has(tmpModel.relations[relationId].type)){
+                    toShowR = true;
+                }
                 for (let roleIndex1 in tmpModel.relations[relationId].roles) {
                     if(roleIndex1 == roleIndex) continue; //对除去中心节点本身的节点进行处理
                     let tmpRole = tmpModel.relations[relationId].roles[roleIndex1];
                     if(data.isEntity(tmpRole.node_id,tmpModel)){
                         if(this.valuelist.fresh) {
-                            this.valuelist.showValue.add(tmpModel.nodes[tmpRole.node_id].value);
+                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value);
                         }
                         else{
-                            if(this.valuelist.showValue.has(tmpModel.nodes[tmpRole.node_id].value)){
-                                toShow = true;
+                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value)){
+                                toShowE = true;
                             }
                         }
                     }
-                    // console.log(tmpModel.nodes[tmpModel.relations[relationId].roles[roleIndex1].node_id]);
+                    else toShowE=true; //TODO 在这里显示的应该是属性，属性可以做单独处理
+
                 }
-                if(this.valuelist.fresh||toShow){
+                if(this.valuelist.fresh||(toShowE&&toShowR)){
                     entity.relations[relationId] = tmpModel.relations[relationId]
                     entity.relations[relationId].id = relationId;
                 }

@@ -10,7 +10,7 @@
                    data-onstyle="default">
           </div>
           <button class="btn btn-default toggle recommend">图谱推荐</button>
-          <button class="btn btn-default toggle filter-btn" data-toggle="modal" data-target="#filter-window">筛选</button>
+          <button style="display:none" class="btn btn-default toggle filter-btn" data-toggle="modal" data-target="#filter-window">筛选</button>
           <div class="modal fade" id="filter-window" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
               <div class="modal-content">
@@ -23,15 +23,10 @@
                     <label>
                       <input type="checkbox" checked> 请打勾
                     </label>
-                  </div>
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" checked> 请打勾
-                    </label>
                   </div-->
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                  <button type="button" class="btn btn-default filter-cancel" data-dismiss="modal">取消</button>
                   <button type="button" class="btn btn-primary filter-apply" data-dismiss="modal">确认</button>
                 </div>
               </div><!-- /.modal-content -->

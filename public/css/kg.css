@@ -1636,3 +1636,7 @@ span.twitter-typeahead .tt-hint {
 /*.carousel-control.right {*/
   /*background-image: none;*/
 /*}*/
+
+ul {
+  list-style-type: none;
+}

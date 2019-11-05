@@ -7,6 +7,7 @@ var mutex = 0;
 var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
+
 $(function () {
 
     $(document).on("click", '#stigmod-search-left-btn', function () {
@@ -36,11 +37,14 @@ $(function () {
                 network.focusNode(id);
             }
             detail.drawIndex(instance_model, true, id);
+            //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
+            $(".btn.filter-btn").hide();
         } else {
             //局部图谱
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
+            $(".btn.filter-btn").show();
         }
     })
 
@@ -59,12 +63,61 @@ $(function () {
         }
     })
 
+    //筛选栏层级选择效果
+    $(document).on("change",".filter-checkbox:checkbox",function(){
+        var checked = $(this).prop("checked"),
+            container = $(this).parent(),
+            siblings = container.siblings();
+        container.find('input[type="checkbox"]').prop({
+            indeterminate: false,
+            checked: checked
+        });
+        function checkSiblings(el) {
+            var parent = el.parent().parent(),
+                all = true;
+            el.siblings().each(function() {
+                let returnValue = all = ($(this).children('input[type="checkbox"]').prop("checked") === checked);
+                return returnValue;
+            });
+            if (all && checked) {
+                parent.children('input[type="checkbox"]').prop({
+                    indeterminate: false,
+                    checked: checked
+                });
+                checkSiblings(parent);
+            } else if (all && !checked) {
+                parent.children('input[type="checkbox"]').prop("checked", checked);
+                parent.children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
+                checkSiblings(parent);
+            } else {
+                el.parents("li").children('input[type="checkbox"]').prop({
+                    indeterminate: true,
+                    checked: false
+                });
+            }
+        }
+        checkSiblings(container);
+    })
+
+    $(document).on("click", ".btn.filter-cancel", function () {
+        $(".filter-checkbox.entity:checkbox").each(function(){
+            if($(this).prop("checked")^svg.valuelist.entity.has($(this).attr("value"))){
+                $(this).trigger("click");
+            }
+        });
+        $(".filter-checkbox.relation:checkbox").each(function(){
+            if($(this).prop("checked")^svg.valuelist.relation.has($(this).attr("value"))){
+                $(this).trigger("click");
+            }
+        });
+    })
     $(document).on("click", ".btn.filter-apply", function () {
         svg.valuelist.fresh = false;
-        svg.valuelist.showValue = new Set();
+        svg.valuelist.init();
         $(".filter-checkbox:checkbox").each(function(){
             if($(this).prop("checked")){
-                svg.valuelist.showValue.add($(this).attr("value"));
+                if($(this).hasClass('entity')) svg.valuelist.entity.add($(this).attr("value"));
+                if($(this).hasClass('relation')) svg.valuelist.relation.add($(this).attr("value"));
             }
         });
         let centerNode = $(".entity.center");
