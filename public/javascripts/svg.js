@@ -20,7 +20,6 @@ function svgObj(svg=""){
         rcmdLen: 0,         //推荐中，节点连接关系的个数
         wholeLen: 0,        //=tmpLen+rcmdLen
     }
-
     this.valuelist = {//表示当前要显示的元素的列表
         fresh: true, //true时表示要刷新过滤列表
         entity: new Set(),
@@ -159,22 +158,45 @@ svgObj.prototype.freshFilter = function(){
     let temp=$(".filter-panel");
     temp.empty();
     let list=$("<ul></ul>");
-    let entityList=$("<ul></ul>");
+    let typeList=$("<ul></ul>");
     let relationList=$("<ul></ul>");
-    let entities=$("<li></li>");
+    let types=$("<li></li>");
     let relations=$("<li></li>");
     list.addClass("list-unstyled");
-    list.append(entities).append(relations);
-    entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-        "            <scan>实体</scan>").append(entityList);
+    list.append(types).append(relations);
+    types.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+        "            <scan>实体</scan>").append(typeList);
     relations.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
         "            <scan>关系</scan>").append(relationList);
+    // for(let value of this.valuelist.entity)
+    // {
+    //     typeList.append("<li>\n" +
+    //         "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+    //         "                <scan>"+value+"</scan>\n" +
+    //         "            </li>")
+    // }
     for(let value of this.valuelist.entity)
     {
+        //console.log(value);
+        let ventity=value.split(/\s+/)[0];
+        let vtype=value.split(/\s+/)[1];
+        let entities,entityList;
+        entities=typeList.children("[value='"+vtype+"']");
+        if(entities.length>0) {
+            entityList=entities.children("ul");
+        }else {
+            entities=$("<li></li>");
+            entityList=$("<ul></ul>");
+            entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+                "            <scan>"+vtype+"</scan>").append(entityList);
+            entities.attr("value",vtype);
+            typeList.append(entities);
+        }
         entityList.append("<li>\n" +
             "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
-            "                <scan>"+value+"</scan>\n" +
+            "                <scan>"+ventity+"</scan>\n" +
             "            </li>")
+
     }
     for(let value of this.valuelist.relation)
     {
@@ -514,10 +536,11 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
                     let tmpRole = tmpModel.relations[relationId].roles[roleIndex1];
                     if(data.isEntity(tmpRole.node_id,tmpModel)){
                         if(this.valuelist.fresh) {
-                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value);
+                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0]);
+                            //这里选用实体的第一个tag作为它的类型
                         }
                         else{
-                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value)){
+                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0])){
                                 toShowE = true;
                             }
                         }

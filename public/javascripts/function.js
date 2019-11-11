@@ -99,7 +99,7 @@ $(function () {
         checkSiblings(container);
     })
 
-    $(document).on("click", ".btn.filter-cancel", function () {
+    $(document).on("click", ".btn.filter-cancel", function () {//在取消筛选时恢复筛选框效果
         $(".filter-checkbox.entity:checkbox").each(function(){
             if($(this).prop("checked")^svg.valuelist.entity.has($(this).attr("value"))){
                 $(this).trigger("click");
