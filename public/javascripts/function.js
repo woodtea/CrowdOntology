@@ -66,31 +66,31 @@ $(function () {
     //筛选栏层级选择效果
     $(document).on("change",".filter-checkbox:checkbox",function(){
         var checked = $(this).prop("checked"),
-            container = $(this).parent(),
+            container = $(this).parent().parent(),
             siblings = container.siblings();
         container.find('input[type="checkbox"]').prop({
             indeterminate: false,
             checked: checked
         });
         function checkSiblings(el) {
-            var parent = el.parent().parent(),
+            var parent = el.parent().parent(), 
                 all = true;
             el.siblings().each(function() {
-                let returnValue = all = ($(this).children('input[type="checkbox"]').prop("checked") === checked);
+                let returnValue = all = ($(this).children().children('input[type="checkbox"]').prop("checked") === checked);
                 return returnValue;
             });
             if (all && checked) {
-                parent.children('input[type="checkbox"]').prop({
+                parent.children().children('input[type="checkbox"]').prop({
                     indeterminate: false,
                     checked: checked
                 });
                 checkSiblings(parent);
             } else if (all && !checked) {
-                parent.children('input[type="checkbox"]').prop("checked", checked);
-                parent.children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
+                parent.children().children('input[type="checkbox"]').prop("checked", checked);
+                parent.children().children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
                 checkSiblings(parent);
             } else {
-                el.parents("li").children('input[type="checkbox"]').prop({
+                el.parents("li").children().children('input[type="checkbox"]').prop({
                     indeterminate: true,
                     checked: false
                 });
@@ -129,6 +129,21 @@ $(function () {
             svg.drawEntity(id);
         }
         svg.valuelist.fresh=true;
+    })
+
+    $(document).on("click",".filter-fold.glyphicon",function(){
+        if($(this).hasClass("glyphicon-chevron-down"))
+        {
+            $(this).siblings("ul").hide();
+            $(this).removeClass("glyphicon-chevron-down");
+            $(this).addClass("glyphicon-chevron-right");
+        }
+        else
+        {
+            $(this).siblings("ul").show();
+            $(this).removeClass("glyphicon-chevron-right");
+            $(this).addClass("glyphicon-chevron-down");
+        }
     })
 
 

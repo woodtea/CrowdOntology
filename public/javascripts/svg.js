@@ -155,6 +155,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
 }
 
 svgObj.prototype.freshFilter = function(){
+    let foldButton="<span class=\"filter-fold glyphicon glyphicon-chevron-down\"></span>"
     let temp=$(".filter-panel");
     temp.empty();
     let list=$("<ul></ul>");
@@ -164,17 +165,44 @@ svgObj.prototype.freshFilter = function(){
     let relations=$("<li></li>");
     list.addClass("list-unstyled");
     list.append(types).append(relations);
-    types.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-        "            <scan>实体</scan>").append(typeList);
-    relations.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-        "            <scan>关系</scan>").append(relationList);
+    // types.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+    //     "            <scan>实体</scan>").append(typeList);
+    // relations.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+    //     "            <scan>关系</scan>").append(relationList);
     // for(let value of this.valuelist.entity)
     // {
-    //     typeList.append("<li>\n" +
+    //     //console.log(value);
+    //     let ventity=value.split(/\s+/)[0];
+    //     let vtype=value.split(/\s+/)[1];
+    //     let entities,entityList;
+    //     entities=typeList.children("[value='"+vtype+"']");
+    //     if(entities.length>0) {
+    //         entityList=entities.children("ul");
+    //     }else {
+    //         entities=$("<li></li>");
+    //         entityList=$("<ul></ul>");
+    //         entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
+    //             "            <scan>"+vtype+"</scan>").append(entityList);
+    //         entities.attr("value",vtype);
+    //         typeList.append(entities);
+    //     }
+    //     entityList.append("<li>\n" +
     //         "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+    //         "                <scan>"+ventity+"</scan>\n" +
+    //         "            </li>");
+    //
+    // }
+    // for(let value of this.valuelist.relation)
+    // {
+    //     relationList.append("<li>\n" +
+    //         "                <input class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
     //         "                <scan>"+value+"</scan>\n" +
     //         "            </li>")
     // }
+    types.append(foldButton+"<label class='container-check' for='entities'><input id='entities' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
+        "      实体</label>").append(typeList);
+    relations.append(foldButton+"<label class='container-check' for='relations'><input id='relations' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
+        "      关系</label>").append(relationList);
     for(let value of this.valuelist.entity)
     {
         //console.log(value);
@@ -187,23 +215,25 @@ svgObj.prototype.freshFilter = function(){
         }else {
             entities=$("<li></li>");
             entityList=$("<ul></ul>");
-            entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-                "            <scan>"+vtype+"</scan>").append(entityList);
+            entities.append(foldButton+"<label class='container-check' for='type"+vtype+"'><input id='type"+vtype+"' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
+                vtype+"</label>").append(entityList);
             entities.attr("value",vtype);
             typeList.append(entities);
         }
         entityList.append("<li>\n" +
-            "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
-            "                <scan>"+ventity+"</scan>\n" +
-            "            </li>")
+            "                <label class='container-check' for='entity"+ventity+"'>"+
+            "                <input id='entity"+ventity+"'class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+            "                <span class='checkmark'></span>\n" +
+                ventity+"</label>            </li>");
 
     }
     for(let value of this.valuelist.relation)
     {
         relationList.append("<li>\n" +
-            "                <input class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
-            "                <scan>"+value+"</scan>\n" +
-            "            </li>")
+            "                <label class='container-check' for='relation"+value+"'>"+
+            "                <input id='relation"+value+"'class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
+            "                <span class='checkmark'></span>\n" +
+            value+"</label>            </li>");
     }
     temp.append(list);
 }
