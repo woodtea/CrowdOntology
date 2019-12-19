@@ -73,7 +73,7 @@ $(function () {
             checked: checked
         });
         function checkSiblings(el) {
-            var parent = el.parent().parent(), 
+            var parent = el.parent().parent(),
                 all = true;
             el.siblings().each(function() {
                 let returnValue = all = ($(this).children().children('input[type="checkbox"]').prop("checked") === checked);
@@ -542,7 +542,6 @@ $(function () {
             alert("主属性不能为空!");
             return;
         }
-
         let valueId;
         for(let key in model.nodes){
             if(model.nodes[key].tag == "Symbol"){
