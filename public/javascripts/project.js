@@ -11,7 +11,6 @@ function wushuangProject() {
     let endTimeI = new Date("2018-10-24 22:00");
 
 
-
     wushuangC = ["jiangy", "ciecwch", "wxmin", "luoyx", "zhangmy", "zhut", "464408345", "zhangxy",]
     wushuangI = ["yuxiaz", "symbolk", "liberion", "weiyh", "guojm", "2217496259"]
 
