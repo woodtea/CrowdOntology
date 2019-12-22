@@ -79,6 +79,7 @@ ioObj.prototype.init = function () {
 
 }
 
+//TODO 创建新属性的临时解决方案，等待修改value2id或getValueId函数
 ioObj.prototype.socketEmitNewArray = function (type, msg) {
     this.tmpMsg.emit.push(msg);
     this.tmpMsg.type.push(type);

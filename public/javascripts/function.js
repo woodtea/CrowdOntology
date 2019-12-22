@@ -1026,6 +1026,7 @@ let tagReformat = {
         if (msg.relations) {
             //alert(relations)
             for (let relationId in msg.relations) {
+                //TODO 此处有问题，在判断relation时（如，一个entity和它属性的关系)不应该只看relation的名字
                 let tmp = msg.relations[relationId].type; //前后不统一
                 msg.relations[relationId].type = getValueId(tmp, model.relations);
             }

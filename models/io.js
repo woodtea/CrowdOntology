@@ -10,7 +10,10 @@ const logger = require("../logger_config");
 var DataManager = require('./dm');
 var dm = new DataManager(server_config);
 // console.log(dm);
-
+//mcreate_empty_project_with_name("test");
+//mcreate_hlm_project();
+//mcreate_movie_project_with_name("任意电影");
+//mcreate_algorithm_project_with_name("test4");
 function ioConfig(server){
 
     var io = require('socket.io')(server);
@@ -460,7 +463,9 @@ function ioConfig(server){
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-weiyh");
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-guojm");
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-qiaoxiaohe");
-            }else{
+            }else if(msg.substring(0,12)=="mcreate_algo") {
+                mcreate_algorithm_project_with_name(msg.substring(12,msg.length));
+            }else {
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
@@ -1268,6 +1273,111 @@ function mcreate_movie_project_with_name(projectName){
                         ]
                         dm.handle(mcreate_relation("恩情", roles, project_id = projectName), function (rep) {});
 
+                    });
+                });
+            });
+        });
+    });
+    return;
+}
+function mcreate_algorithm_project_with_name(projectName) {
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+    var humanId,algoId,questionId,structureId,complexId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "人", projectName), function (rep) {
+            for (let key in rep.migrate) humanId = rep.migrate[key];
+            dm.handle(mcreate_node("Entity", "算法", projectName), function (rep) {
+                for (let key in rep.migrate) algoId = rep.migrate[key];
+                dm.handle(mcreate_node("Entity", "问题", projectName), function (rep) {
+                    for (let key in rep.migrate) questionId = rep.migrate[key];
+                    dm.handle(mcreate_node("Entity", "数据结构", projectName), function (rep) {
+                        for (let key in rep.migrate) structureId = rep.migrate[key];
+                        dm.handle(mcreate_node("Entity", "复杂度值", projectName), function (rep) {
+                            for (let key in rep.migrate) complexId = rep.migrate[key];
+                            dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+                                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                                //创建属性
+                                let roles;
+                                roles = [{rolename : "", node_id : humanId}, {rolename : "姓名", node_id : symbolId}]
+                                dm.handle(mcreate_relation(value="姓名",roles,project_id=projectName),function(rep){
+                                    let relationId;
+                                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                                    dm.handle(madd_key_attr(node_id=humanId,[relationId],user_id="",project_id=projectName),function(rep){});
+                                });
+                                roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
+                                dm.handle(mcreate_relation("性别",roles,project_id=projectName),function(rep){});
+                                roles = [{rolename : "", node_id : humanId}, {rolename : "出生年份", node_id : symbolId}]
+                                dm.handle(mcreate_relation("出生年份",roles,project_id=projectName),function(rep){});
+
+                                roles = [{rolename : "", node_id : questionId}, {rolename : "问题名", node_id : symbolId}]
+                                dm.handle(mcreate_relation("问题名",roles,project_id=projectName),function(rep){
+                                    let relationId;
+                                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                                    dm.handle(madd_key_attr(node_id=questionId,[relationId],user_id="",project_id=projectName),function(rep){});
+                                });
+
+                                roles = [{rolename : "", node_id : structureId}, {rolename : "名称", node_id : symbolId}]
+                                dm.handle(mcreate_relation(value="名称",roles,project_id=projectName),function(rep){
+                                    let relationId;
+                                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                                    dm.handle(madd_key_attr(node_id=structureId,[relationId],user_id="",project_id=projectName),function(rep){});
+                                });
+
+                                roles = [{rolename : "", node_id : algoId}, {rolename : "算法名", node_id : symbolId}]
+                                dm.handle(mcreate_relation(value="算法名",roles,project_id=projectName),function(rep){
+                                    let relationId;
+                                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                                    dm.handle(madd_key_attr(node_id=algoId,[relationId],user_id="",project_id=projectName),function(rep){});
+                                });
+
+                                roles = [{rolename : "", node_id : complexId}, {rolename : "值", node_id : symbolId}]
+                                dm.handle(mcreate_relation(value="值",roles,project_id=projectName),function(rep){
+                                    let relationId;
+                                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                                    dm.handle(madd_key_attr(node_id=complexId,[relationId],user_id="",project_id=projectName),function(rep){});
+                                });
+
+
+
+
+                                //创建关系
+                                roles = [
+                                    {rolename : "数据结构", node_id : structureId},
+                                    {rolename : "发明者", node_id : humanId}
+                                ]
+                                dm.handle(mcreate_relation("发明", roles, project_id = projectName), function (rep) {});
+
+                                roles = [
+                                    {rolename : "算法", node_id : structureId},
+                                    {rolename : "提出者", node_id : humanId}
+                                ]
+                                dm.handle(mcreate_relation("提出", roles, project_id = projectName), function (rep) {});
+
+                                roles = [
+                                    {rolename : "较大", node_id : complexId},
+                                    {rolename : "较小", node_id : complexId}
+                                ]
+                                dm.handle(mcreate_relation("复杂度比较", roles, project_id = projectName), function (rep) {});
+
+                                roles = [
+                                    {rolename : "算法", node_id : algoId},
+                                    {rolename : "使用", node_id : structureId},
+                                    {rolename : "问题", node_id : questionId}
+                                ]
+                                dm.handle(mcreate_relation("解决", roles, project_id = projectName), function (rep) {});
+
+                                roles = [
+                                    {rolename : "算法", node_id : algoId},
+                                    {rolename : "空间", node_id : complexId},
+                                    {rolename : "时间", node_id : complexId}
+                                ]
+                                dm.handle(mcreate_relation("复杂度", roles, project_id = projectName), function (rep) {});
+                            });
+                        });
                     });
                 });
             });
