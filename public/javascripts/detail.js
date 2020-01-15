@@ -285,7 +285,7 @@ detailObj.prototype.classReviseSubmit = function (item, candidate = 0) {
         relationId: generateFrontRelationID(candidate)
     }
 
-    console.log(entity);
+    //console.log(entity);
     connection.io_create_insModel_entity(entity);
 }
 
@@ -750,7 +750,7 @@ detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recomm
     popoverHide();
 
     if (tmpModel.relations[relationId] == undefined) {
-        console.log("citeRecommendation error!");
+        //console.log("citeRecommendation error!");
         return;
     }
 

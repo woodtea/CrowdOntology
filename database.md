@@ -12,8 +12,8 @@ var DataManager = require('./dm');
 var dm = new DataManager(server_config);
 
 dm.handle(msg, function(rep){
-    console.log('[CALLBACK]')
-    console.log(rep);
+    //console.log('[CALLBACK]')
+    //console.log(rep);
 });
 ```
 

@@ -39,7 +39,7 @@ ioObj.prototype.init = function () {
 
     this.socket.on('insModel', function (msg) {
         tagReformat.id2value(msg);
-        console.log(msg);
+        //console.log(msg);
         switch (msg.operation) {
             case 'get':
                 that.io_get_insModel_done(msg);
@@ -89,8 +89,8 @@ ioObj.prototype.socketEmitArray = function (type, msg) {
 }
 
 ioObj.prototype.socketEmit = function (type, msg) {
-    console.log(type)
-    console.log(msg)
+    // console.log(type)
+    // console.log(msg)
     this.socket_mutex = true;
     this.socket.emit(type, msg);
 }
@@ -279,9 +279,9 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
         }
         for (relationId in relation) {
             for(let i in relation[relationId].roles){
-                console.log(centerId);
-                console.log(relation[relationId].roles[i].node_id)
-                console.log(relation[relationId].roles[i].rolename)
+                // console.log(centerId);
+                // console.log(relation[relationId].roles[i].node_id)
+                // console.log(relation[relationId].roles[i].rolename)
                 if(relation[relationId].roles[i].node_id == classId && relation[relationId].roles[i].rolename == ""){
                     let array = getAttributeTypes(centerId);
                     setAttributeTypeTypeahead(array);
@@ -308,6 +308,7 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
         "tags": entity.tags,
         "value": ""
     }
+    console.log("ffffff",entity.tags[0]);
     this.io_create_insModel_node(entityNode);
 
     //生成Value节点
@@ -468,11 +469,11 @@ ioObj.prototype.io_remove_insModel_node_done = function (msg) {
         return;
     } else {
         let node = this.tmpMsgPop(msg.operationId).nodes;
-        console.log("io_remove_insModel_node_done");
-        console.log(node);
+        //console.log("io_remove_insModel_node_done");
+        //console.log(node);
         let nodeId;
         for (nodeId in node) break;
-        console.log(nodeId);
+        //console.log(nodeId);
         data.removeNode(nodeId);
         return;
     }
@@ -485,7 +486,7 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
         this.migrateEmitMsg(msg.migrate);
         let curMsg = this.tmpMsgPop(msg.operationId);
         let relation = curMsg.relations;
-        console.log(curMsg);
+        //console.log(curMsg);
         tagReformat.id2value(curMsg);
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
@@ -509,7 +510,7 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
             if (svgPending > 0) {
                 svgPending--;
                 if (svgPending == 0) {
-                    console.log(isGetRcmd);
+                    //console.log(isGetRcmd);
                     if (isGetRcmd) {
                         isGetRcmd = false;
                         svg.svg.select("g.entity.center").classed("isCentralized", true)

@@ -1,4 +1,3 @@
-
 <div id="stigmod-pg-user">
     <div class="row">
         <!-- 左侧信息栏 -->
@@ -6,12 +5,14 @@
 
         <div class="col-xs-2">
             <img src="/images/user_avatar_default3.jpg" class="img-responsive img-rounded"/>
-            <br />
+            <br/>
             <div id="stigmod-username"><%= locals.user.name %></div>
-            <hr />
+            <hr/>
             <div id="stigmod-info-left">
                 <p><span class="glyphicon glyphicon-map-marker stigmod-detailinfo-icon"></span>&nbsp;Beijing</p>
-                <p><span class="glyphicon glyphicon-envelope stigmod-detailinfo-icon"></span>&nbsp;<%= locals.user.mail %></p>
+                <p>
+                    <span class="glyphicon glyphicon-envelope stigmod-detailinfo-icon"></span>&nbsp;<%= locals.user.mail %>
+                </p>
                 <!--p><span class="glyphicon glyphicon-link stigmod-detailinfo-icon"></span>&nbsp;userUrl</p>
                 <div><span class="glyphicon glyphicon-time stigmod-detailinfo-icon"></span>&nbsp;Joined&nbsp;on&nbsp;2017-12-03</div-->
             </div>
@@ -22,9 +23,12 @@
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active"><a href="#"><span class="fa fa-cube"></span> &nbsp;Models</a></li>
-                        <li role="presentation"><a href="#"><span class="glyphicon glyphicon-comment"></span> &nbsp;Discussions</a></li>
-                        <li role="presentation"><a href="#"><span class="glyphicon glyphicon-transfer"></span> &nbsp;Activities</a></li>
+                        <li role="presentation" class="active"><a href="#"><span class="fa fa-cube"></span> &nbsp;Models</a>
+                        </li>
+                        <li role="presentation"><a href="#"><span class="glyphicon glyphicon-comment"></span> &nbsp;Discussions</a>
+                        </li>
+                        <li role="presentation"><a href="#"><span class="glyphicon glyphicon-transfer"></span> &nbsp;Activities</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -33,131 +37,157 @@
                 <div class="col-xs-12">
                     <form class="form-inline" role="form">
                         <div class="form-group" id="stigmod-searchbar-form">
-                            <input type="text" class="form-control" placeholder="Find a model..." id="stigmod-searchbar-input">
+                            <input type="text" class="form-control" placeholder="Find a model..."
+                                   id="stigmod-searchbar-input">
                         </div>
                         <button class="btn btn-default">Search</button>
-                        <a class="btn btn-warning" id="stigmod-searchbar-newbtn" href="/newmodel"><span class="fa fa-cube"></span>&nbsp;&nbsp;Create New</a>
+                        <a class="btn btn-warning" id="stigmod-searchbar-newbtn" href="/newmodel"><span
+                                    class="fa fa-cube"></span>&nbsp;&nbsp;Create New</a>
                     </form>
                 </div>
             </div>
-            <hr />
+            <hr/>
             <div id="stigmod-model-info-container">
                 <div class="stigmod-modelshow">
-           <div class="row">
-               <div class="col-xs-9 stigmod-modelshow-title">
-                   <a href="/workspace/大话西游-电影人物关系图谱">大话西游-电影人物关系图谱</a>
-               </div>
-               <div class="col-xs-3 stigmod-modelshow-info">
-                   <i class="fa fa-language"></i>
-                   <span class="stigmod-modelshow-language">中文</span> &nbsp;&nbsp;
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-10 stigmod-modelshow-description">
-                   大话西游-电影人物关系图谱
-               </div>
-               <div class="col-xs-2">
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-12 stigmod-modelshow-date">
-                   Updated on Jul 3, 2017 10:09:35 AM
-               </div>
-           </div>
-           <hr/>
-       </div>
-       <!--div class="stigmod-modelshow">
-           <div class="row">
-               <div class="col-xs-9 stigmod-modelshow-title">
-                   <a href="/workspace/电影人物关系图谱">电影人物关系图谱</a>
-               </div>
-               <div class="col-xs-3 stigmod-modelshow-info">
-                   <i class="fa fa-language"></i>
-                   <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-th-large"></span>
-                   <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-random"></span>
-                   <span class="stigmod-modelshow-relation">1</span>
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-10 stigmod-modelshow-description">
-                   电影人物关系图谱
-               </div>
-               <div class="col-xs-2">
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-12 stigmod-modelshow-date">
-                   Updated on Jul 3, 2017 10:09:35 AM
-               </div>
-           </div>
-           <hr/>
-       </div>
-       <div class="stigmod-modelshow">
-           <div class="row">
-               <div class="col-xs-9 stigmod-modelshow-title">
-                   <a href="/workspace/红楼梦人物关系图谱">红楼梦人物关系图谱</a>
-               </div>
-               <div class="col-xs-3 stigmod-modelshow-info">
-                   <i class="fa fa-language"></i>
-                   <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-th-large"></span>
-                   <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-random"></span>
-                   <span class="stigmod-modelshow-relation">1</span>
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-10 stigmod-modelshow-description">
-                   红楼梦人物关系图谱
-               </div>
-               <div class="col-xs-2">
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-12 stigmod-modelshow-date">
-                   Updated on Jul 3, 2017 10:09:35 AM
-               </div>
-           </div>
-           <hr/>
-       </div>
-       <!--div class="stigmod-modelshow">
-           <div class="row">
-               <div class="col-xs-9 stigmod-modelshow-title">
-                   <a href="/workspace/让子弹飞-电影人物关系图谱">让子弹飞-电影人物关系图谱</a>
-               </div>
-               <div class="col-xs-3 stigmod-modelshow-info">
-                   <i class="fa fa-language"></i>
-                   <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-th-large"></span>
-                   <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
-                   <span class="glyphicon glyphicon-random"></span>
-                   <span class="stigmod-modelshow-relation">1</span>
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-10 stigmod-modelshow-description">
-                   让子弹飞-电影人物关系图谱
-               </div>
-               <div class="col-xs-2">
-               </div>
-           </div>
-           <div class="row">
-               <div class="col-xs-12 stigmod-modelshow-date">
-                   Updated on Jul 3, 2017 10:09:35 AM
-               </div>
-           </div>
-           <hr/>
-       </div-->
+                    <div class="row">
+                        <div class="col-xs-9 stigmod-modelshow-title">
+                            <a href="/workspace/大话西游-电影人物关系图谱">大话西游-电影人物关系图谱</a>
+                        </div>
+                        <div class="col-xs-3 stigmod-modelshow-info">
+                            <i class="fa fa-language"></i>
+                            <span class="stigmod-modelshow-language">中文</span> &nbsp;&nbsp;
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 stigmod-modelshow-description">
+                            大话西游-电影人物关系图谱
+                        </div>
+                        <div class="col-xs-2">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 stigmod-modelshow-date">
+                            Updated on Jul 3, 2017 10:09:35 AM
+                        </div>
+                    </div>
+                    <hr/>
+                    <div id="stigmod-model-info-container">
+                        <div class="stigmod-modelshow">
+                            <div class="row">
+                                <div class="col-xs-9 stigmod-modelshow-title">
+                                    <a href="/workspace/陈情令">陈情令-电视剧人物关系图谱</a>
+                                </div>
+                                <div class="col-xs-3 stigmod-modelshow-info">
+                                    <i class="fa fa-language"></i>
+                                    <span class="stigmod-modelshow-language">中文</span> &nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-10 stigmod-modelshow-description">
+                                    陈情令-电视剧人物关系图谱
+                                </div>
+                                <div class="col-xs-2">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 stigmod-modelshow-date">
+                                    Updated on Dec 25, 2019 10:09:35 AM
+                                </div>
+                            </div>
+                            <hr/>
+                        </div>
+                        <!--div class="stigmod-modelshow">
+                            <div class="row">
+                                <div class="col-xs-9 stigmod-modelshow-title">
+                                    <a href="/workspace/电影人物关系图谱">电影人物关系图谱</a>
+                                </div>
+                                <div class="col-xs-3 stigmod-modelshow-info">
+                                    <i class="fa fa-language"></i>
+                                    <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-th-large"></span>
+                                    <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-random"></span>
+                                    <span class="stigmod-modelshow-relation">1</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-10 stigmod-modelshow-description">
+                                    电影人物关系图谱
+                                </div>
+                                <div class="col-xs-2">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 stigmod-modelshow-date">
+                                    Updated on Jul 3, 2017 10:09:35 AM
+                                </div>
+                            </div>
+                            <hr/>
+                        </div>
+                        <div class="stigmod-modelshow">
+                            <div class="row">
+                                <div class="col-xs-9 stigmod-modelshow-title">
+                                    <a href="/workspace/红楼梦人物关系图谱">红楼梦人物关系图谱</a>
+                                </div>
+                                <div class="col-xs-3 stigmod-modelshow-info">
+                                    <i class="fa fa-language"></i>
+                                    <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-th-large"></span>
+                                    <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-random"></span>
+                                    <span class="stigmod-modelshow-relation">1</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-10 stigmod-modelshow-description">
+                                    红楼梦人物关系图谱
+                                </div>
+                                <div class="col-xs-2">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 stigmod-modelshow-date">
+                                    Updated on Jul 3, 2017 10:09:35 AM
+                                </div>
+                            </div>
+                            <hr/>
+                        </div>
+                        <!--div class="stigmod-modelshow">
+                            <div class="row">
+                                <div class="col-xs-9 stigmod-modelshow-title">
+                                    <a href="/workspace/让子弹飞-电影人物关系图谱">让子弹飞-电影人物关系图谱</a>
+                                </div>
+                                <div class="col-xs-3 stigmod-modelshow-info">
+                                    <i class="fa fa-language"></i>
+                                    <span class="stigmod-modelshow-language">en</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-th-large"></span>
+                                    <span class="stigmod-modelshow-class">4</span> &nbsp;&nbsp;
+                                    <span class="glyphicon glyphicon-random"></span>
+                                    <span class="stigmod-modelshow-relation">1</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-10 stigmod-modelshow-description">
+                                    让子弹飞-电影人物关系图谱
+                                </div>
+                                <div class="col-xs-2">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 stigmod-modelshow-date">
+                                    Updated on Jul 3, 2017 10:09:35 AM
+                                </div>
+                            </div>
+                            <hr/>
+                        </div-->
+                    </div>
+                </div>
+                <div class="col-xs-2"></div>
+
             </div>
         </div>
-        <div class="col-xs-2"></div>
+        <!-- ModelInfo 显示组件 -->
 
-    </div>
-</div>
-<!-- ModelInfo 显示组件 -->
-
-<script src="/javascripts/project.js"></script>
+        <script src="/javascripts/project.js"></script>
 
 

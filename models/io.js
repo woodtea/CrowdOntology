@@ -30,11 +30,11 @@ function ioConfig(server){
             db["instance_model"][msg.user] = msg.instance_model;
             //data.instance_model = msg.instance_model;
             //return socket.emit('chat message',msg)
-            console.log(db);
+            //console.log(db);
         })
         socket.on('model', function(msg){
             logger.info(JSON.stringify(msg))
-            console.log(msg);
+            //console.log(msg);
             let emitMsg;
             switch (msg.operation){
                 case 'mget':
@@ -43,8 +43,8 @@ function ioConfig(server){
                         return socket.emit('model',emitMsg);
                     });*/
                     dm.handle(msg, function(rep){
-                        console.log("model")
-                        console.log(rep)
+                        //console.log("model")
+                        //console.log(rep)
                         logger.trace(JSON.stringify(rep))
                         return socket.emit("model",rep);
                     });
@@ -73,7 +73,7 @@ function ioConfig(server){
 
         socket.on('insModel', function(msg){
             logger.info(JSON.stringify(msg))
-            console.log(msg);
+            //console.log(msg);
             let emitMsg;
 
             switch (msg.operation){
@@ -82,9 +82,9 @@ function ioConfig(server){
                     emitMsg = io_get_insModel(msg,function(emitMsg){
                         return socket.emit('insModel',emitMsg);
                     });*/
-                    console.log("insModel")
+                    //console.log("insModel")
                     dm.handle(msg, function(rep){
-                        console.log(rep)
+                        //console.log(rep)
                         logger.trace(JSON.stringify(rep))
                         return socket.emit("insModel",rep);
                     });
@@ -140,7 +140,7 @@ function ioConfig(server){
                     break;
                 case 'rcmd_entity':
                     dm.handle(msg, function(rep){
-                        console.log(rep);
+                        //console.log(rep);
                         logger.trace(JSON.stringify(rep))
                         return socket.emit("insModel",rep);
                     });
@@ -164,7 +164,7 @@ function ioConfig(server){
 
         //just for test
         socket.on('iotest',function(msg){
-            console.log(msg);
+            //console.log(msg);
             msg0 = {
                 operation:'init'
             };
@@ -463,8 +463,8 @@ function ioConfig(server){
             }else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
-                    console.log('[CALLBACK]')
-                    console.log(rep);
+                    // console.log('[CALLBACK]')
+                    // console.log(rep);
                     return socket.emit('iotest_back', rep);
                 });
             }
@@ -517,12 +517,12 @@ function emitMsgHeader(rcvMsg,err,msg){
 function io_create_insModel_node(rcvMsg,callback){
 
     let newMsg = formatExchange.web2Server(rcvMsg);
-
+    console.log("hhhhh",newMsg["nodes"][0].tags[0]);
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -531,12 +531,11 @@ function io_create_insModel_node(rcvMsg,callback){
 
 function io_create_model_keyAttr(rcvMsg,callback) {
     let newMsg = formatExchange.web2Server(rcvMsg);
-
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -550,8 +549,8 @@ function io_remove_insModel_node(rcvMsg,callback){
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -565,8 +564,8 @@ function io_create_insModel_relation(rcvMsg,callback){
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -580,8 +579,8 @@ function io_remove_insModel_relation(rcvMsg,callback){
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -599,8 +598,8 @@ function io_recommend_insModel(rcvMsg,callback){
         emitMsg.relations = rep.relations;
         emitMsg.rcmd_relations = rep.rcmd_relations;
         emitMsg.migrate = rep.migrate;
-        console.log('[CALLBACK]')
-        console.log(rep);
+        // console.log('[CALLBACK]')
+        // console.log(rep);
         callback(emitMsg);
     });
 
@@ -630,7 +629,7 @@ function mcreate_relation(value,roles,project_id){
             }
         ]
     };
-    console.log(msg);
+    // console.log(msg);
     return msg;
 }
 

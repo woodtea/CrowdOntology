@@ -37,7 +37,7 @@ User.prototype.save = function save() {
     };
     db.user.push(user);
 
-    console.log(db);
+    //console.log(db);
     return;
 };
 

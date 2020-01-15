@@ -47,14 +47,14 @@ function setClassValueTypeahead() {
             let type = $('#class-revise .type-input').val();
             let array = [];
             if (type == "") {
-                console.log("Alert: In ClassValueTypeahead, class type is \"\"");
+                //console.log("Alert: In ClassValueTypeahead, class type is \"\"");
                 for (let key in recommend_index) {
                     array.push(...recommend_index[key]);
                 }
             }
             else if (recommend_index[type] == undefined) {
                 array = [];
-                console.log("Alert:recommend_index." + type + " is empty")
+                //console.log("Alert:recommend_index." + type + " is empty")
             } else {
                 array = recommend_index[type];
             }
@@ -265,7 +265,7 @@ function setRelationRoleValueTypeahead(item, entities, nodeId) {
             let type = $(item).find(".tag").attr("value");
             if (entities[type] == undefined) {
                 array = [];
-                console.log("Alert:entities." + type + " is empty")
+                //console.log("Alert:entities." + type + " is empty")
             } else {
                 array = entities[type];
             }

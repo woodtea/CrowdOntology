@@ -14,18 +14,18 @@ $(function () {
     })
 
     $(document).on("click", '#stigmod-fullscreen-btn .glyphicon-resize-small', function () {
-        console.log("cancle");
+        //console.log("cancle");
         let docElm = document;
-        console.log(docElm.exitFullscreen)
-        console.log(docElm.mozCancelFullScreen)
-        console.log(docElm.webkitCancelFullScreen)
-        console.log(docElm.msExitFullscreen)
+        // console.log(docElm.exitFullscreen)
+        // console.log(docElm.mozCancelFullScreen)
+        // console.log(docElm.webkitCancelFullScreen)
+        // console.log(docElm.msExitFullscreen)
         if(docElm.exitFullscreen) {//W3C
             docElm.cancelFullscreen();
         }else if(docElm.mozCancelFullScreen) {//FireFox
             docElm.mozCancelFullScreen();
         }else if(docElm.webkitCancelFullScreen) {//Chrome等
-            console.log("bbb");
+            //console.log("bbb");
             docElm.webkitCancelFullScreen();
         }else if  (docElm.msExitFullscreen) {//IE
             docElm.msExitFullscreen();

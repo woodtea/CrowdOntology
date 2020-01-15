@@ -406,8 +406,8 @@ $(function () {
 
         let type = $(this).val();
         let array = getEntityTypes();
-        if (array.indexOf(type) == -1) {
-            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+        if (array.length == 0 || array.indexOf(type) == -1) {
+            if (($(this).parent().children("ul").css("display") == 'none'|| array.length==0) && $(this).is(":focus")) {
                 let content = '<p>是否新建实体类型?</p>';
                 content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
@@ -1022,17 +1022,17 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
         if (model["nodes"][nId0] != undefined) {
             tags0 = model["nodes"][nId0]["tags"];
         } else {
-            console.log("alert");
-            console.log("not found nId0:" + nId0);
-            console.log("model:" + model);
+            // console.log("alert");
+            // console.log("not found nId0:" + nId0);
+            // console.log("model:" + model);
             continue;
         }
         if (model["nodes"][nId1] != undefined) {
             tags1 = model["nodes"][nId1]["tags"];
         } else {
-            console.log("alert");
-            console.log("not found nId1:" + nId1);
-            console.log("model:" + model);
+            // console.log("alert");
+            // console.log("not found nId1:" + nId1);
+            // console.log("model:" + model);
             continue;
         }
 
@@ -1158,9 +1158,9 @@ reviseMergeFilter = function (newId,tmpModel=instance_model) {
                 roles[j].node_id = newId;
             }
         }
-        console.log(entity);
+        //console.log(entity);
         if(relationCompare(entity.relations,obj.relations[i][relationId])){
-            console.log("xxx"+i);
+            //console.log("xxx"+i);
             obj.relations.splice(i,1);
         }
     }
@@ -1168,8 +1168,8 @@ reviseMergeFilter = function (newId,tmpModel=instance_model) {
 }
 
 relationCompare = function (relations,relation){
-    console.log(relations);
-    console.log(relation);
+    // console.log(relations);
+    // console.log(relation);
     let cpObj = {};
     let flag = false;
     for(let id in relations){

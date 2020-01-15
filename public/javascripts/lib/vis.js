@@ -3661,7 +3661,7 @@ var Validator = function () {
     key: 'checkFields',
     value: function checkFields(option, options, referenceOptions, referenceOption, refOptionObj, path) {
       var log = function log(message) {
-        console.log('%c' + message + Validator.printLocation(path, option), printStyle);
+        //console.log('%c' + message + Validator.printLocation(path, option), printStyle);
       };
 
       var optionType = Validator.getType(options[option]);
@@ -3760,7 +3760,7 @@ var Validator = function () {
         msg = '. Did you mean one of these: ' + Validator.print((0, _keys2['default'])(options)) + Validator.printLocation(path, option);
       }
 
-      console.log('%cUnknown option detected: "' + option + '"' + msg, printStyle);
+      //console.log('%cUnknown option detected: "' + option + '"' + msg, printStyle);
       errorFound = true;
     }
 

@@ -3,7 +3,7 @@
 function formatExchange(){};
 
 formatExchange.prototype.web2Server = function(msg,type=""){
-    console.log(msg);
+    //console.log(msg);
     let newMsg;
     switch (msg.operation){
         case 'mcreate_node':
@@ -141,12 +141,14 @@ format_create_insModel_node = function (msg) {
     newMsg = format_basic(msg,0);
     newMsg.operation = newMsg.operation+"_proxy";   //临时
 
+
     newMsg["nodes"]=[{
         "front_id" : frontId,
         "tags" : msg["nodes"][frontId].tags,
         "value": msg["nodes"][frontId].value//,
         //"dataType": msg["nodes"][frontId].dataType,
     }];
+    console.log("bbbbb",msg["nodes"][frontId].tags[0]);
     return newMsg;
 }
 
@@ -175,8 +177,8 @@ format_create_insModel_relation = function (msg) {
         "tag" : msg["relations"][frontId].type,
         "roles": msg["relations"][frontId].roles
     }];
-    console.log(newMsg)
-    console.log(newMsg["relations"][0])
+    // console.log(newMsg)
+    // console.log(newMsg["relations"][0])
     return newMsg;
 }
 
@@ -189,7 +191,7 @@ format_remove_insModel_relation = function (msg){
 
     newMsg = format_basic(msg,0);
     newMsg["relations"]=[frontId];
-    console.log(newMsg)
+    //console.log(newMsg)
     return newMsg;
 }
 
