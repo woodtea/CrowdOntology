@@ -79,10 +79,21 @@ ioObj.prototype.init = function () {
 
 }
 
+ioObj.prototype.socketEmitNewArray = function (type, msg) {
+    this.tmpMsg.emit.push(msg);
+    this.tmpMsg.type.push(type);
+    console.log("sendrelation");
+    console.log(JSON.stringify(msg));
+    if (!this.socket_mutex) {
+        this.socketEmit(type, msg)
+    }
+}
+
 ioObj.prototype.socketEmitArray = function (type, msg) {
     tagReformat.value2id(msg);
     this.tmpMsg.emit.push(msg);
     this.tmpMsg.type.push(type);
+    //console.log(JSON.stringify(msg));
     if (!this.socket_mutex) {
         this.socketEmit(type, msg)
     }
@@ -149,6 +160,7 @@ ioObj.prototype.io_create_moodel_entity = function (entity) {
         ]
     }
     this.io_create_insModel_relation(relations);
+
 }
 
 ioObj.prototype.io_create_model_node = function (nodes) {
@@ -173,7 +185,6 @@ ioObj.prototype.io_create_model_entity = function (entity) {
         "value": entity.value
     }
     this.io_create_model_node(entityNode);
-
 /*
     //生成Value节点
     let valueNode = {};
@@ -194,14 +205,11 @@ ioObj.prototype.io_create_model_entity = function (entity) {
         //desc
     }
     this.io_create_model_relation(relations);
-
-
     let array = [{
         id:entity.nodeId,
         keyAttr:entity.relationId
     }];
     this.io_create_model_keyAttr(array);
-
 }
 
 ioObj.prototype.io_create_model_node_done = function (msg) {
@@ -243,7 +251,11 @@ ioObj.prototype.io_create_model_keyAttr_done = function (msg) {
 ioObj.prototype.io_create_model_relation = function (relations) {
     let msg = this.emitMsgHeader('mcreate_relation');
     msg["relations"] = relations;
-    this.socketEmitArray('model', msg);
+    //console.log(JSON.stringify(relations));
+    //console.log("ready to emit relation");
+    //console.log(JSON.stringify(msg));
+    //this.socketEmitArray('model', msg);
+    this.socketEmitNewArray('model', msg);
 }
 
 ioObj.prototype.io_create_model_relation_done = function (msg) {

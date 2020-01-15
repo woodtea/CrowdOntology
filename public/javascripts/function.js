@@ -7,6 +7,7 @@ var mutex = 0;
 var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
+
 $(function () {
 
     $(document).on("click", '#stigmod-search-left-btn', function () {
@@ -36,11 +37,14 @@ $(function () {
                 network.focusNode(id);
             }
             detail.drawIndex(instance_model, true, id);
+            //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
+            $(".btn.filter-btn").hide();
         } else {
             //局部图谱
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
+            $(".btn.filter-btn").show();
         }
     })
 
@@ -56,6 +60,89 @@ $(function () {
             let rcmdNode = $(".entity.center.isCentralized");
             if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
 
+        }
+    })
+
+    //筛选栏层级选择效果
+    $(document).on("change",".filter-checkbox:checkbox",function(){
+        var checked = $(this).prop("checked"),
+            container = $(this).parent().parent(),
+            siblings = container.siblings();
+        container.find('input[type="checkbox"]').prop({
+            indeterminate: false,
+            checked: checked
+        });
+        function checkSiblings(el) {
+            var parent = el.parent().parent(),
+                all = true;
+            el.siblings().each(function() {
+                let returnValue = all = ($(this).children().children('input[type="checkbox"]').prop("checked") === checked);
+                return returnValue;
+            });
+            if (all && checked) {
+                parent.children().children('input[type="checkbox"]').prop({
+                    indeterminate: false,
+                    checked: checked
+                });
+                checkSiblings(parent);
+            } else if (all && !checked) {
+                parent.children().children('input[type="checkbox"]').prop("checked", checked);
+                parent.children().children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
+                checkSiblings(parent);
+            } else {
+                el.parents("li").children().children('input[type="checkbox"]').prop({
+                    indeterminate: true,
+                    checked: false
+                });
+            }
+        }
+        checkSiblings(container);
+    })
+
+    $(document).on("click", ".btn.filter-cancel", function () {//在取消筛选时恢复筛选框效果
+        $(".filter-checkbox.entity:checkbox").each(function(){
+            if($(this).prop("checked")^svg.valuelist.entity.has($(this).attr("value"))){
+                $(this).trigger("click");
+            }
+        });
+        $(".filter-checkbox.relation:checkbox").each(function(){
+            if($(this).prop("checked")^svg.valuelist.relation.has($(this).attr("value"))){
+                $(this).trigger("click");
+            }
+        });
+    })
+    $(document).on("click", ".btn.filter-apply", function () {
+        svg.valuelist.fresh = false;
+        svg.valuelist.init();
+        $(".filter-checkbox:checkbox").each(function(){
+            if($(this).prop("checked")){
+                if($(this).hasClass('entity')) svg.valuelist.entity.add($(this).attr("value"));
+                if($(this).hasClass('relation')) svg.valuelist.relation.add($(this).attr("value"));
+            }
+        });
+        let centerNode = $(".entity.center");
+        let id= centerNode.attr("id");
+        if($(".btn.recommend").hasClass("active"))
+        {
+            svg.drawRecommendation(id);
+        }else{
+            svg.drawEntity(id);
+        }
+        svg.valuelist.fresh=true;
+    })
+
+    $(document).on("click",".filter-fold.glyphicon",function(){
+        if($(this).hasClass("glyphicon-chevron-down"))
+        {
+            $(this).siblings("ul").hide();
+            $(this).removeClass("glyphicon-chevron-down");
+            $(this).addClass("glyphicon-chevron-right");
+        }
+        else
+        {
+            $(this).siblings("ul").show();
+            $(this).removeClass("glyphicon-chevron-right");
+            $(this).addClass("glyphicon-chevron-down");
         }
     })
 
@@ -143,7 +230,6 @@ $(function () {
         svg.svg.selectAll("g.relation").classed("active", false);
         svg.svg.selectAll("path").classed("active", false);
         $(".btn.recommend").removeClass("active");
-
         let item = this;
         if (d3.select(this).classed("isRecommendation") == true) {
             clickTimeout.set(function () {
@@ -159,7 +245,7 @@ $(function () {
                     $(properties).children().remove();
                     detail.drawIndex();
                     svg.drawEntity(id);
-                } else {
+                } else {//大多数时候执行这个
                     drawNodeDetails(id);
                 }
             });
@@ -456,7 +542,6 @@ $(function () {
             alert("主属性不能为空!");
             return;
         }
-
         let valueId;
         for(let key in model.nodes){
             if(model.nodes[key].tag == "Symbol"){
