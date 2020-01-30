@@ -517,7 +517,6 @@ function emitMsgHeader(rcvMsg,err,msg){
 function io_create_insModel_node(rcvMsg,callback){
 
     let newMsg = formatExchange.web2Server(rcvMsg);
-    console.log("hhhhh",newMsg["nodes"][0].tags[0]);
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.migrate = rep.migrate;

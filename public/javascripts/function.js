@@ -1278,10 +1278,21 @@ relationCompare = function (relations,relation){
     return flag;
 }
 
-function generateNewRole(role, node, tag, relationId,needTrash=true){
-    let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
-        '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
-        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+function generateNewRole(role, node, tag, relationId,needTrash=true,needNumber=false){
+    let html;
+    if(needNumber)
+    {
+        html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+            '<span class="col-xs-4 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>'+
+            '<span class="col-xs-3 role vcenter" style="padding: 0px"><input type="number" class="stigmod-input" value=1></input></span>';
+    }
+    else
+    {
+        html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+            '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>';
+    }
     if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
     html+= '<span class="tag" style="display: none" value=' + tag + '>' +
         '<span class="relation" style="display: none" value=' + relationId + '>' +

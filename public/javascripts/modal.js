@@ -100,7 +100,18 @@ $(function () {
         setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
     })
 
+    $(document).on("click","#modalAddRelInModel2 .fa-plus",function(){
+        let item = $("#modalAddRelInModel2 .modal-body")
+        $(item).find("#relation-add .roles").append(generateNewRole("","","","",true,true));
+        setRawRelationRoleValueTypeahead2($("#relation-add .roles").children().last());
+    })
+
+
     $(document).on("click","#modalAddRelInModel .glyphicon-trash",function(){
+        $(this).parent().remove();
+    })
+
+    $(document).on("click","#modalAddRelInModel2 .glyphicon-trash",function(){
         $(this).parent().remove();
     })
 
@@ -151,6 +162,40 @@ $(function () {
             }
             data.pendingInsRel.push(insRelations);
             //connection.io_create_insModel_relation(insRelations);
+        }
+    })
+
+    $(document).on("click","#modalAddRelInModel2 .btn-primary",function(){
+        //创建
+        let rel = fetchNewRel2();
+        let err,str;
+        [err,str] = checkNewRel(rel);
+
+        $("#modalAddRelInModel2 .modal-body .alert").children().remove();
+
+        if(err){
+            //处理提示
+            let html = '<div class="alert alert-danger alert-dismissible"><p>'+str+'</p></div>';
+            $("#modalAddRelInModel2 .modal-body .alert").append(html);
+        }else{
+            //生成model
+            let relationId = generateFrontRelationID();
+            let relations = {};
+            relations[relationId] = {
+                "type":rel.type,
+                "roles": [],
+            }
+            let entityType,entityTypeId;
+            for(let i in rel.roles){
+                entityType = rel.roles[i][1];
+                for(let key in model.nodes){
+                    if(model.nodes[key].value == entityType) entityTypeId=key;
+                }
+                relations[relationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityTypeId})
+            }
+            if(rel.desc!=undefined&&rel.desc!="") relations[relationId].desc = rel.desc;
+            connection.io_create_model_relation(relations);
+            $("#modalAddRelInModel2").modal("hide");
         }
     })
 
@@ -210,7 +255,7 @@ $(function () {
                 break;
             }
         }
-        let entityArray = getIndexArray();
+        let entityArray = getIndexArray2();
         for(let i=0;i<rel.roles.length;i++){
             if(rel.roles[i][1] != "" && entityArray.indexOf(rel.roles[i][1])==-1 ){
                 err=true;
@@ -233,6 +278,25 @@ $(function () {
         }
 
         let desc = $("#modalAddRelInModel .description input").val();
+        if(desc!=""&&desc!=undefined) rel.desc = desc;
+        return rel;
+    }
+
+    function fetchNewRel2(){
+        let rel = {
+            type: $("#modalAddRelInModel2").find(".type-input").first().val(),
+            roles: []
+        }
+
+        let inputs = $("#modalAddRelInModel2 .roles input");
+        for(let i=0;i<$(inputs).length/3;i++){
+            for(let j=0;j<$(inputs).eq(i*3+2).val();j++)
+            {
+                rel.roles.push([$(inputs).eq(i*3).val(),$(inputs).eq(i*3+1).val()]);
+            }
+        }
+
+        let desc = "";
         if(desc!=""&&desc!=undefined) rel.desc = desc;
         return rel;
     }

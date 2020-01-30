@@ -9,6 +9,16 @@ function getIndexArray(tmpModel = instance_model) {
     return indexArray;
 }
 
+function getIndexArray2(tmpModel = model) {
+    let indexArray = [];
+    for (let id in tmpModel.nodes) {
+        if (tmpModel.nodes[id].tag == "Entity") {
+            indexArray.push(tmpModel.nodes[id].value);
+        }
+    }
+    return indexArray;
+}
+
 function setIndexTypeahead(array) {
     $('#stigmod-search-left-input').typeahead({
         source: array,
@@ -207,6 +217,15 @@ function setRelationTypeTypeahead(array) {
 function setRawRelationRoleValueTypeahead(item,tmpModel = instance_model){
     $(item).find("input").last().typeahead({
         source: getIndexArray(tmpModel),
+        minLength: 0,
+        showHintOnFocus: true,
+        fitToElement: true,
+        autoSelect: true
+    });}
+
+function setRawRelationRoleValueTypeahead2(item,tmpModel = model){
+    $(item).find("input").eq(-2).typeahead({
+        source: getIndexArray2(tmpModel),
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
