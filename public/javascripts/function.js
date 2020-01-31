@@ -24,6 +24,8 @@ $(function () {
     })
 
     $(document).on("click", ".btn-group.workspace", function () {
+        if(!$(".btn-group.workspace2 .btn-default").hasClass("off"))
+            return;
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
             if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
@@ -45,6 +47,33 @@ $(function () {
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
+        }
+    })
+
+    $(document).on("click", ".btn-group.workspace2", function () {
+        if ($(this).children(".btn-default").hasClass("off")) {
+            //实例层
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+            $('#glborloc').bootstrapToggle('enable');
+            $('#glborloc').bootstrapToggle('off');
+            $("svg.local").hide()
+            network.setData();
+            $("div.global").show();
+            let item = $(index).find(".active");
+            let id = $(item).children(".nodeId").attr("value");
+            if(id!=undefined){
+                network.focusNode(id);
+            }
+            detail.drawIndex(instance_model, true, id);
+            //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
+            $(".btn.filter-btn").hide();
+        } else {
+            //模型层
+            $('#glborloc').bootstrapToggle('off');
+            $('#glborloc').bootstrapToggle('disable');
+            $("svg.local").hide();
+            network.setModelData();
+            $("div.global").show();
         }
     })
 
@@ -1163,6 +1192,7 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
         detail.drawIndex(instance_model, showIndex);
         svg.drawEntity(centerNode);
         if (!$(".btn-group.workspace .btn-default").hasClass("off")) {
+            //局部图谱
             $("#" + centerNode).delay("10").click();
         } else {
             drawNodeDetails(centerNode);

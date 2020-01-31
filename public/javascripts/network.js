@@ -52,6 +52,10 @@ networkObj.prototype.setData = function () {
     this.network.setData(this.getData());
 }
 
+networkObj.prototype.setModelData = function () {
+    this.network.setData(this.getModelData());
+}
+
 
 networkObj.prototype.showNodeDetail = function (nodeId) {
     //$("#modalNetwork").modal('hide')
@@ -150,6 +154,48 @@ networkObj.prototype.getData = function () {
 
         for (let i in roles) {
             edges.push({from: id, to: roles[i].node_id})
+        }
+    }
+
+    return {
+        nodes: nodes,
+        edges: edges
+    };
+}
+
+networkObj.prototype.getModelData = function () {
+    let nodes = [], edges = [];
+    for (let id in model.nodes) {
+        if(model.nodes[id].value!="String") {
+            nodes.push({
+                id: id,
+                label: model.nodes[id].value,
+                group: model.nodes[id].value,
+            })
+        }
+    }
+
+    for (let id in model.relations) {
+        let isAttribute = false;
+        let roles = model.relations[id].roles;
+        for (let i in roles) {
+            if (roles[i].rolename == '') {
+                isAttribute = true;
+                break;
+            }
+        }
+
+        if (isAttribute) continue;
+
+        nodes.push({
+            id: id,
+            label: model.relations[id].value,
+            group: "__relation"
+        })
+
+        for (let i in roles) {
+           //edges.push({from: id, to: roles[i].node_id, label:roles[i].rolename});
+            edges.push({from: id, to: roles[i].node_id});
         }
     }
 

@@ -226,6 +226,7 @@ ioObj.prototype.io_create_model_node_done = function (msg) {
             delete model.nodes[nodeId].tags;
             break;
         }
+        network.setModelData();
         return;
     }
 }
@@ -302,6 +303,7 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
                 break;
             }
         }
+        network.setModelData();
         return;
     }
 }
