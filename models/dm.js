@@ -711,6 +711,7 @@ msg : {
 DataManager.prototype.createRelation = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var relation = msg.relations[0];
+    console.log("fuck relation",relation);
     var roles = relation.roles;
 
     var startCypher = '';
@@ -745,7 +746,7 @@ DataManager.prototype.createRelation = function (msg, callback) {
             tag: relation.tag
         }) +
         startCypher +
-        'CREATE (p)-[:has]->(r:RelInst)\n\
+        'CREATE (p)-[:has]->(r:RelInst {referInfo:{referInfo},timeArray:{timeArray}})\n\
         CREATE (u)-[:refer]->(r)\n\
         CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
         CREATE (u)-[:refer]->(iof)\n\
@@ -763,7 +764,9 @@ DataManager.prototype.createRelation = function (msg, callback) {
             pname: msg.project_id,
             uname: msg.user_id,
             rname: relation.value,
-            tag: relation.tag
+            tag: relation.tag,
+            referInfo:relation.referInfo,
+            timeArray:relation.timeArray
         })
         .then(function (res) {
             var relationId = res.records[0].get('relationId').toString(); //获取id

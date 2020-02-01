@@ -154,6 +154,8 @@ $(function () {
             insRelations[insRelationId] = {
                 "type":rel.type,
                 "roles": [],
+                "referInfo":"",
+                "timeArray":[],
             }
             for(let i in rel.roles){
                 entityName = rel.roles[i][1];

@@ -172,13 +172,27 @@ format_create_insModel_relation = function (msg) {
     newMsg = format_basic(msg,0);
     newMsg.operation = newMsg.operation+"_proxy";   //临时
 
-    newMsg["relations"]=[{
-        "front_id" : frontId,
-        "tag" : msg["relations"][frontId].type,
-        "roles": msg["relations"][frontId].roles
-    }];
+    if(msg["relations"][frontId].referInfo && msg["relations"][frontId].timeArray){
+        newMsg["relations"]=[{
+            "front_id" : frontId,
+            "tag" : msg["relations"][frontId].type,
+            "roles": msg["relations"][frontId].roles,
+            "referInfo":msg["relations"][frontId].referInfo,
+            "timeArray":msg["relations"][frontId].timeArray
+        }];
+    }
+    else{
+        newMsg["relations"]=[{
+            "front_id" : frontId,
+            "tag" : msg["relations"][frontId].type,
+            "roles": msg["relations"][frontId].roles,
+            "referInfo":"",
+            "timeArray":[]
+        }];
+    }
+
     // console.log(newMsg)
-    // console.log(newMsg["relations"][0])
+    //console.log(newMsg["relations"][0])
     return newMsg;
 }
 

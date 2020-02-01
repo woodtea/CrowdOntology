@@ -47,7 +47,7 @@ detailObj.prototype.drawIndex = function (model = instance_model, showIndex = tr
 
 detailObj.prototype.drawAttributes = function (id) {
 
-    let html = this.generateTitle("属性", "attribute");
+    let html = this.generateTitle("字面量", "attribute");
     $(properties).append(html);
 
     let entity = data.getEntity(id, instance_model);
@@ -59,7 +59,7 @@ detailObj.prototype.drawAttributes = function (id) {
     }
     $(properties).find("#attribute").append(html);
 
-    $(properties).find("#attribute").append(this.generatePlusLogo("attribute"));
+    //$(properties).find("#attribute").append(this.generatePlusLogo("attribute"));
 
 }
 
@@ -223,6 +223,26 @@ detailObj.prototype.relationRevise = function (item, type = "add") {
         '</div>' +
         '<div class="list-group" id="roles">' +
         '</div>' +
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-10">' + "时间周期" + '</span>' +
+        '<span class="col-xs-2 vcenter fa fa-plus" id="timePeriodAdd"></span>'+
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row" id="time-period">'+
+        '<span class="col-xs-4 vcenter">开始</span>'+
+        '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+        '<span class="col-xs-4 vcenter">结束</span>'+
+        '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>'+
+        '</div>'+
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-12">' + "参考" + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row">'+
+        '<span class="col-xs-12 vcenter" style="padding: 0px" ><input type="text" class="stigmod-input" id="refer-info" value=></span>'+
+        '</div>'+
         '</div>';
 
     $(".properties-revise").find("#relation-revise").append(html);
@@ -463,7 +483,9 @@ detailObj.prototype.attributeReviseSubmit = function (item) {
         "roles": [
             {"rolename": "", "node_id": centerId},
             {"rolename": type, "node_id": nodeId}
-        ]
+        ],
+        "referInfo":"",
+        "timeArray":[],
     }
     connection.io_create_insModel_relation(relations);
     return;
@@ -495,7 +517,32 @@ detailObj.prototype.attributeRemoveSubmit = function (item) {
 detailObj.prototype.relationReviseSubmit = function (item) {
 
     let type = $(item).find(".type-input").val();
-    //let value = $(item).find(".value-input").val();
+    let referInfo = $(item).find("#refer-info").val();
+    //console.log("referInfo:",referInfo);
+    let startTimes = $(item).find(".start-time");
+    console.log("startTime:",startTimes);
+    let endTimes = $(item).find(".end-time");
+    let timeArray = [];
+    for(let i=0;i<startTimes.length;i++)
+    {
+        if(startTimes.eq(i).val()){
+            timeArray.push(startTimes.eq(i).val());
+        }
+        else{
+            timeArray.push("finite");
+        }
+
+        if(endTimes.eq(i).val()) {
+            timeArray.push(endTimes.eq(i).val());
+        }
+        else{
+            timeArray.push("finite");
+        }
+
+        // console.log("start:",startTimes.eq(i).val());
+        // console.log("end:",endTimes.eq(i).val());
+    }
+    let value = $(item).find(".value-input").val();
 
     let length = $("#roles").children().length;
     let roles = [];
@@ -557,7 +604,9 @@ detailObj.prototype.relationReviseSubmit = function (item) {
     let relations = {};
     relations[relationId] = {
         "type": type,
-        "roles": []
+        "roles": [],
+        "referInfo":referInfo,
+        "timeArray":timeArray
     }
     for (let i in roles) {
         relations[relationId].roles[i] = {

@@ -156,8 +156,10 @@ ioObj.prototype.io_create_moodel_entity = function (entity) {
         "type": keyAttribute,
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
-            {"rolename": keyAttribute, "node_id": entity.valueId}
-        ]
+            {"rolename": keyAttribute, "node_id": entity.valueId},
+        ],
+        "referInfo":"",
+        "timeArray":[],
     }
     this.io_create_insModel_relation(relations);
 
@@ -201,7 +203,9 @@ ioObj.prototype.io_create_model_entity = function (entity) {
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
             {"rolename": entity.keyAttr, "node_id": entity.valueId}
-        ]
+        ],
+        "referInfo":"",
+        "timeArray":"",
         //desc
     }
     this.io_create_model_relation(relations);
@@ -251,6 +255,10 @@ ioObj.prototype.io_create_model_keyAttr_done = function (msg) {
 
 ioObj.prototype.io_create_model_relation = function (relations) {
     let msg = this.emitMsgHeader('mcreate_relation');
+    if(typeof (relations.referInfo)=="undefined")
+        relations.referInfo="";
+    if(typeof (relations.timeArray)=="undefined")
+        relations.timeArray=[];
     msg["relations"] = relations;
     //console.log(JSON.stringify(relations));
     //console.log("ready to emit relation");
@@ -341,7 +349,9 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
             {"rolename": keyAttribute, "node_id": entity.valueId}
-        ]
+        ],
+        "referInfo":"",
+        "timeArray":[],
     }
     this.io_create_insModel_relation(relations);
 }
