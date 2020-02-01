@@ -25,8 +25,20 @@ function networkObj() {
 
     this.network.on("doubleClick", function (params) {
         if (params.nodes.length == 1) {
-            let id = params.nodes[0]
-            that.showNodeDetail(id)
+            let id = params.nodes[0];
+            let id2 = -1;
+            if(that.network.body.data.nodes._data[id].group == "__relation")
+            {
+                for(let edgeid in that.network.body.data.edges._data){
+                    let edge = that.network.body.data.edges._data[edgeid];
+                    if(edge.from == id)
+                    {
+                        id2 = edge.to;
+                        break;
+                    }
+                }
+            }
+            that.showNodeDetail(id,id2);
         } else if (params.edges.length == 1) {
             //clickOnEdge
             let id = params.edges[0]
@@ -57,11 +69,16 @@ networkObj.prototype.setModelData = function () {
 }
 
 
-networkObj.prototype.showNodeDetail = function (nodeId) {
+networkObj.prototype.showNodeDetail = function (nodeId,nodeId2) {
     //$("#modalNetwork").modal('hide')
-    svg.drawEntity(nodeId, instance_model); //画出中心区域
-    $("#" + nodeId).trigger("click");
+    if(nodeId2 == -1)
+        nodeId2 = nodeId;
+    svg.drawEntity(nodeId2, instance_model); //画出中心区域
     showLocal();
+    drawNodeDetails(nodeId2);
+    //$("#" + nodeId2).trigger("click");
+    $("#" + nodeId).trigger("click");
+
 }
 
 

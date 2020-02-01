@@ -74,6 +74,7 @@ $(function () {
             $("svg.local").hide();
             network.setModelData();
             $("div.global").show();
+            $(".btn.filter-btn").hide();
         }
     })
 
@@ -1193,7 +1194,7 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
         svg.drawEntity(centerNode);
         if (!$(".btn-group.workspace .btn-default").hasClass("off")) {
             //局部图谱
-            $("#" + centerNode).delay("10").click();
+            //$("#" + centerNode).delay("10").click();
         } else {
             drawNodeDetails(centerNode);
         }
