@@ -94,10 +94,24 @@ $(function () {
         }
     })
 
-    $(document).on("click","#modalAddRelInModel .fa-plus",function(){
+    $(document).on("click","#fa-plus-role",function(){
         let item = $("#modalAddRelInModel .modal-body")
         $(item).find("#relation-add .roles").append(generateNewRole("","","",""));
         setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
+    })
+
+    $(document).on("click","#fa-plus-time",function(){
+        let html = '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+            '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>';
+        $("#time-period2").append(html);
+    })
+
+    $(document).on("click","#timePeriodAdd",function(){
+        let html = '<span class="col-xs-4 vcenter">开始</span>'+
+            '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+            '<span class="col-xs-4 vcenter">结束</span>'+
+            '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>';
+        $("#time-period").append(html);
     })
 
     $(document).on("click","#modalAddRelInModel2 .fa-plus",function(){
@@ -149,13 +163,38 @@ $(function () {
             connection.io_create_model_relation(relations);
             $("#modalAddRelInModel").modal("hide");
 
+            let referInfo = $("#modalAddRelInModel").find(".refer-info").val();
+            //console.log("referInfo:",referInfo);
+            let startTimes = $("#modalAddRelInModel").find(".start-time");
+            //console.log("startTime:",startTimes);
+            let endTimes = $("#modalAddRelInModel").find(".end-time");
+            let timeArray = [];
+            for(let i=0;i<startTimes.length;i++)
+            {
+                if(startTimes.eq(i).val()){
+                    timeArray.push(startTimes.eq(i).val());
+                }
+                else{
+                    timeArray.push("finite");
+                }
+
+                if(endTimes.eq(i).val()) {
+                    timeArray.push(endTimes.eq(i).val());
+                }
+                else{
+                    timeArray.push("finite");
+                }
+
+                // console.log("start:",startTimes.eq(i).val());
+                // console.log("end:",endTimes.eq(i).val());
+            }
             let insRelationId = generateFrontRelationID(1);
             let insRelations = {};
             insRelations[insRelationId] = {
                 "type":rel.type,
                 "roles": [],
-                "referInfo":"",
-                "timeArray":[],
+                "referInfo":referInfo,
+                "timeArray":timeArray,
             }
             for(let i in rel.roles){
                 entityName = rel.roles[i][1];

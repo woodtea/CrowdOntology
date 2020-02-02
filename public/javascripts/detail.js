@@ -241,7 +241,7 @@ detailObj.prototype.relationRevise = function (item, type = "add") {
         '</div>' +
         '</div>' +
         '<div class="list-group-item stigmod-hovershow-trig row">'+
-        '<span class="col-xs-12 vcenter" style="padding: 0px" ><input type="text" class="stigmod-input" id="refer-info" value=></span>'+
+        '<span class="col-xs-12 vcenter" style="padding: 0px" ><input type="text" class="stigmod-input refer-info" value=></span>'+
         '</div>'+
         '</div>';
 
@@ -517,7 +517,7 @@ detailObj.prototype.attributeRemoveSubmit = function (item) {
 detailObj.prototype.relationReviseSubmit = function (item) {
 
     let type = $(item).find(".type-input").val();
-    let referInfo = $(item).find("#refer-info").val();
+    let referInfo = $(item).find(".refer-info").val();
     //console.log("referInfo:",referInfo);
     let startTimes = $(item).find(".start-time");
     console.log("startTime:",startTimes);
@@ -542,7 +542,7 @@ detailObj.prototype.relationReviseSubmit = function (item) {
         // console.log("start:",startTimes.eq(i).val());
         // console.log("end:",endTimes.eq(i).val());
     }
-    let value = $(item).find(".value-input").val();
+    //let value = $(item).find(".value-input").val();
 
     let length = $("#roles").children().length;
     let roles = [];
@@ -719,7 +719,7 @@ detailObj.prototype.generateContent = function (type, value, nodeId = "", relati
 
 detailObj.prototype.generatePlusLogo = function (type) {
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
-        '<span class="fa fa-plus" type=' + type + '></span></a>';
+        '<span class="fa fa-plus" id="fa-plus-role" type=' + type + '></span></a>';
     return html;
 }
 

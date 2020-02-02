@@ -786,8 +786,32 @@ $(function () {
         $(item).find("#relation-add .roles").append(generateNewRole("","","","",false));
         setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
 
+        //新增时间和参考选项
+        html =  '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-6">' + "开始时间" + '</span>'+
+        '<span class="col-xs-6">' + "结束时间" + '</span>'+
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row" id="time-period2">'+
+        '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+        '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>'+
+        '</div>'+
+        '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
+        '<span class="col-xs-2 vcenter fa fa-plus" id="fa-plus-time"></span></a>'+
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-12" style="text-align: center">' + "参考" + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row">'+
+        '<span class="col-xs-12 vcenter" style="padding: 0px" ><input type="text" class="stigmod-input refer-info" value=></span>'+
+        '</div>';
+        $(item).find("#relation-add").append(html);
+
         //显示描述
-        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px;display:none">' +
             '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
             '<div class="stigmod-rcmd-title row">' +
             '<span class="col-xs-12">' + "描述" + '</span>' +
