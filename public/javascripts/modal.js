@@ -102,8 +102,8 @@ $(function () {
 
     $(document).on("click","#modalAddRelInModel2 .fa-plus",function(){
         let item = $("#modalAddRelInModel2 .modal-body")
-        $(item).find("#relation-add .roles").append(generateNewRole("","","","",true,true));
-        setRawRelationRoleValueTypeahead2($("#relation-add .roles").children().last());
+        $(item).find("#model-relation-add .roles").append(generateNewRole("","","","",true,true));
+        setRawRelationRoleValueTypeahead2($("#model-relation-add .roles").children().last());
     })
 
 
@@ -171,7 +171,7 @@ $(function () {
         //创建
         let rel = fetchNewRel2();
         let err,str;
-        [err,str] = checkNewRel(rel);
+        [err,str] = checkNewRel2(rel);
 
         $("#modalAddRelInModel2 .modal-body .alert").children().remove();
 
@@ -232,6 +232,43 @@ $(function () {
     }
 
     function checkNewRel(rel){
+        let err=false,str="";
+        if(rel.type == ""){
+            err=true;
+            str+="关系名不可为空<br/>";
+        }
+        let centerId = $("g.center").attr("id");
+        let array = getRelationTypes(centerId);
+        if (array.indexOf(rel.type) != -1) {
+            err=true;
+            str+="当前关系名已存在<br/>";
+        }
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][0] == ""){
+                err=true;
+                str+="角色不可为空<br/>";
+                break;
+            }
+        }
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][1] == ""){
+                err=true;
+                str+="承担者不可为空<br/>";
+                break;
+            }
+        }
+        let entityArray = getIndexArray();
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][1] != "" && entityArray.indexOf(rel.roles[i][1])==-1 ){
+                err=true;
+                str+='承担者"'+rel.roles[i][1]+'"不存在<br/>';
+                break;
+            }
+        }
+        return [err,str];
+    }
+
+    function checkNewRel2(rel){
         let err=false,str="";
         if(rel.type == ""){
             err=true;

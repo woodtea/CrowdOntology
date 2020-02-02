@@ -18,23 +18,23 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
 $('[data-popover="popover"]').popover()
 
 
-$(document).on("mouseover", '.showPopover li', function () {
-
-    let nodeId = data.getEntityIdByValue($(this).text())[0];
-    let content = generatePoperContent(nodeId);
-
-    $(this).popover({
-        "animation": true,
-        "title": "详情",
-        "trigger": "hover",
-        "placement": "left",
-        "container": 'body',
-        "html": true,
-        "content": content
-    })
-
-    $(this).popover("show")
-})
+// $(document).on("mouseover", '.showPopover li', function () {
+//
+//     let nodeId = data.getEntityIdByValue($(this).text())[0];
+//     let content = generatePoperContent(nodeId);
+//
+//     $(this).popover({
+//         "animation": true,
+//         "title": "详情",
+//         "trigger": "hover",
+//         "placement": "left",
+//         "container": 'body',
+//         "html": true,
+//         "content": content
+//     })
+//
+//     $(this).popover("show")
+// })
 
 $(document).on("mouseover", '.entity.isRecommendation', function () {
 
@@ -125,7 +125,7 @@ $(function () {
         }
         else{
             $("#modalAddRelInModel2").modal("show");
-            html = detail.generateTitle("关系", "relation-add");
+            html = detail.generateTitle("模型层关系", "model-relation-add");
             let item = $("#modalAddRelInModel2 .modal-body");
             $(item).children().remove();
             $(item).append(html);
@@ -133,7 +133,7 @@ $(function () {
                 '<div class="row">' +
                 '<div class="col-xs-12"><input type="text" class="stigmod-input type-input typeahead" stigmod-inputcheck="relation-modify" value="" placeholder="关系" style="text-align:center;"></div>' +
                 '</div></a>';
-            $(item).find("#relation-add").append(html);
+            $(item).find("#model-relation-add").append(html);
             html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
                 '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
                 '<div class="stigmod-rcmd-title row">' +
@@ -145,10 +145,10 @@ $(function () {
                 '<div class="list-group roles">' +
                 '</div>' +
                 '</div>';
-            $(item).find("#relation-add").append(html);
-            $(item).find("#relation-add").append(detail.generatePlusLogo("relRole"));
-            $(item).find("#relation-add .roles").append(generateNewRole("","","","",false,true));
-            setRawRelationRoleValueTypeahead2($("#relation-add .roles").children().last());
+            $(item).find("#model-relation-add").append(html);
+            $(item).find("#model-relation-add").append(detail.generatePlusLogo("relRole"));
+            $(item).find("#model-relation-add .roles").append(generateNewRole("","","","",false,true));
+            setRawRelationRoleValueTypeahead2($("#model-relation-add .roles").children().last());
             html = '<div class="alert"></div>';
             $(item).append(html);
 
