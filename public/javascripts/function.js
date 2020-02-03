@@ -332,29 +332,29 @@ $(function () {
 
     //双击节点
     $(document).on("dblclick", 'g', function () {
-        if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
-            clickTimeout.clear();
-
-            let id = $(this).attr("id");
-            let ids = id.split("-");
-            let relationId = ids[ids.length - 1];
-
-            detail.citeRecommendation(relationId);
-        } else {
-            clickTimeout.clear();
-
-            if (d3.select(this).classed("isCentralized") == false) {
-                $(this).trigger("click");
-                $(".btn.recommend").removeClass("active");
-                return;
-            } else {
-                $(".btn.recommend").addClass("active");
-                let nodeId = $(this).attr("id");
-                let node = {}
-                node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
-                connection.io_recommend_insModel_node(node);
-            }
-        }
+        // if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
+        //     clickTimeout.clear();
+        //
+        //     let id = $(this).attr("id");
+        //     let ids = id.split("-");
+        //     let relationId = ids[ids.length - 1];
+        //
+        //     detail.citeRecommendation(relationId);
+        // } else {
+        //     clickTimeout.clear();
+        //
+        //     if (d3.select(this).classed("isCentralized") == false) {
+        //         $(this).trigger("click");
+        //         $(".btn.recommend").removeClass("active");
+        //         return;
+        //     } else {
+        //         $(".btn.recommend").addClass("active");
+        //         let nodeId = $(this).attr("id");
+        //         let node = {}
+        //         node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+        //         connection.io_recommend_insModel_node(node);
+        //     }
+        // }
     })
 
     //点击关系文本
