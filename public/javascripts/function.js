@@ -67,6 +67,8 @@ $(function () {
             detail.drawIndex(instance_model, true, id);
             //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
             $(".btn.filter-btn").hide();
+            document.getElementById('stigmod-search-left-input').style.visibility="visible";
+            document.getElementById('stigmod-search-left-btn').style.visibility="visible";
         } else {
             //模型层
             $('#glborloc').bootstrapToggle('off');
@@ -75,6 +77,8 @@ $(function () {
             network.setModelData();
             $("div.global").show();
             $(".btn.filter-btn").hide();
+            document.getElementById('stigmod-search-left-input').style.visibility="hidden";
+            document.getElementById('stigmod-search-left-btn').style.visibility="hidden";
         }
     })
 
