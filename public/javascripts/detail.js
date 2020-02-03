@@ -74,13 +74,13 @@ detailObj.prototype.drawRelations = function (id) {
 
     let entity = svg.getEntity(id, instance_model);
     let relations = this.filterRelations(entity.relations);
-
     let relationArray = [];
     for (let i in relations) {
         let relation = relations[i];
         if (relationArray.indexOf(relation.relationId) == -1) {
             relationArray.push(relation.relationId);
-            html = this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId);
+            console.log("relation detail is",relation);
+            html = this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId, relation.referInfo, relation.timeArray);
             $(properties).find("#relation").append(html);
         } else {
             /*
@@ -702,18 +702,46 @@ detailObj.prototype.generateCollapseContent = function (type, value, nodeId = ""
     return html;
 }
 
-detailObj.prototype.generateContent = function (type, value, nodeId = "", relationId = "") {
+detailObj.prototype.generateContent = function (type, value, nodeId = "", relationId = "", referInfo="", timeArray=[]) {
     if (type == undefined) type = "姓名";
     //alert(nodeId);
     //alert(relationId);
-    let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
+    let referHtml = '<span style="color: #00B7FF">参考信息：' + referInfo + '</span>';
+    let timeHtml = '';
+    if (timeArray){
+        for(var i=0;i<timeArray.length;i++){
+            if(i%2 == 0){
+                let tmpHtml = '<span style="color:#f0ad4e">' + timeArray[i] + '  ~  ' + timeArray[i+1]+'</span></br>';
+                timeHtml += tmpHtml;
+            }
+        }
+    }
+    let tailHtml = '<span class="pull-right stigmod-hovershow-cont">' +
+        '<span class="fa fa-edit"></span>' +
+        '</span></a>';
+    let headHtml = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
         '<span class="nodeId" value=' + nodeId + '></span>' +
         '<span class="relationId" value=' + relationId + '></span>' +
         '<span class="type" value=' + type + '>' + type + '</span>' + ' : ' +
-        '<span class="value" value=' + value + '>' + value + '</span>' +
-        '<span class="pull-right stigmod-hovershow-cont">' +
-        '<span class="fa fa-edit"></span>' +
-        '</span></a>';
+        '<span class="value" value=' + value + '>' + value + '</span></br>' ;
+    let html = headHtml;
+    if(timeArray && referInfo){
+        html+=timeHtml;
+        html+=referHtml;
+        html+=tailHtml;
+    }
+    else if(timeArray){
+        html+=timeHtml;
+        html+=tailHtml;
+    }
+    else if(referInfo)
+    {
+        html+=referHtml;
+        html+=tailHtml;
+    }
+    else
+        html+=tailHtml;
+
     return html;
 }
 
@@ -784,7 +812,9 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
                 relationId: id,
                 nodeId: nodeId,
                 type: rawRelation.type,
-                value: value
+                value: value,
+                referInfo:rawRelation.referInfo,
+                timeArray:rawRelation.timeArray
             })
         }
     }

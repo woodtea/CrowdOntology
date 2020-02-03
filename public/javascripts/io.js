@@ -510,7 +510,6 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
         this.migrateEmitMsg(msg.migrate);
         let curMsg = this.tmpMsgPop(msg.operationId);
         let relation = curMsg.relations;
-        //console.log(curMsg);
         tagReformat.id2value(curMsg);
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;

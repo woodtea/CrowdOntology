@@ -551,7 +551,6 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
     //处理邻接信息
     for (let relationId in tmpModel.relations) {
         for (let roleIndex in tmpModel.relations[relationId].roles) {
-            //console.log(tmpModel.relations[relationId]);
             if (id == tmpModel.relations[relationId].roles[roleIndex].node_id) {
                 //Edited by Cui on 2019/10/22 对显示列表的相关处理
                 let toShowE = false,toShowR = false;
@@ -580,6 +579,7 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
                 }
                 if(this.valuelist.fresh||(toShowE&&toShowR)){
                     entity.relations[relationId] = tmpModel.relations[relationId]
+                    //console.log("hhhhhhhhh",tmpModel.relations[relationId]);
                     entity.relations[relationId].id = relationId;
                 }
                 break;

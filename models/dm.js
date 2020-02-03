@@ -1063,7 +1063,7 @@ DataManager.prototype.get = function (msg, callback) {
         MATCH (u:User {name: {uname}})\n\
         MATCH (p)-[:has]->(r:RelInst)<-[:refer]-(u)\n\
         MATCH (r)-[hr:has_role]->(tgt)\n\
-        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId';
+        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId, r.referInfo AS referInfo, r.timeArray AS timeArray';
     var instCypher = 'MATCH (p:Project {name: {pname}})\n\
         MATCH (u:User {name: {uname}})\n\
         MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)\n\
@@ -1106,12 +1106,24 @@ DataManager.prototype.get = function (msg, callback) {
                     for (var i = 0; i < res.records.length; i++) {
                         var rec = res.records[i];
                         var relationId = rec.get('relationId').toString();
+                        var referInfo;
+                        if(rec.get('referInfo'))
+                            referInfo = rec.get('referInfo').toString();
+                        else
+                            referInfo = "";
+                        var timeArray;
+                        if(rec.get('timeArray'))
+                            timeArray = rec.get('timeArray');
+                        else
+                            timeArray = [];
                         var roleName = rec.get('roleName');
                         var roleId = rec.get('roleId').toString();
 
                         if (relations[relationId] == undefined) {
                             relations[relationId] = {
-                                roles: []
+                                roles: [],
+                                referInfo: referInfo,
+                                timeArray: timeArray
                             };
                         }
                         relations[relationId].roles.push({
