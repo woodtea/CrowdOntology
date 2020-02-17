@@ -105,7 +105,7 @@ function ioConfig(server){
                     break;
                 case 'create_relation':
                     emitMsg = io_create_insModel_relation(msg,function(emitMsg){
-                        console.log("hhhhhh",emitMsg);
+                        //console.log("hhhhhh",emitMsg);
                         logger.info(JSON.stringify(emitMsg))
                         return socket.emit('insModel',emitMsg);
                     });
@@ -559,7 +559,7 @@ function io_remove_insModel_node(rcvMsg,callback){
 function io_create_insModel_relation(rcvMsg,callback){
 
     let newMsg = formatExchange.web2Server(rcvMsg);
-    console.log("newmsg here",newMsg);
+    //console.log("newmsg here",newMsg);
 
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);

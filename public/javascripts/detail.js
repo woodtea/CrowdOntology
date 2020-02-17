@@ -65,21 +65,24 @@ detailObj.prototype.drawAttributes = function (id) {
 
 detailObj.prototype.drawRelations = function (id) {
 
+    //console.log("daozhelilema?");
     let html = this.generateTitle("关系", "relation");
     $(properties).append(html);
 
 
     //let entity = data.getEntity(id, instance_model);
     //let relations = filterRelations(entity.neighbours);
-
+    //console.log("instance_model hhhh",instance_model);
     let entity = svg.getEntity(id, instance_model);
+    //console.log("entity relations",entity.relations);
     let relations = this.filterRelations(entity.relations);
+    //console.log("filter relations",relations);
     let relationArray = [];
     for (let i in relations) {
         let relation = relations[i];
         if (relationArray.indexOf(relation.relationId) == -1) {
             relationArray.push(relation.relationId);
-            console.log("relation detail is",relation);
+            //console.log("relation detail is",relation);
             html = this.generateContent(relation.type, relation.value, relation.nodeId, relation.relationId, relation.referInfo, relation.timeArray);
             $(properties).find("#relation").append(html);
         } else {
@@ -791,7 +794,8 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
     let relations = []
     for (let id in rawRelations) {
         let rawRelation = rawRelations[id];
-        if (relationTypeArray.indexOf(rawRelation.type) != -1) {
+        //console.log("relation tpye array",relationTypeArray);
+        //if (relationTypeArray.indexOf(rawRelation.type) != -1) {
             let nodeId = [];
             let value = [];
             if(centerId==undefined){
@@ -816,7 +820,7 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
                 referInfo:rawRelation.referInfo,
                 timeArray:rawRelation.timeArray
             })
-        }
+        //}
     }
     return relations;
 }

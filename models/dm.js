@@ -711,7 +711,7 @@ msg : {
 DataManager.prototype.createRelation = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var relation = msg.relations[0];
-    console.log("fuck relation",relation);
+    //console.log("fuck relation",relation);
     var roles = relation.roles;
 
     var startCypher = '';

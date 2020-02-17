@@ -172,7 +172,7 @@ format_create_insModel_relation = function (msg) {
     newMsg = format_basic(msg,0);
     newMsg.operation = newMsg.operation+"_proxy";   //临时
 
-    if(msg["relations"][frontId].referInfo && msg["relations"][frontId].timeArray){
+    if(msg["relations"][frontId].referInfo || msg["relations"][frontId].timeArray){
         newMsg["relations"]=[{
             "front_id" : frontId,
             "tag" : msg["relations"][frontId].type,

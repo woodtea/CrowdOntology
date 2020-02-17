@@ -199,7 +199,7 @@ $(function () {
             for(let i in rel.roles){
                 entityName = rel.roles[i][1];
                 entityId = data.getEntityIdByValue(entityName)[0];
-                insRelations[insRelationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityId},)
+                insRelations[insRelationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityId})
             }
             data.pendingInsRel.push(insRelations);
             //connection.io_create_insModel_relation(insRelations);

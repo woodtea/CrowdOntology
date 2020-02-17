@@ -330,7 +330,7 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
         "tags": entity.tags,
         "value": ""
     }
-    console.log("ffffff",entity.tags[0]);
+    //console.log("ffffff",entity.tags[0]);
     this.io_create_insModel_node(entityNode);
 
     //生成Value节点
@@ -371,6 +371,7 @@ ioObj.prototype.io_remove_insModel_node = function (nodeId) {
 
 ioObj.prototype.io_create_insModel_relation = function (relations) {
     let msg = this.emitMsgHeader('create_relation');
+    //console.log("relation here:",relations);
     msg["relations"] = relations;
     this.socketEmitArray('insModel', msg);
 }
@@ -526,6 +527,9 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
             nodeId = instance_model.relations[relationId].roles[n].node_id;
             if (nodeId != centerId) break;
         }
+
+        //console.log("center node here",centerNode);
+        //console.log("instance_model relations",instance_model.relations);
 
         //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
         if (!prepareNewEntity(instance_model, !svgPending, isGetRcmd)) {
@@ -794,6 +798,7 @@ ioObj.prototype.prepareModel = function (){
             if (model.nodes[role.node_id].tag == "Entity") {
                 count++;
                 if (count > 1) {
+                    //console.log("change relationTpyeArray!!!!!!!!!!!");
                     relationTypeArray.push(model.relations[key].value);
                     break;
                 }
