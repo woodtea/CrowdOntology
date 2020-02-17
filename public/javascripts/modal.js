@@ -175,14 +175,14 @@ $(function () {
                     timeArray.push(startTimes.eq(i).val());
                 }
                 else{
-                    timeArray.push("finite");
+                    timeArray.push("infinite");
                 }
 
                 if(endTimes.eq(i).val()) {
                     timeArray.push(endTimes.eq(i).val());
                 }
                 else{
-                    timeArray.push("finite");
+                    timeArray.push("infinite");
                 }
 
                 // console.log("start:",startTimes.eq(i).val());

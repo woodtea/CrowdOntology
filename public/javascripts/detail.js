@@ -532,14 +532,14 @@ detailObj.prototype.relationReviseSubmit = function (item) {
             timeArray.push(startTimes.eq(i).val());
         }
         else{
-            timeArray.push("finite");
+            timeArray.push("infinite");
         }
 
         if(endTimes.eq(i).val()) {
             timeArray.push(endTimes.eq(i).val());
         }
         else{
-            timeArray.push("finite");
+            timeArray.push("infinite");
         }
 
         // console.log("start:",startTimes.eq(i).val());
@@ -712,6 +712,11 @@ detailObj.prototype.generateContent = function (type, value, nodeId = "", relati
     let referHtml = '<span style="color: #00B7FF">参考信息：' + referInfo + '</span>';
     let timeHtml = '';
     if (timeArray){
+        for(var i=0;i<timeArray.length;i++){
+            if(timeArray[i] == "finite"){
+                timeArray[i] = "infinite";
+            }
+        }
         for(var i=0;i<timeArray.length;i++){
             if(i%2 == 0){
                 let tmpHtml = '<span style="color:#f0ad4e">' + timeArray[i] + '  ~  ' + timeArray[i+1]+'</span></br>';
