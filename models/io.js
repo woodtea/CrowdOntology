@@ -37,7 +37,7 @@ function ioConfig(server){
         })
         socket.on('model', function(msg){
             logger.info(JSON.stringify(msg))
-            console.log(msg);
+            //console.log(msg);
             let emitMsg;
             switch (msg.operation){
                 case 'mget':
@@ -70,6 +70,9 @@ function ioConfig(server){
                         return socket.emit('model',emitMsg);
                     });
                     break;
+
+
+
 
             }
         })
@@ -465,6 +468,8 @@ function ioConfig(server){
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-qiaoxiaohe");
             }else if(msg.substring(0,12)=="mcreate_algo") {
                 mcreate_algorithm_project_with_name(msg.substring(12,msg.length));
+            }else if(msg.substring(0,13)=="mcreate_empty") {
+                mcreate_empty_project_with_name(msg.substring(13,msg.length));
             }else {
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
@@ -1385,4 +1390,21 @@ function mcreate_algorithm_project_with_name(projectName) {
     });
     return;
 }
+function mcreate_empty_project_with_name(projectName) {
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+
+    dm.handle(msg1, function(rep) {
+        /*dm.handle(mcreate_node("Entity", "人", projectName), function (rep) {
+        });*/
+        dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+            //for (let key in rep.migrate) symbolId = rep.migrate[key];
+        })
+    });
+    return;
+}
+
 module.exports = ioConfig;

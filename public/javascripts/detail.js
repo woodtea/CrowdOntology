@@ -712,7 +712,7 @@ detailObj.prototype.rightColumnShow = function (item) {
 detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=instance_model) {
 
     let relations = []
-    for (let id in rawRelations) {
+    out:for (let id in rawRelations) {
         let rawRelation = rawRelations[id];
         if (relationTypeArray.indexOf(rawRelation.type) != -1) {
             let nodeId = [];
@@ -730,7 +730,13 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
                     mutex++;
                 }
             }
-
+            for(let eachvalue of value)
+            {
+                if(eachvalue=="")
+                {
+                    continue out;
+                }
+            }
             relations.push({
                 relationId: id,
                 nodeId: nodeId,

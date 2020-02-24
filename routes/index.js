@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var request = require('request');
 var User = require('../models/user');
 
 var server_config = require('../server_config.json');
@@ -16,34 +17,105 @@ router.get('/', function(req, res, next) {
 
 /* GET Signin page. */
 router.get('/signin', function(req, res, next) {
-    let [success,error] = getAlertMsg(req);
-    res.render('signin', {
-        title: 'SingIn',
-        success:success,
-        error:error
-    });
+    let token = req.query.token;
+    if (!token)
+    {
+        let [success,error] = getAlertMsg(req);
+        res.render('signin', {
+            title: 'SingIn',
+            success:success,
+            error:error
+        });
+    }
+    else//带token情况，为统一平台返回
+    {
+        console.log("request>>>>>>>>>>")
+        request(
+            `http://passport.pintu.fun/check_token?token=${token}&t=${new Date().getTime()}`,
+            function (error, response, data) {
+
+                if (!error && response.statusCode === 200) {
+                    console.log("back2>>>>>>>>>>>>>>>>>>>>>>>")
+                    data = JSON.parse(data);
+                    console.log(data);
+                    if (data.error === 0) {
+                        console.log("back22>>>>>>>>>>>>>>>>>>>>>>>")
+                        let userId = data.username;
+                        if (!userId) {
+                            console.log("nouserid>>>>>>>>>>>")
+                            res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
+                            return;
+                        }
+                        console.log("userid:"+userId)
+                        req.session.user =   {
+                            mail:userId
+                        }
+                        let msg = {
+                            operation: 'get_user',
+                            operation_id: '',
+                            name: userId
+                        };
+                        dm.handle(msg, function(rep){
+                            console.log(rep)
+                            console.log("back3>>>>>>>>>>>>>>>>>>>>>>>")
+                            if(rep.user_id != -1){//平台返回账号已在数据库中存在
+                                req.session['success'] = 'SignUp Success';
+                                res.redirect('/user');
+                            }else{
+                                let msg = {
+                                    operation: 'create_user',
+                                    operation_id: '',
+                                    name: userId
+                                };
+                                console.log("back4>>>>>>>>>>>>>>>>>>>>>>>")
+                                dm.handle(msg, function(rep){
+                                    console.log(rep)
+                                    res.redirect('/user');
+                                });
+                            }
+                        });
+                    } else {
+                        // token 验证失败，重新去 passport 登录。
+                        console.log("back3>>>>>>>>>>>>>>>>>>>>>>>")
+                        res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
+                    }
+                } else {
+                    res.redirect(`http:/passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
+                }
+            });
+    }
+
 });
 
 router.post('/signin', function(req, res, next) {
     console.log(req.body)
-    let msg = {
-        operation: 'get_user',
-        operation_id: '',
-        name: req.body.mail
-    };
-    dm.handle(msg, function(rep){
-        console.log(rep)
-        if(rep.user_id != -1){
-            req.session.user = {
-                mail:req.body.mail  //for test
+    console.log("login>>>>>>>>>>>>>>>>>>>>>>")
+    if(req.body.method=="1")
+    {
+        res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
+    }
+    else
+    {
+        let msg = {
+            operation: 'get_user',
+            operation_id: '',
+            name: req.body.mail
+        };
+        dm.handle(msg, function(rep){
+            console.log(rep)
+            if(rep.user_id != -1){
+                req.session.user = {
+                    mail:req.body.mail  //for test
+                }
+                req.session['success'] = 'SignUp Success';
+                res.redirect('/user');
+            }else{
+                req.session['error'] = 'User not found';
+                res.redirect('/signin');
             }
-            req.session['success'] = 'SignUp Success';
-            res.redirect('/user');
-        }else{
-            req.session['error'] = 'User not found';
-            res.redirect('/signin');
-        }
-    });
+        });
+    }
+
 });
 
 router.get('/signout', function(req, res, next) {

@@ -53,13 +53,14 @@ $(function () {
             //$(this).removeClass("active");
             let rcmdNode = $(".entity.center.isCentralized");
             if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
+            $(".change-btn").hide();
         } else {//推荐时需要显示局部图谱
             //$(this).addClass("active");
             showLocal();
             checkRcmd = true;
             let rcmdNode = $(".entity.center.isCentralized");
             if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
-
+            $(".change-btn").show();
         }
     })
 
@@ -124,11 +125,22 @@ $(function () {
         let id= centerNode.attr("id");
         if($(".btn.recommend").hasClass("active"))
         {
+            console.log("drawrecomm");
             svg.drawRecommendation(id);
         }else{
+            console.log("drawent");
             svg.drawEntity(id);
         }
         svg.valuelist.fresh=true;
+    })
+
+    $(document).on("click",".btn.change-btn",function(){
+        svg.rcmd.fresh=false;
+        svg.rcmd.jumpLen+=svg.rcmd.showLen;
+        let centerNode = $(".entity.center");
+        let id= centerNode.attr("id");
+        svg.drawRecommendation(id);
+        svg.rcmd.fresh=true;
     })
 
     $(document).on("click",".filter-fold.glyphicon",function(){
@@ -302,6 +314,10 @@ $(function () {
 
     //双击节点
     $(document).on("dblclick", 'g', function () {
+        if (d3.select(this).classed("element-group") == true)
+        {
+            return;
+        }
         if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
             clickTimeout.clear();
 
@@ -493,7 +509,8 @@ $(function () {
         let type = $(this).val();
         let array = getEntityTypes();
         if (array.indexOf(type) == -1) {
-            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+            //console.log($(this).parent().children("ul").css("display")+"      "+$(this).is(":focus"))
+            if (($(this).parent().children("ul").css("display") == 'none'||$(this).parent().children("ul").css("display") == undefined) && $(this).is(":focus")) {
                 let content = '<p>是否新建实体类型?</p>';
                 content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
@@ -549,6 +566,7 @@ $(function () {
                 break;
             }
         }
+        //if(valueId==undefined) valueId=0;
         let entity = {
             "nodeId": generateFrontNodeID(),
             "relationId": generateFrontRelationID(),

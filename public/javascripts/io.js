@@ -81,6 +81,7 @@ ioObj.prototype.init = function () {
 
 //TODO 创建新属性的临时解决方案，等待修改value2id或getValueId函数
 ioObj.prototype.socketEmitNewArray = function (type, msg) {
+   // tagReformat.value2id(msg);
     this.tmpMsg.emit.push(msg);
     this.tmpMsg.type.push(type);
     console.log("sendrelation");
@@ -91,10 +92,11 @@ ioObj.prototype.socketEmitNewArray = function (type, msg) {
 }
 
 ioObj.prototype.socketEmitArray = function (type, msg) {
+
     tagReformat.value2id(msg);
     this.tmpMsg.emit.push(msg);
     this.tmpMsg.type.push(type);
-    //console.log(JSON.stringify(msg));
+    console.log(JSON.stringify(msg));
     if (!this.socket_mutex) {
         this.socketEmit(type, msg)
     }
@@ -584,7 +586,16 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
 
         data.completeRcmdModel(recommend_model);
 
+
+
         prepareNewEntity(recommend_model, false);
+
+        // for(key in recommend_model.nodes)
+        // {
+        //     console.log(recommend_model.nodes[key].value);
+        //     if(recommend_model.nodes[key].value=="") delete recommend_model.nodes[key];
+        // }
+        // console.log(recommend_model);
 
         //let centerId = $("g.center").attr("id");
         let entity = svg.getEntity(centerId, recommend_model);
@@ -781,6 +792,7 @@ ioObj.prototype.prepareModel = function (){
     for (let key in model.relations) {
         let count = 0;
         for (let role of model.relations[key].roles) {
+            if (model.nodes[role.node_id] == undefined) continue;
             if (model.nodes[role.node_id].tag == "Entity") {
                 count++;
                 if (count > 1) {

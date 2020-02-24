@@ -6,7 +6,7 @@
         <h2 class="panel-title">Sign in</h2>
     </div>
     <div class="panel-body">
-        <form action="/signin" method="post" role="form">
+        <form action="/signin" method="post" role="form" novalidate>
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" class="form-control" required id="email" name="mail"/>
@@ -18,8 +18,10 @@
             <!--label class="checkbox">
               <input type="checkbox" value="remember-me"> Remember me
             </label-->
-            <button class="btn btn-default" type="submit">Sign in</button>
+            <button class="btn btn-default" type="submit" name="method" value="0">Sign in</button>
+            <button class="btn btn-default" name="method" value="1">统一平台登录</button>
         </form>
     </div>
+
 </div>
 
