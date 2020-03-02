@@ -95,6 +95,10 @@ function ioConfig(server){
                         return socket.emit("insModel",rep);
                     });
                     break;
+                case 'cite_rcmd':
+                    console.log("receive>>>>>>>>>>>>>>>>>>")
+                    socket.emit('insModel',msg);
+                    break;
                 case 'create_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);

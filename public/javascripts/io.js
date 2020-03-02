@@ -44,6 +44,9 @@ ioObj.prototype.init = function () {
             case 'get':
                 that.io_get_insModel_done(msg);
                 break;
+            case 'cite_rcmd':
+                that.io_cite_recommend_done(msg);
+                break;
             case 'create_node':
                 that.io_create_insModel_node_done(msg);
                 break;
@@ -199,7 +202,7 @@ ioObj.prototype.io_create_model_entity = function (entity) {
     this.io_create_insModel_node(valueNode)
 */
     //生成关系
-    let relations = {};
+    let relations = {}
     relations[entity.relationId] = {
         "type": entity.keyAttr,
         "roles": [
@@ -314,6 +317,13 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
 ioObj.prototype.io_get_insModel = function (user_id, projectId) {
     let msg = this.generate_msg_base(user_id, projectId, 'get');
     this.socketEmitArray('insModel', msg);
+}
+
+ioObj.prototype.io_cite_recommend = function (status) {
+    let msg = this.emitMsgHeader('cite_rcmd');
+    if(status===1) msg["done"] = "true";
+    else msg["done"] = "false";
+    this.socketEmitArray('insModel',msg);
 }
 
 ioObj.prototype.io_create_insModel_entity = function (entity) {
@@ -456,6 +466,15 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
         //detail.drawIndex();
         showGlobal();//不知道为什么，动态宽高后，直接显示network不正常。
         detail.rightColumnShow(index);
+    }
+}
+
+ioObj.prototype.io_cite_recommend_done = function (msg) {
+    if (msg.error) {
+        return
+    } else {
+        this.tmpMsgPop(msg.operationId);
+        console.log("pop>>>>>>>>>>>>>");
     }
 }
 

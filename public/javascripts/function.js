@@ -178,6 +178,7 @@ $(function () {
 
     $(document).on("click", '#modalCiteRcmd .btn-primary', function () {
         $("#modalCiteRcmd").modal('hide')
+        connection.io_cite_recommend(0);
         for (let i in rcmd_pending.entities) {
             connection.io_create_insModel_entity(rcmd_pending.entities[i]);
         }
@@ -187,6 +188,7 @@ $(function () {
         if (getJsonLength(rcmd_pending.relations) > 0) {
             connection.io_create_insModel_relation(rcmd_pending.relations);
         }
+        connection.io_cite_recommend(1);
     })
 
     $(document).on("click", '#modalRevise button', function () {
