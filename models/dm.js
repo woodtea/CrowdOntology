@@ -4,13 +4,13 @@ const ogmneo = require('ogmneo');
 var keyAttributeArray = ["姓名","名字","名称","片名"];
 
 function DataManager(cfg) {
-    console.log('[config] ' + cfg);
+    //console.log('[config] ' + cfg);
     ogmneo.Connection.connect('neo4j', cfg.passwd, cfg.address);
     ogmneo.Connection.logCypherEnabled = true;
 }
 
 function extractBasic(msg) {
-    console.log(msg);
+    //console.log(msg);
     return {
         operation: msg.operation,
         user_id: msg.user_id,
@@ -42,8 +42,8 @@ String.prototype.format = function (args) {
 }
 
 DataManager.prototype.handle = function (msg, callback) {
-    console.log("DataManager.prototype.handle");
-    console.log(msg);
+    // console.log("DataManager.prototype.handle");
+    // console.log(msg);
     try {
         switch (msg.operation) {
             case 'init':
@@ -325,8 +325,8 @@ DataManager.prototype.mAddKeyAttr = function (msg, callback) {
             key_list: '[' + key_list.toString() + ']'
         });
     
-    console.log("[CYPHER]");
-    console.log(cypher);
+    // console.log("[CYPHER]");
+    // console.log(cypher);
     
     var resp = extractBasic(msg);
     resp.error = false;
@@ -448,7 +448,7 @@ DataManager.prototype.mGet = function (msg, callback) {
                 prop['key_attr_list']  = tmp.map(x=>x.toString()); //获得概念的key attr信息
                 // prop.id = nodeId;
                 nodes[nodeId] = prop;
-                console.log(prop);
+                //console.log(prop);
             }
             session.run(relationCypher, {
                     pname: msg.project_id
@@ -631,7 +631,6 @@ DataManager.prototype.createNode = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var node = msg.nodes[0];
     var tags = node.tags;
-
     var tagCypher = '';
     var startCypher = '';
     for (var i = 0; i < tags.length; i++) {
@@ -658,8 +657,8 @@ DataManager.prototype.createNode = function (msg, callback) {
         CREATE (u)-[:refer]->(i)\n' +
         tagCypher +
         'RETURN id(i) AS nodeId, i AS node';
-    console.log('[CYPHER]');
-    console.log(cypher);
+    // console.log('[CYPHER]');
+    // console.log(cypher);
 
     var resp = extractBasic(msg);
     resp.error = false;
@@ -712,6 +711,7 @@ msg : {
 DataManager.prototype.createRelation = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var relation = msg.relations[0];
+    //console.log("fuck relation",relation);
     var roles = relation.roles;
 
     var startCypher = '';
@@ -746,15 +746,15 @@ DataManager.prototype.createRelation = function (msg, callback) {
             tag: relation.tag
         }) +
         startCypher +
-        'CREATE (p)-[:has]->(r:RelInst)\n\
+        'CREATE (p)-[:has]->(r:RelInst {referInfo:{referInfo},timeArray:{timeArray}})\n\
         CREATE (u)-[:refer]->(r)\n\
         CREATE (r)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
         CREATE (u)-[:refer]->(iof)\n\
         CREATE (p)-[:has]->(iof)' +
         roleCypher +
         'RETURN id(r) AS relationId, r AS relation';
-    console.log('[CYPHER]');
-    console.log(cypher);
+    // console.log('[CYPHER]');
+    // console.log(cypher);
 
     var resp = extractBasic(msg);
     resp.error = false;
@@ -764,7 +764,9 @@ DataManager.prototype.createRelation = function (msg, callback) {
             pname: msg.project_id,
             uname: msg.user_id,
             rname: relation.value,
-            tag: relation.tag
+            tag: relation.tag,
+            referInfo:relation.referInfo,
+            timeArray:relation.timeArray
         })
         .then(function (res) {
             var relationId = res.records[0].get('relationId').toString(); //获取id
@@ -1061,17 +1063,17 @@ DataManager.prototype.get = function (msg, callback) {
         MATCH (u:User {name: {uname}})\n\
         MATCH (p)-[:has]->(r:RelInst)<-[:refer]-(u)\n\
         MATCH (r)-[hr:has_role]->(tgt)\n\
-        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId';
+        RETURN id(r) AS relationId, hr.name AS roleName, id(tgt) AS roleId, r.referInfo AS referInfo, r.timeArray AS timeArray';
     var instCypher = 'MATCH (p:Project {name: {pname}})\n\
         MATCH (u:User {name: {uname}})\n\
         MATCH (p)-[:has]->(iof:inst_of)<-[:refer]-(u)\n\
         MATCH (i)-[:from]->(iof)-[:to]->(j)\n\
         RETURN id(i) AS iId, id(j) AS jId';
 
-    console.log('[CYPHER]');
-    console.log(nodeCypher);
-    console.log(relationCypher);
-    console.log(instCypher);
+    // console.log('[CYPHER]');
+    // console.log(nodeCypher);
+    // console.log(relationCypher);
+    // console.log(instCypher);
 
     var resp = extractBasic(msg);
     resp.error = false;
@@ -1083,7 +1085,7 @@ DataManager.prototype.get = function (msg, callback) {
         })
         .then(function (res) {
             var nodes = {};
-            console.log("[Node]");
+            //console.log("[Node]");
             for (var i = 0; i < res.records.length; i++) {
                 var rec = res.records[i];
                 var nodeId = rec.get('nodeId').toString();
@@ -1092,7 +1094,7 @@ DataManager.prototype.get = function (msg, callback) {
                 prop['tags'] = [];
                 nodes[nodeId] = prop;
 
-                console.log(nodeId);
+                //console.log(nodeId);
             }
             session.run(relationCypher, {
                     pname: msg.project_id,
@@ -1104,12 +1106,24 @@ DataManager.prototype.get = function (msg, callback) {
                     for (var i = 0; i < res.records.length; i++) {
                         var rec = res.records[i];
                         var relationId = rec.get('relationId').toString();
+                        var referInfo;
+                        if(rec.get('referInfo'))
+                            referInfo = rec.get('referInfo').toString();
+                        else
+                            referInfo = "";
+                        var timeArray;
+                        if(rec.get('timeArray'))
+                            timeArray = rec.get('timeArray');
+                        else
+                            timeArray = [];
                         var roleName = rec.get('roleName');
                         var roleId = rec.get('roleId').toString();
 
                         if (relations[relationId] == undefined) {
                             relations[relationId] = {
-                                roles: []
+                                roles: [],
+                                referInfo: referInfo,
+                                timeArray: timeArray
                             };
                         }
                         relations[relationId].roles.push({
@@ -1126,7 +1140,7 @@ DataManager.prototype.get = function (msg, callback) {
                                 var rec = res.records[i];
                                 var iId = rec.get('iId').toString();
                                 var jId = rec.get('jId').toString();
-                                console.log(iId, jId);
+                                //console.log(iId, jId);
                                 if (nodes[iId] != undefined) {
                                     nodes[iId].tags.push(jId);
                                 } else if (relations[iId] != undefined) {
@@ -1177,8 +1191,8 @@ DataManager.prototype.removeNode = function (msg, callback) {
             nodeId: msg.nodes[0]
         });
 
-    console.log('[CYPHER]');
-    console.log(cypher);
+    // console.log('[CYPHER]');
+    // console.log(cypher);
 
     var resp = extractBasic(msg);
     resp.error = false;
@@ -1228,8 +1242,8 @@ DataManager.prototype.removeRelation = function (msg, callback) {
         relationId: msg.relations[0]
     });
 
-    console.log('[CYPHER]');
-    console.log(cypher);
+    // console.log('[CYPHER]');
+    // console.log(cypher);
 
     var resp = extractBasic(msg);
     resp.error = false;

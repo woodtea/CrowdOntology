@@ -9,6 +9,16 @@ function getIndexArray(tmpModel = instance_model) {
     return indexArray;
 }
 
+function getIndexArray2(tmpModel = model) {
+    let indexArray = [];
+    for (let id in tmpModel.nodes) {
+        if (tmpModel.nodes[id].tag == "Entity") {
+            indexArray.push(tmpModel.nodes[id].value);
+        }
+    }
+    return indexArray;
+}
+
 function setIndexTypeahead(array) {
     $('#stigmod-search-left-input').typeahead({
         source: array,
@@ -47,14 +57,14 @@ function setClassValueTypeahead() {
             let type = $('#class-revise .type-input').val();
             let array = [];
             if (type == "") {
-                console.log("Alert: In ClassValueTypeahead, class type is \"\"");
+                //console.log("Alert: In ClassValueTypeahead, class type is \"\"");
                 for (let key in recommend_index) {
                     array.push(...recommend_index[key]);
                 }
             }
             else if (recommend_index[type] == undefined) {
                 array = [];
-                console.log("Alert:recommend_index." + type + " is empty")
+                //console.log("Alert:recommend_index." + type + " is empty")
             } else {
                 array = recommend_index[type];
             }
@@ -213,6 +223,15 @@ function setRawRelationRoleValueTypeahead(item,tmpModel = instance_model){
         autoSelect: true
     });}
 
+function setRawRelationRoleValueTypeahead2(item,tmpModel = model){
+    $(item).find("input").eq(-2).typeahead({
+        source: getIndexArray2(tmpModel),
+        minLength: 0,
+        showHintOnFocus: true,
+        fitToElement: true,
+        autoSelect: true
+    });}
+
 //
 function getRelationValues(nodeId) {
     //给关系和类型吧
@@ -265,7 +284,7 @@ function setRelationRoleValueTypeahead(item, entities, nodeId) {
             let type = $(item).find(".tag").attr("value");
             if (entities[type] == undefined) {
                 array = [];
-                console.log("Alert:entities." + type + " is empty")
+                //console.log("Alert:entities." + type + " is empty")
             } else {
                 array = entities[type];
             }

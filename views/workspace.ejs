@@ -5,11 +5,16 @@
       <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
         <div class="col-xs-4">
           <div class="btn-group workspace" role="group" aria-label="...">
-            <input type="checkbox" checked data-toggle="toggle"
+            <input id="glborloc" type="checkbox" checked data-toggle="toggle"
                    data-on="局部图谱" data-off="全局图谱"
-                   data-onstyle="default">
+                   data-onstyle="primary">
           </div>
-          <button class="btn btn-default toggle recommend">图谱推荐</button>
+          <button class="btn btn-default toggle recommend" style="display: none">图谱推荐</button>
+          <div class="btn-group workspace2" role="group" aria-label="...">
+            <input type="checkbox" data-toggle="toggle"
+                   data-on="模型层" data-off="实例层"
+                   data-onstyle="success">
+          </div>
           <button style="display:none" class="btn btn-default toggle filter-btn" data-toggle="modal" data-target="#filter-window">筛选</button>
           <div class="modal fade" id="filter-window" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-custom">
@@ -205,6 +210,23 @@
 </div>
 
 <div class="modal fade bs-example-modal-sm" id="modalAddRelInModel" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">创建新的关系类型</h4>
+      </div>
+      <div class="modal-body" style="text-align: center">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-primary">创建</button>
+        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" id="modalAddRelInModel2" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">

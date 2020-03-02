@@ -109,10 +109,50 @@ $(document).on("mouseover", '.duplicated-item', function () {
 
 $(function () {
     $(document).on("click", '.popover-content .add-class', function () {
-        detail.classRevise(this, "add");
+        //实例层
+        if($(".btn-group.workspace2 .btn-default").hasClass("off")){
+            detail.classRevise(this, "add");
+        }
+        //模型层
+        else{
+            $("#modalAddEntityInModel").modal("show");
+        }
+
     })
     $(document).on("click", '.popover-content .add-relation', function () {
-        detail.relationRevise(this, "add");
+        if($(".btn-group.workspace2 .btn-default").hasClass("off")) {
+            detail.relationRevise(this, "add");
+        }
+        else{
+            $("#modalAddRelInModel2").modal("show");
+            html = detail.generateTitle("模型层关系", "model-relation-add");
+            let item = $("#modalAddRelInModel2 .modal-body");
+            $(item).children().remove();
+            $(item).append(html);
+            html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
+                '<div class="row">' +
+                '<div class="col-xs-12"><input type="text" class="stigmod-input type-input typeahead" stigmod-inputcheck="relation-modify" value="" placeholder="关系" style="text-align:center;"></div>' +
+                '</div></a>';
+            $(item).find("#model-relation-add").append(html);
+            html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+                '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+                '<div class="stigmod-rcmd-title row">' +
+                '<span class="col-xs-4">' + "角色" + '</span>' +
+                '<span class="col-xs-4">' + "承担者" + '</span>' +
+                '<span class="col-xs-4">' + "数量" + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="list-group roles">' +
+                '</div>' +
+                '</div>';
+            $(item).find("#model-relation-add").append(html);
+            $(item).find("#model-relation-add").append(detail.generatePlusLogo("relRole"));
+            $(item).find("#model-relation-add .roles").append(generateNewRole("","","","",false,true));
+            setRawRelationRoleValueTypeahead2($("#model-relation-add .roles").children().last());
+            html = '<div class="alert"></div>';
+            $(item).append(html);
+
+        }
     })
 });
 

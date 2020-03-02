@@ -25,8 +25,20 @@ function networkObj() {
 
     this.network.on("doubleClick", function (params) {
         if (params.nodes.length == 1) {
-            let id = params.nodes[0]
-            that.showNodeDetail(id)
+            let id = params.nodes[0];
+            let id2 = -1;
+            if(that.network.body.data.nodes._data[id].group == "__relation")
+            {
+                for(let edgeid in that.network.body.data.edges._data){
+                    let edge = that.network.body.data.edges._data[edgeid];
+                    if(edge.from == id)
+                    {
+                        id2 = edge.to;
+                        break;
+                    }
+                }
+            }
+            that.showNodeDetail(id,id2);
         } else if (params.edges.length == 1) {
             //clickOnEdge
             let id = params.edges[0]
@@ -52,12 +64,21 @@ networkObj.prototype.setData = function () {
     this.network.setData(this.getData());
 }
 
+networkObj.prototype.setModelData = function () {
+    this.network.setData(this.getModelData());
+}
 
-networkObj.prototype.showNodeDetail = function (nodeId) {
+
+networkObj.prototype.showNodeDetail = function (nodeId,nodeId2) {
     //$("#modalNetwork").modal('hide')
-    svg.drawEntity(nodeId, instance_model); //画出中心区域
-    $("#" + nodeId).trigger("click");
+    if(nodeId2 == -1)
+        nodeId2 = nodeId;
+    svg.drawEntity(nodeId2, instance_model); //画出中心区域
     showLocal();
+    drawNodeDetails(nodeId2);
+    //$("#" + nodeId2).trigger("click");
+    $("#" + nodeId).trigger("click");
+
 }
 
 
@@ -150,6 +171,48 @@ networkObj.prototype.getData = function () {
 
         for (let i in roles) {
             edges.push({from: id, to: roles[i].node_id})
+        }
+    }
+
+    return {
+        nodes: nodes,
+        edges: edges
+    };
+}
+
+networkObj.prototype.getModelData = function () {
+    let nodes = [], edges = [];
+    for (let id in model.nodes) {
+        if(model.nodes[id].value!="String") {
+            nodes.push({
+                id: id,
+                label: model.nodes[id].value,
+                group: model.nodes[id].value,
+            })
+        }
+    }
+
+    for (let id in model.relations) {
+        let isAttribute = false;
+        let roles = model.relations[id].roles;
+        for (let i in roles) {
+            if (roles[i].rolename == '') {
+                isAttribute = true;
+                break;
+            }
+        }
+
+        if (isAttribute) continue;
+
+        nodes.push({
+            id: id,
+            label: model.relations[id].value,
+            group: "__relation"
+        })
+
+        for (let i in roles) {
+           //edges.push({from: id, to: roles[i].node_id, label:roles[i].rolename});
+            edges.push({from: id, to: roles[i].node_id});
         }
     }
 

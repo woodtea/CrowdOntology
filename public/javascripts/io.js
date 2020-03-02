@@ -39,7 +39,7 @@ ioObj.prototype.init = function () {
 
     this.socket.on('insModel', function (msg) {
         tagReformat.id2value(msg);
-        console.log(msg);
+        //console.log(msg);
         switch (msg.operation) {
             case 'get':
                 that.io_get_insModel_done(msg);
@@ -106,9 +106,8 @@ ioObj.prototype.socketEmitArray = function (type, msg) {
 }
 
 ioObj.prototype.socketEmit = function (type, msg) {
-    console.log(type)
-    console.log(msg)
-    //console.trace();
+    // console.log(type)
+    // console.log(msg)
     this.socket_mutex = true;
     this.socket.emit(type, msg);
 }
@@ -163,8 +162,10 @@ ioObj.prototype.io_create_moodel_entity = function (entity) {
         "type": keyAttribute,
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
-            {"rolename": keyAttribute, "node_id": entity.valueId}
-        ]
+            {"rolename": keyAttribute, "node_id": entity.valueId},
+        ],
+        "referInfo":"",
+        "timeArray":[],
     }
     this.io_create_insModel_relation(relations);
 
@@ -208,7 +209,9 @@ ioObj.prototype.io_create_model_entity = function (entity) {
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
             {"rolename": entity.keyAttr, "node_id": entity.valueId}
-        ]
+        ],
+        "referInfo":"",
+        "timeArray":"",
         //desc
     }
     this.io_create_model_relation(relations);
@@ -233,6 +236,7 @@ ioObj.prototype.io_create_model_node_done = function (msg) {
             delete model.nodes[nodeId].tags;
             break;
         }
+        network.setModelData();
         return;
     }
 }
@@ -257,6 +261,10 @@ ioObj.prototype.io_create_model_keyAttr_done = function (msg) {
 
 ioObj.prototype.io_create_model_relation = function (relations) {
     let msg = this.emitMsgHeader('mcreate_relation');
+    if(typeof (relations.referInfo)=="undefined")
+        relations.referInfo="";
+    if(typeof (relations.timeArray)=="undefined")
+        relations.timeArray=[];
     msg["relations"] = relations;
     //console.log(JSON.stringify(relations));
     //console.log("ready to emit relation");
@@ -298,9 +306,9 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
         }
         for (relationId in relation) {
             for(let i in relation[relationId].roles){
-                console.log(centerId);
-                console.log(relation[relationId].roles[i].node_id)
-                console.log(relation[relationId].roles[i].rolename)
+                // console.log(centerId);
+                // console.log(relation[relationId].roles[i].node_id)
+                // console.log(relation[relationId].roles[i].rolename)
                 if(relation[relationId].roles[i].node_id == classId && relation[relationId].roles[i].rolename == ""){
                     let array = getAttributeTypes(centerId);
                     setAttributeTypeTypeahead(array);
@@ -309,6 +317,7 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
                 break;
             }
         }
+        network.setModelData();
         return;
     }
 }
@@ -334,6 +343,7 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
         "tags": entity.tags,
         "value": ""
     }
+    //console.log("ffffff",entity.tags[0]);
     this.io_create_insModel_node(entityNode);
 
     //生成Value节点
@@ -352,7 +362,9 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
             {"rolename": keyAttribute, "node_id": entity.valueId}
-        ]
+        ],
+        "referInfo":"",
+        "timeArray":[],
     }
     this.io_create_insModel_relation(relations);
 }
@@ -372,6 +384,7 @@ ioObj.prototype.io_remove_insModel_node = function (nodeId) {
 
 ioObj.prototype.io_create_insModel_relation = function (relations) {
     let msg = this.emitMsgHeader('create_relation');
+    //console.log("relation here:",relations);
     msg["relations"] = relations;
     this.socketEmitArray('insModel', msg);
 }
@@ -503,11 +516,11 @@ ioObj.prototype.io_remove_insModel_node_done = function (msg) {
         return;
     } else {
         let node = this.tmpMsgPop(msg.operationId).nodes;
-        console.log("io_remove_insModel_node_done");
-        console.log(node);
+        //console.log("io_remove_insModel_node_done");
+        //console.log(node);
         let nodeId;
         for (nodeId in node) break;
-        console.log(nodeId);
+        //console.log(nodeId);
         data.removeNode(nodeId);
         return;
     }
@@ -520,7 +533,6 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
         this.migrateEmitMsg(msg.migrate);
         let curMsg = this.tmpMsgPop(msg.operationId);
         let relation = curMsg.relations;
-        console.log(curMsg);
         tagReformat.id2value(curMsg);
         //let relation = tmpMsgPop(msg.operationId).relations //tmpMsg.emit.nodes;
         let relationId;
@@ -538,13 +550,16 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
             if (nodeId != centerId) break;
         }
 
+        //console.log("center node here",centerNode);
+        //console.log("instance_model relations",instance_model.relations);
+
         //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
         if (!prepareNewEntity(instance_model, !svgPending, isGetRcmd)) {
             let notRecommendation = $("g.center.isCentralized").attr("id");
             if (svgPending > 0) {
                 svgPending--;
                 if (svgPending == 0) {
-                    console.log(isGetRcmd);
+                    //console.log(isGetRcmd);
                     if (isGetRcmd) {
                         isGetRcmd = false;
                         svg.svg.select("g.entity.center").classed("isCentralized", true)
@@ -815,6 +830,7 @@ ioObj.prototype.prepareModel = function (){
             if (model.nodes[role.node_id].tag == "Entity") {
                 count++;
                 if (count > 1) {
+                    //console.log("change relationTpyeArray!!!!!!!!!!!");
                     relationTypeArray.push(model.relations[key].value);
                     break;
                 }

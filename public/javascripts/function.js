@@ -24,6 +24,8 @@ $(function () {
     })
 
     $(document).on("click", ".btn-group.workspace", function () {
+        if(!$(".btn-group.workspace2 .btn-default").hasClass("off"))
+            return;
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
             if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
@@ -45,6 +47,38 @@ $(function () {
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
+        }
+    })
+
+    $(document).on("click", ".btn-group.workspace2", function () {
+        if ($(this).children(".btn-default").hasClass("off")) {
+            //实例层
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+            $('#glborloc').bootstrapToggle('enable');
+            $('#glborloc').bootstrapToggle('off');
+            $("svg.local").hide()
+            network.setData();
+            $("div.global").show();
+            let item = $(index).find(".active");
+            let id = $(item).children(".nodeId").attr("value");
+            if(id!=undefined){
+                network.focusNode(id);
+            }
+            detail.drawIndex(instance_model, true, id);
+            //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
+            $(".btn.filter-btn").hide();
+            document.getElementById('stigmod-search-left-input').style.visibility="visible";
+            document.getElementById('stigmod-search-left-btn').style.visibility="visible";
+        } else {
+            //模型层
+            $('#glborloc').bootstrapToggle('off');
+            $('#glborloc').bootstrapToggle('disable');
+            $("svg.local").hide();
+            network.setModelData();
+            $("div.global").show();
+            $(".btn.filter-btn").hide();
+            document.getElementById('stigmod-search-left-input').style.visibility="hidden";
+            document.getElementById('stigmod-search-left-btn').style.visibility="hidden";
         }
     })
 
@@ -343,6 +377,7 @@ $(function () {
                 connection.io_recommend_insModel_node(node);
             }
         }
+
     })
 
     //点击关系文本
@@ -510,9 +545,11 @@ $(function () {
 
         let type = $(this).val();
         let array = getEntityTypes();
-        if (array.indexOf(type) == -1) {
+
+        if (array.length == 0 || array.indexOf(type) == -1) {
             //console.log($(this).parent().children("ul").css("display")+"      "+$(this).is(":focus"))
-            if (($(this).parent().children("ul").css("display") == 'none'||$(this).parent().children("ul").css("display") == undefined) && $(this).is(":focus")) {
+            if (($(this).parent().children("ul").css("display") == 'none'|| array.length==0 || $(this).parent().children("ul").css("display") == undefined) && $(this).is(":focus")) {
+
                 let content = '<p>是否新建实体类型?</p>';
                 content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
@@ -776,8 +813,32 @@ $(function () {
         $(item).find("#relation-add .roles").append(generateNewRole("","","","",false));
         setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
 
+        //新增时间和参考选项
+        html =  '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-6">' + "开始时间" + '</span>'+
+        '<span class="col-xs-6">' + "结束时间" + '</span>'+
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row" id="time-period2">'+
+        '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+        '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>'+
+        '</div>'+
+        '<a href="#" class="list-group-item stigmod-hovershow-trig" style="text-align: center">' +
+        '<span class="col-xs-2 vcenter fa fa-plus" id="fa-plus-time"></span></a>'+
+        '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
+        '<div class="stigmod-rcmd-title row">' +
+        '<span class="col-xs-12" style="text-align: center">' + "参考" + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="list-group-item stigmod-hovershow-trig row">'+
+        '<span class="col-xs-12 vcenter" style="padding: 0px" ><input type="text" class="stigmod-input refer-info" value=></span>'+
+        '</div>';
+        $(item).find("#relation-add").append(html);
+
         //显示描述
-        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px">' +
+        html = '<div class="panel panel-default list-group-item showPopover" style="margin: 0px;display:none">' +
             '<div class="panel-heading" style="padding-top:5px;padding-bottom: 5px">' +
             '<div class="stigmod-rcmd-title row">' +
             '<span class="col-xs-12">' + "描述" + '</span>' +
@@ -1128,17 +1189,17 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
         if (model["nodes"][nId0] != undefined) {
             tags0 = model["nodes"][nId0]["tags"];
         } else {
-            console.log("alert");
-            console.log("not found nId0:" + nId0);
-            console.log("model:" + model);
+            // console.log("alert");
+            // console.log("not found nId0:" + nId0);
+            // console.log("model:" + model);
             continue;
         }
         if (model["nodes"][nId1] != undefined) {
             tags1 = model["nodes"][nId1]["tags"];
         } else {
-            console.log("alert");
-            console.log("not found nId1:" + nId1);
-            console.log("model:" + model);
+            // console.log("alert");
+            // console.log("not found nId1:" + nId1);
+            // console.log("model:" + model);
             continue;
         }
 
@@ -1184,7 +1245,8 @@ function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = f
         detail.drawIndex(instance_model, showIndex);
         svg.drawEntity(centerNode);
         if (!$(".btn-group.workspace .btn-default").hasClass("off")) {
-            $("#" + centerNode).delay("10").click();
+            //局部图谱
+            //$("#" + centerNode).delay("10").click();
         } else {
             drawNodeDetails(centerNode);
         }
@@ -1264,9 +1326,9 @@ reviseMergeFilter = function (newId,tmpModel=instance_model) {
                 roles[j].node_id = newId;
             }
         }
-        console.log(entity);
+        //console.log(entity);
         if(relationCompare(entity.relations,obj.relations[i][relationId])){
-            console.log("xxx"+i);
+            //console.log("xxx"+i);
             obj.relations.splice(i,1);
         }
     }
@@ -1274,8 +1336,8 @@ reviseMergeFilter = function (newId,tmpModel=instance_model) {
 }
 
 relationCompare = function (relations,relation){
-    console.log(relations);
-    console.log(relation);
+    // console.log(relations);
+    // console.log(relation);
     let cpObj = {};
     let flag = false;
     for(let id in relations){
@@ -1299,10 +1361,21 @@ relationCompare = function (relations,relation){
     return flag;
 }
 
-function generateNewRole(role, node, tag, relationId,needTrash=true){
-    let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
-        '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
-        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+function generateNewRole(role, node, tag, relationId,needTrash=true,needNumber=false){
+    let html;
+    if(needNumber)
+    {
+        html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+            '<span class="col-xs-4 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>'+
+            '<span class="col-xs-3 role vcenter" style="padding: 0px"><input type="number" class="stigmod-input" value=1></input></span>';
+    }
+    else
+    {
+        html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
+            '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
+            '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>';
+    }
     if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
     html+= '<span class="tag" style="display: none" value=' + tag + '>' +
         '<span class="relation" style="display: none" value=' + relationId + '>' +

@@ -12,7 +12,7 @@ var http = require('http');
 // get os platform
 var os=require('os');
 var platform=os.platform();
-console.log(platform);
+//console.log(platform);
 /**
  * Get port from environment and store in Express.
  */

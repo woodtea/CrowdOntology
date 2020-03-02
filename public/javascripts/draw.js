@@ -233,7 +233,7 @@ function drawEntity(id, model = instance_model) {
     }
 
     let entity = data.getEntity(id, model);
-    console.log(entity);
+    //console.log(entity);
     if (entity == undefined) return false;  //如果不是实体的话
 
     //$(graph).children().remove();
@@ -698,8 +698,8 @@ function drawCommonRelations(centX, centY, r, R, shiftX, shiftY, node, reverse =
     if (instance_model.relations[data.id] != undefined) {
         let roles = instance_model.relations[data.id].roles;
         if (roles[0].rolename != "" && roles[1].rolename != "") {
-            console.log(roles[1].node_id)
-            console.log(nodeId)
+            // console.log(roles[1].node_id)
+            // console.log(nodeId)
             if (roles[1].node_id == nodeId ^ reverse) {
                 data.value = roles[0].rolename + "-" + roles[1].rolename;
             } else {

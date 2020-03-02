@@ -14,18 +14,18 @@ $(function () {
     })
 
     $(document).on("click", '#stigmod-fullscreen-btn .glyphicon-resize-small', function () {
-        console.log("cancle");
+        //console.log("cancle");
         let docElm = document;
-        console.log(docElm.exitFullscreen)
-        console.log(docElm.mozCancelFullScreen)
-        console.log(docElm.webkitCancelFullScreen)
-        console.log(docElm.msExitFullscreen)
+        // console.log(docElm.exitFullscreen)
+        // console.log(docElm.mozCancelFullScreen)
+        // console.log(docElm.webkitCancelFullScreen)
+        // console.log(docElm.msExitFullscreen)
         if(docElm.exitFullscreen) {//W3C
             docElm.cancelFullscreen();
         }else if(docElm.mozCancelFullScreen) {//FireFox
             docElm.mozCancelFullScreen();
         }else if(docElm.webkitCancelFullScreen) {//Chrome等
-            console.log("bbb");
+            //console.log("bbb");
             docElm.webkitCancelFullScreen();
         }else if  (docElm.msExitFullscreen) {//IE
             docElm.msExitFullscreen();
@@ -94,13 +94,38 @@ $(function () {
         }
     })
 
-    $(document).on("click","#modalAddRelInModel .fa-plus",function(){
+    $(document).on("click","#fa-plus-role",function(){
         let item = $("#modalAddRelInModel .modal-body")
         $(item).find("#relation-add .roles").append(generateNewRole("","","",""));
         setRawRelationRoleValueTypeahead($("#relation-add .roles").children().last());
     })
 
+    $(document).on("click","#fa-plus-time",function(){
+        let html = '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+            '<span class="col-xs-6 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>';
+        $("#time-period2").append(html);
+    })
+
+    $(document).on("click","#timePeriodAdd",function(){
+        let html = '<span class="col-xs-4 vcenter">开始</span>'+
+            '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input start-time"></span>'+
+            '<span class="col-xs-4 vcenter">结束</span>'+
+            '<span class="col-xs-8 vcenter" style="padding: 0px" ><input type="date" class="stigmod-input end-time"></span>';
+        $("#time-period").append(html);
+    })
+
+    $(document).on("click","#modalAddRelInModel2 .fa-plus",function(){
+        let item = $("#modalAddRelInModel2 .modal-body")
+        $(item).find("#model-relation-add .roles").append(generateNewRole("","","","",true,true));
+        setRawRelationRoleValueTypeahead2($("#model-relation-add .roles").children().last());
+    })
+
+
     $(document).on("click","#modalAddRelInModel .glyphicon-trash",function(){
+        $(this).parent().remove();
+    })
+
+    $(document).on("click","#modalAddRelInModel2 .glyphicon-trash",function(){
         $(this).parent().remove();
     })
 
@@ -138,19 +163,80 @@ $(function () {
             connection.io_create_model_relation(relations);
             $("#modalAddRelInModel").modal("hide");
 
+            let referInfo = $("#modalAddRelInModel").find(".refer-info").val();
+            //console.log("referInfo:",referInfo);
+            let startTimes = $("#modalAddRelInModel").find(".start-time");
+            //console.log("startTime:",startTimes);
+            let endTimes = $("#modalAddRelInModel").find(".end-time");
+            let timeArray = [];
+            for(let i=0;i<startTimes.length;i++)
+            {
+                if(startTimes.eq(i).val()){
+                    timeArray.push(startTimes.eq(i).val());
+                }
+                else{
+                    timeArray.push("infinite");
+                }
+
+                if(endTimes.eq(i).val()) {
+                    timeArray.push(endTimes.eq(i).val());
+                }
+                else{
+                    timeArray.push("infinite");
+                }
+
+                // console.log("start:",startTimes.eq(i).val());
+                // console.log("end:",endTimes.eq(i).val());
+            }
             let insRelationId = generateFrontRelationID(1);
             let insRelations = {};
             insRelations[insRelationId] = {
                 "type":rel.type,
                 "roles": [],
+                "referInfo":referInfo,
+                "timeArray":timeArray,
             }
             for(let i in rel.roles){
                 entityName = rel.roles[i][1];
                 entityId = data.getEntityIdByValue(entityName)[0];
-                insRelations[insRelationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityId},)
+                insRelations[insRelationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityId})
             }
             data.pendingInsRel.push(insRelations);
             //connection.io_create_insModel_relation(insRelations);
+        }
+    })
+
+    $(document).on("click","#modalAddRelInModel2 .btn-primary",function(){
+        //创建
+        let rel = fetchNewRel2();
+        let err,str;
+        [err,str] = checkNewRel2(rel);
+
+        $("#modalAddRelInModel2 .modal-body .alert").children().remove();
+
+        if(err){
+            //处理提示
+            let html = '<div class="alert alert-danger alert-dismissible"><p>'+str+'</p></div>';
+            $("#modalAddRelInModel2 .modal-body .alert").append(html);
+        }else{
+            //生成model
+            let relationId = generateFrontRelationID();
+            let relations = {};
+            relations[relationId] = {
+                "type":rel.type,
+                "roles": [],
+            }
+            let entityType,entityTypeId;
+            for(let i in rel.roles){
+                entityType = rel.roles[i][1];
+                for(let key in model.nodes){
+                    if(model.nodes[key].value == entityType) entityTypeId=key;
+                }
+                relations[relationId].roles.push({"rolename": rel.roles[i][0], "node_id": entityTypeId})
+            }
+            if(rel.desc!=undefined&&rel.desc!="") relations[relationId].desc = rel.desc;
+            connection.io_create_model_relation(relations);
+            $("#modalAddRelInModel2").modal("hide");
         }
     })
 
@@ -221,6 +307,43 @@ $(function () {
         return [err,str];
     }
 
+    function checkNewRel2(rel){
+        let err=false,str="";
+        if(rel.type == ""){
+            err=true;
+            str+="关系名不可为空<br/>";
+        }
+        let centerId = $("g.center").attr("id");
+        let array = getRelationTypes(centerId);
+        if (array.indexOf(rel.type) != -1) {
+            err=true;
+            str+="当前关系名已存在<br/>";
+        }
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][0] == ""){
+                err=true;
+                str+="角色不可为空<br/>";
+                break;
+            }
+        }
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][1] == ""){
+                err=true;
+                str+="承担者不可为空<br/>";
+                break;
+            }
+        }
+        let entityArray = getIndexArray2();
+        for(let i=0;i<rel.roles.length;i++){
+            if(rel.roles[i][1] != "" && entityArray.indexOf(rel.roles[i][1])==-1 ){
+                err=true;
+                str+='承担者"'+rel.roles[i][1]+'"不存在<br/>';
+                break;
+            }
+        }
+        return [err,str];
+    }
+
     function fetchNewRel(){
         let rel = {
             type: $("#modalAddRelInModel").find(".type-input").first().val(),
@@ -233,6 +356,25 @@ $(function () {
         }
 
         let desc = $("#modalAddRelInModel .description input").val();
+        if(desc!=""&&desc!=undefined) rel.desc = desc;
+        return rel;
+    }
+
+    function fetchNewRel2(){
+        let rel = {
+            type: $("#modalAddRelInModel2").find(".type-input").first().val(),
+            roles: []
+        }
+
+        let inputs = $("#modalAddRelInModel2 .roles input");
+        for(let i=0;i<$(inputs).length/3;i++){
+            for(let j=0;j<$(inputs).eq(i*3+2).val();j++)
+            {
+                rel.roles.push([$(inputs).eq(i*3).val(),$(inputs).eq(i*3+1).val()]);
+            }
+        }
+
+        let desc = "";
         if(desc!=""&&desc!=undefined) rel.desc = desc;
         return rel;
     }

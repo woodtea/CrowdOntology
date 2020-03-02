@@ -52,9 +52,9 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
                 if (entity.neighbours[neighbourID] == undefined) {
                     if (tmpModel.nodes[neighbourID] == undefined) {
                         alert("Not found!" + neighbourID);
-                        console.log("alert notfound in getEntity");
-                        console.log(neighbourID);
-                        console.log(tmpModel);
+                        // console.log("alert notfound in getEntity");
+                        // console.log(neighbourID);
+                        // console.log(tmpModel);
                         continue;
                     }
                     entity.neighbours[neighbourID] = {
@@ -84,10 +84,10 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
 }
 
 modelObj.prototype.removeNode = function (nodeId, tmpModel = instance_model) {
-    console.log(nodeId);
-    console.log("removeNode");
+    //console.log(nodeId);
+    //console.log("removeNode");
     let entity = svg.getEntity(nodeId);
-    console.log(entity);
+    //console.log(entity);
     delete tmpModel.nodes[nodeId];
     for(let relationId in entity.relations){
         delete tmpModel.relations[relationId];
@@ -103,8 +103,8 @@ modelObj.prototype.getAttrTags = function (nodeId, attribute) {
 modelObj.prototype.isEntity = function (id, model = instance_model) {
 
     if (model.nodes[id] == undefined) {
-        console.log("Alert: entity not found!")
-        console.log("entity id:" + id);
+        //console.log("Alert: entity not found!")
+        //console.log("entity id:" + id);
         return;
     }
     if (model.nodes[id].tags == undefined) return; //数据结构异常
