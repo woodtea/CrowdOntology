@@ -27,7 +27,7 @@ $(function () {
         if(!$(".btn-group.workspace2 .btn-default").hasClass("off"))
             return;
         if ($(this).children(".btn-default").hasClass("off")) {
-            //全局图谱
+            //局部切换至全局图谱
             if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
 
             $("svg.local").hide()
@@ -41,19 +41,22 @@ $(function () {
             detail.drawIndex(instance_model, true, id);
             //Edited by cui on 2019/11/5 筛选栏仅在局部图谱显示
             $(".btn.filter-btn").hide();
+            $(".btn.recommend").hide();
         } else {
-            //局部图谱
+            //全局切换至局部图谱
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
+            $(".btn.recommend").show();
         }
     })
 
     $(document).on("click", ".btn-group.workspace2", function () {
         if ($(this).children(".btn-default").hasClass("off")) {
-            //实例层
-            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+            //模型层切换到实例层
+
+
             $('#glborloc').bootstrapToggle('enable');
             $('#glborloc').bootstrapToggle('off');
             $("svg.local").hide()
@@ -70,7 +73,14 @@ $(function () {
             document.getElementById('stigmod-search-left-input').style.visibility="visible";
             document.getElementById('stigmod-search-left-btn').style.visibility="visible";
         } else {
-            //模型层
+            //实例层切换到模型层
+            //if($(".btn-group.workspace").children(".btn-default").hasClass("on"))
+            {
+                if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");
+                $(".btn.filter-btn").hide();
+                $(".btn.recommend").hide();
+            }
+
             $('#glborloc').bootstrapToggle('off');
             $('#glborloc').bootstrapToggle('disable');
             $("svg.local").hide();

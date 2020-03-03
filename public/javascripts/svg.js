@@ -128,7 +128,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     }
 
     let rcmdLen = getJsonLength(entity1.relations);
-    console.log("www"+rcmdLen+"   "+this.rcmd.showLen);
+    //console.log("www"+rcmdLen+"   "+this.rcmd.showLen);
     if(rcmdLen > this.rcmd.showLen)
     {
         let begin=this.rcmd.jumpLen%rcmdLen;
@@ -136,7 +136,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
         let pointer=0;
         for(let key in entity1.relations)
         {
-            console.log(begin+"   "+end+"  "+pointer);
+            //console.log(begin+"   "+end+"  "+pointer);
             if(begin<end)
             {
                 if(pointer<begin||pointer>end) delete entity1.relations[key];
