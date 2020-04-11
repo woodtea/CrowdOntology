@@ -513,6 +513,7 @@ $(function () {
         if (array.indexOf(type) == -1) {
             //console.log($(this).parent().children("ul").css("display")+"      "+$(this).is(":focus"))
             if (($(this).parent().children("ul").css("display") == 'none'||$(this).parent().children("ul").css("display") == undefined) && $(this).is(":focus")) {
+            //if (($(this).parent().children("ul").css("display") == 'none') && $(this).is(":focus")) {
                 let content = '<p>是否新建实体类型?</p>';
                 content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
@@ -1308,4 +1309,39 @@ function generateNewRole(role, node, tag, relationId,needTrash=true){
         '<span class="relation" style="display: none" value=' + relationId + '>' +
         '</div>';
     return html;
+}
+
+function ellipsisDisplay(node, line, space, str,basicem=0.5)
+{
+    let len=str.length;
+    let nowline=1;
+    let actualine=Math.ceil(len/space);
+    if(actualine>line) actualine=line;
+    basicem=basicem-(actualine-1)/2.0;
+    for(let i=1;i<actualine;i++)
+    {
+        node.append("text")
+            .text(str.substring(0,space))
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+i-1)+"em");
+        str=str.substring(space);
+    }
+    if(str.length>space)
+    {
+        node.append("text")
+            .text("...")
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+actualine-1)+"em");
+        node.classed("ellipsis","true");
+    }
+    else
+    {
+        node.append("text")
+            .text(str)
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+actualine-1)+"em");
+    }
 }

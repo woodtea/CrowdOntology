@@ -9,6 +9,8 @@ const logger = require("../logger_config");
 
 var DataManager = require('./dm');
 var dm = new DataManager(server_config);
+
+var fs= require('fs');
 // console.log(dm);
 //mcreate_empty_project_with_name("test");
 //mcreate_hlm_project();
@@ -70,10 +72,6 @@ function ioConfig(server){
                         return socket.emit('model',emitMsg);
                     });
                     break;
-
-
-
-
             }
         })
 
@@ -470,10 +468,24 @@ function ioConfig(server){
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-weiyh");
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-guojm");
                 mcreate_movie_project_with_name("无双-电影人物关系图谱-qiaoxiaohe");
+            }else if(msg=="mcreate_epi"){//新冠-流行病学图谱
+                mcreate_epi_project(socket);
+            }else if(msg=="create_epi"){
+                create_epi_project(socket);
+            }else if(msg=="mcreate_event"){//新冠-热点事件图谱
+                mcreate_event_project(socket);
+            }else if(msg=="create_event"){
+                create_event_project(socket);
+            }else if(msg=="mcreate_policy"){//新冠-热点事件图谱
+                mcreate_policy_project(socket);
+            }else if(msg=="create_policy"){
+                create_policy_project(socket);
             }else if(msg.substring(0,12)=="mcreate_algo") {
                 mcreate_algorithm_project_with_name(msg.substring(12,msg.length));
             }else if(msg.substring(0,13)=="mcreate_empty") {
                 mcreate_empty_project_with_name(msg.substring(13,msg.length));
+            }else if(msg=="mcreate_ontology"){
+                mcreate_ontology_project();
             }else {
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
@@ -1394,6 +1406,54 @@ function mcreate_algorithm_project_with_name(projectName) {
     });
     return;
 }
+function mcreate_ontology_project(projectName="Ontology") {
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+    let classId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "Class", projectName), function (rep) {
+            for (let key in rep.migrate) classId = rep.migrate[key];
+            dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                //创建属性
+                let roles;
+                roles = [{rolename : "", node_id : classId}, {rolename : "label", node_id : symbolId}]
+                dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                    let relationId;
+                    for (let key in rep.migrate) relationId = rep.migrate[key];
+                    dm.handle(madd_key_attr(node_id=classId,[relationId],user_id="",project_id=projectName),function(rep){});
+                });
+                roles = [{rolename : "", node_id : classId}, {rolename : "hasRelatedSynonym", node_id : symbolId}]
+                dm.handle(mcreate_relation("hasRelatedSynonym",roles,project_id=projectName),function(rep){});
+                roles = [{rolename : "", node_id : classId}, {rolename : "hasDefinition", node_id : symbolId}]
+                dm.handle(mcreate_relation("hasDefinition",roles,project_id=projectName),function(rep){});
+
+                //创建关系
+                roles = [
+                    {rolename : "children", node_id : classId},
+                    {rolename : "parent", node_id : classId}
+                ]
+                dm.handle(mcreate_relation("subClassOf", roles, project_id = projectName), function (rep) {});
+
+                roles = [
+                    {rolename : "part", node_id : classId},
+                    {rolename : "whole", node_id : classId}
+                ]
+                dm.handle(mcreate_relation("partOf", roles, project_id = projectName), function (rep) {});
+
+                roles = [
+                    {rolename : "", node_id : classId},
+                    {rolename : "", node_id : classId}
+                ]
+                dm.handle(mcreate_relation("disjointWith", roles, project_id = projectName), function (rep) {});
+            })
+        });
+    });
+    return;
+}
 function mcreate_empty_project_with_name(projectName) {
     msg1 = {
         operation: 'create_project',
@@ -1409,6 +1469,451 @@ function mcreate_empty_project_with_name(projectName) {
         })
     });
     return;
+}
+
+let classmap={},promap={},remap={};
+let timeout=5000;
+function mcreate_epi_project(socket,projectName="流行病学图谱")
+{
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+    fs.readFile('../data/epi.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        var content = data.toString();
+        content = JSON.parse(content);
+        classmap={},promap={};
+        let symbolId,relationId;;
+        let roles;
+        var glist=content['@graph'];
+        dm.handle(msg1, function(rep) {
+            dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                for(var item of glist)//添加类
+                {
+
+                    if(item['@type']=='rdfs:Class')
+                    {
+                        console.log(item['rdfs:label']);
+                        classmap[item['@id']]={};
+                        classmap[item['@id']]['label']=item['rdfs:label'];
+                        let tmpid=item['@id'];
+                        dm.handle(mcreate_node("Entity", item['rdfs:label'], projectName), function (rep) {
+                            console.log(tmpid);
+                            for (let key in rep.migrate) classmap[tmpid]['id']=rep.migrate[key];
+                            roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "label", node_id : symbolId}]
+                            dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id=classmap[tmpid]['id'],[relationId],user_id="",project_id=projectName),function(rep){});
+                            });
+                        });
+                    }
+                }
+            })
+        });
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(var item of glist) //添加关系和属性
+        {
+            //console.log("inputproperties");
+            if(item['@type']=='rdf:Property')
+            {
+                promap[item['@id']]={};
+                promap[item['@id']]['label']=item['rdfs:label'];
+                var domain = item['rdfs:domain'];
+                var range = item['rdfs:range'];
+                if(!(domain&&range)) continue;
+                if(Object.prototype.toString.call(domain) === "[object Object]") domain=[domain];
+                if(Object.prototype.toString.call(range) === "[object Object]") range=[range];
+                for(var role1 of domain)
+                {
+                    for(var role2 of range)
+                    {
+                        var role1id=classmap[role1['@id']]['id'],role2id;
+                        if(classmap[role2['@id']]) role2id=classmap[role2['@id']]['id'];
+                        else role2id=symbolId; //目前数据类型只有string
+                        roles = [{rolename : "", node_id : role1id}, {rolename : "", node_id : role2id}]
+                        console.log(roles);
+                        dm.handle(mcreate_relation(item['rdfs:label'], roles, project_id = projectName),function (rep) {});
+                    }
+                }
+
+            }
+        }
+        socket.emit("iotest","fresh");
+
+    });
+
+}
+function create_epi_project(socket,projectName="流行病学图谱")
+{
+    fs.readFile('../data/epi.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        let content = data.toString();
+        content = JSON.parse(content);
+        let glist=content['@graph'];
+        for(let item of glist) //添加实例层,第一轮创建实体
+        {
+            if(classmap[item['@type']])
+            {
+                remap[item['@id']]={};
+                remap[item['@id']]['label']=item['rdfs:label'];
+                let msg={};
+                msg['operation']="add_entity"
+                msg['type']=classmap[item['@type']]['label'];
+                msg['entity']=item['rdfs:label'];
+                socket.emit("iotest",msg);
+                await new Promise(resolve => setTimeout(resolve, timeout));
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(let item of glist) //添加实例层,第二轮添加属性和关系
+        {
+            for(let key in item)
+            {
+                if(promap[key])
+                {
+                    if(typeof(item[key])=='string')//属性
+                    {
+                        let msg={};
+                        msg['operation']='add_attr';
+                        msg['type']=promap[key]['label'];
+                        msg['value']=item[key];
+                        msg['entity']=item['rdfs:label'];
+                        socket.emit("iotest",msg);
+                    }
+                    else{//关系
+                        let msg={};
+                        msg['operation']='add_relation';
+                        msg['type']=promap[key]['label'];
+                        msg['roles']=[];
+                        msg['roles'][0]=item['rdfs:label'];
+                        msg['roles'][1]=remap[item[key]['@id']]['label']
+                        socket.emit("iotest",msg);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, timeout));
+                }
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        socket.emit("iotest","fresh");
+
+    });
+}
+
+let prosupple='http://www.openkg.cn/2019-nCoV/event/property/';
+function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
+{
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+    fs.readFile('../data/event.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        let content = data.toString();
+        content = JSON.parse(content);
+        classmap={},promap={};
+        let symbolId,relationId;;
+        let roles;
+        let glist=content['@graph'];
+        dm.handle(msg1, function(rep) {
+            dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                for(let item of glist)//添加类
+                {
+
+                    if(item['@type']=='http://www.w3.org/2000/01/rdf-schema#Class')
+                    {
+                        classmap[item['@id']]={};
+                        let label=item['label']['@value'];
+                        classmap[item['@id']]['label']=label;
+                        let tmpid=item['@id'];
+                        dm.handle(mcreate_node("Entity", label, projectName), function (rep) {
+                            console.log(tmpid);
+                            for (let key in rep.migrate) classmap[tmpid]['id']=rep.migrate[key];
+                            roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "label", node_id : symbolId}]
+                            dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id=classmap[tmpid]['id'],[relationId],user_id="",project_id=projectName),function(rep){});
+                            });
+                        });
+                    }
+                }
+            })
+        });
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(let item of glist) //添加关系和属性
+        {
+            //console.log("inputproperties");
+            if(item['@type']=='http://www.w3.org/1999/02/22-rdf-syntax-ns#Property')
+            {
+                promap[item['@id']]={};
+                let label=item['label']['@value'];
+                promap[item['@id']]['label']=label;
+                let domain = item['domain'];
+                let range = item['range'];
+                if(!(domain&&range)) continue;
+                if(typeof(domain) === "string") domain=[domain];
+                if(typeof(range) === "string") range=[range];
+                for(let role1 of domain)
+                {
+                    for(let role2 of range)
+                    {
+                        //console.log("outrole1____"+role1+'_____'+label);
+                        let role1id=classmap[role1]['id'],role2id;
+                        if(classmap[role2]) role2id=classmap[role2]['id'];
+                        else role2id=symbolId; //目前数据类型只有string
+                        roles = [{rolename : "", node_id : role1id}, {rolename : "", node_id : role2id}]
+                        console.log(roles);
+                        dm.handle(mcreate_relation(label, roles, project_id = projectName),function (rep) {});
+                    }
+                }
+
+            }
+        }
+        socket.emit("iotest","fresh");
+
+    });
+
+}
+function create_policy_project(socket,projectName="新冠热点事件图谱")
+{
+    console.log('herehere');
+    console.log(promap);
+    fs.readFile('../data/event.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        let content = data.toString();
+        content = JSON.parse(content);
+        let glist=content['@graph'];
+        for(let item of glist) //添加实例层,第一轮创建实体
+        {
+            if(classmap[item['@type']])
+            {
+                remap[item['@id']]={};
+                let label=item['label']['@value'];
+                if(item['@type']==='http://www.openkg.cn/2019-nCoV/event/class/C2')
+                {
+                    label=item['P1'];
+                    delete item['P1'];
+                }
+                else delete item['P6'];
+                remap[item['@id']]['label']=label;
+                let msg={};
+                msg['operation']="add_entity"
+                msg['type']=classmap[item['@type']]['label'];
+                msg['entity']=label;
+                socket.emit("iotest",msg);
+                await new Promise(resolve => setTimeout(resolve, timeout));
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(let item of glist) //添加实例层,第二轮添加属性和关系
+        {
+            if(classmap[item['@type']])
+            {
+                let label=remap[item['@id']]['label'];
+                for(let key in item)
+                {
+                    if(promap[prosupple+key])
+                    {
+                        if(!remap[item[key]])//属性
+                        {
+                            let msg={};
+                            msg['operation']='add_attr';
+                            msg['type']=promap[prosupple+key]['label'];
+                            msg['value']=item[key];
+                            msg['entity']=label;
+                            //console.log(prosupple+key);
+                            console.log('target'+promap[prosupple+key]['label']+'______'+msg['value']);
+                            socket.emit("iotest",msg);
+                        }
+                        else{//关系
+                            let msg={};
+                            msg['operation']='add_relation';
+                            msg['type']=promap[prosupple+key]['label'];
+                            msg['roles']=[];
+                            msg['roles'][0]=label;
+                            msg['roles'][1]=remap[item[key]]['label']
+                            console.log('target');
+                            socket.emit("iotest",msg);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, timeout));
+
+                    }
+
+                }
+            }
+
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        //socket.emit("iotest","fresh");
+
+    });
+}
+
+function mcreate_event_project(socket,projectName="新冠热点事件图谱")
+{
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectName
+    };
+    fs.readFile('../data/event.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        let content = data.toString();
+        content = JSON.parse(content);
+        classmap={},promap={},pronamemap={};
+        let symbolId,relationId;;
+        let roles;
+        let glist=content['@graph'];
+        dm.handle(msg1, function(rep) {
+            dm.handle(mcreate_node("Symbol", "String", projectName), function (rep) {
+                for (let key in rep.migrate) symbolId = rep.migrate[key];
+                for(let item of glist)//添加类
+                {
+
+                    if(item['@type']=='http://www.w3.org/2000/01/rdf-schema#Class')
+                    {
+                        classmap[item['@id']]={};
+                        let label=item['label']['@value']
+                        classmap[item['@id']]['label']=label;
+                        let tmpid=item['@id'];
+                        dm.handle(mcreate_node("Entity", label, projectName), function (rep) {
+                            console.log(tmpid);
+                            for (let key in rep.migrate) classmap[tmpid]['id']=rep.migrate[key];
+                            roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "label", node_id : symbolId}]
+                            dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id=classmap[tmpid]['id'],[relationId],user_id="",project_id=projectName),function(rep){});
+                            });
+                        });
+                    }
+                }
+            })
+        });
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(let item of glist) //添加关系和属性
+        {
+            //console.log("inputproperties");
+            if(item['@type']=='http://www.w3.org/1999/02/22-rdf-syntax-ns#Property')
+            {
+                promap[item['@id']]={};
+                let label=item['label']['@value'];
+                promap[item['@id']]['label']=label;
+                let domain = item['domain'];
+                let range = item['range'];
+                if(!(domain&&range)) continue;
+                if(typeof(domain) === "string") domain=[domain];
+                if(typeof(range) === "string") range=[range];
+                for(let role1 of domain)
+                {
+                    for(let role2 of range)
+                    {
+                        //console.log("outrole1____"+role1+'_____'+label);
+                        let role1id=classmap[role1]['id'],role2id;
+                        if(classmap[role2]) role2id=classmap[role2]['id'];
+                        else role2id=symbolId; //目前数据类型只有string
+                        roles = [{rolename : "", node_id : role1id}, {rolename : "", node_id : role2id}]
+                        console.log(roles);
+                        dm.handle(mcreate_relation(label, roles, project_id = projectName),function (rep) {});
+                    }
+                }
+
+            }
+        }
+        socket.emit("iotest","fresh");
+
+    });
+
+}
+
+function create_event_project(socket,projectName="新冠热点事件图谱")
+{
+    console.log('herehere');
+    console.log(promap);
+    fs.readFile('../data/event.json',async function(err,data){
+        if(err){
+            console.error(err);
+        }
+        let content = data.toString();
+        content = JSON.parse(content);
+        let glist=content['@graph'];
+        for(let item of glist) //添加实例层,第一轮创建实体
+        {
+            if(classmap[item['@type']])
+            {
+                remap[item['@id']]={};
+                let label=item['label']['@value'];
+                if(item['@type']==='http://www.openkg.cn/2019-nCoV/event/class/C2')
+                {
+                    label=item['P1'];
+                    delete item['P1'];
+                }
+                else delete item['P6'];
+                remap[item['@id']]['label']=label;
+                let msg={};
+                msg['operation']="add_entity"
+                msg['type']=classmap[item['@type']]['label'];
+                msg['entity']=label;
+                socket.emit("iotest",msg);
+                await new Promise(resolve => setTimeout(resolve, timeout));
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        for(let item of glist) //添加实例层,第二轮添加属性和关系
+        {
+            if(classmap[item['@type']])
+            {
+                let label=remap[item['@id']]['label'];
+                for(let key in item)
+                {
+                    if(promap[prosupple+key])
+                    {
+                        if(!remap[item[key]])//属性
+                        {
+                            let msg={};
+                            msg['operation']='add_attr';
+                            msg['type']=promap[prosupple+key]['label'];
+                            msg['value']=item[key];
+                            msg['entity']=label;
+                            //console.log(prosupple+key);
+                            console.log('target'+promap[prosupple+key]['label']+'______'+msg['value']);
+                            socket.emit("iotest",msg);
+                        }
+                        else{//关系
+                            let msg={};
+                            msg['operation']='add_relation';
+                            msg['type']=promap[prosupple+key]['label'];
+                            msg['roles']=[];
+                            msg['roles'][0]=label;
+                            msg['roles'][1]=remap[item[key]]['label']
+                            console.log('target');
+                            socket.emit("iotest",msg);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, timeout));
+
+                    }
+
+                }
+            }
+
+        }
+        await new Promise(resolve => setTimeout(resolve, timeout));
+        //socket.emit("iotest","fresh");
+
+    });
 }
 
 module.exports = ioConfig;

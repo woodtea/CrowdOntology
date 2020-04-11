@@ -17,6 +17,17 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
 
 $('[data-popover="popover"]').popover()
 
+$(document).on("mouseover",".ellipsis",function(){
+    $(this).popover({
+        "animation": true,
+        "trigger": "hover",
+        "container": 'body',
+        "html": true,
+        "content": $(this).attr('datatext')
+    })
+    $(this).popover("show")
+})
+
 
 $(document).on("mouseover", '.showPopover li', function () {
 

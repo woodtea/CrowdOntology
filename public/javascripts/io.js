@@ -6,12 +6,77 @@ function ioObj() {
         emit: [],
         on: []
     };
+    this.testmode=0;
 }
 
 ioObj.prototype.init = function () {
 
-    this.socket.on('iotest', function (msg) {
-        alert(msg);
+    this.socket.on('iotest', async function (msg) {
+        //alert(msg);
+        if(msg=="fresh")
+        {
+            location.reload();
+            //await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("fresh");
+            return;
+        }
+        let type,relationId,relations;
+        switch(msg.operation) {
+            case 'add_entity':
+                //console.log(msg);
+                let entity = {
+                    tags: [msg.type],
+                    value: msg.entity,
+                    nodeId: generateFrontNodeID(msg.entity, "e"),
+                    valueId: generateFrontNodeID(msg.entity, "v"),
+                    relationId: generateFrontRelationID(0)
+                }
+                that.io_create_insModel_entity(entity);
+                break;
+            case 'add_attr':
+                type = msg.type;
+                let value = msg.value;
+                let nodes = {};
+                let nodeId = generateFrontNodeID(value)
+                let tags = data.getAttrTags(type)
+                nodes[nodeId] = {
+                    "dataType": type,
+                    "tags": tags,
+                    "value": value
+                }
+                that.io_create_insModel_node(nodes)
+                //生成关系
+                let centerId = data.getEntityIdByValue(msg.entity);
+                relationId = generateFrontRelationID();
+                relations = {};
+                relations[relationId] = {
+                    "type": type,
+                    "roles": [
+                        {"rolename": "", "node_id": centerId},
+                        {"rolename": type, "node_id": nodeId}
+                    ]
+                }
+                that.io_create_insModel_relation(relations);
+                break;
+            case 'add_relation':
+                type = msg.type;
+                relationId = generateFrontRelationID();
+                relations = {};
+                relations[relationId] = {
+                    "type": type,
+                    "roles": []
+                }
+                let roles = msg.roles;
+                for (let i in roles) {
+                    relations[relationId].roles[i] = {
+                        "rolename": "",
+                        "node_id": data.getEntityIdByValue(roles[i])
+                    }
+                }
+
+                that.io_create_insModel_relation(relations);
+                break;
+        }
     });
 
     this.socket.on('model', function (msg) {
@@ -528,43 +593,47 @@ ioObj.prototype.io_create_insModel_relation_done = function (msg) {
             instance_model.relations[relationId] = relation[relationId];
             break;
         }
+        console.log(msg.migrate);
         if (msg.migrate[relationId]) relationId = msg.migrate[relationId];
         this.migrate(msg.migrate);
+        if(this.testmode==0) //调试时不刷新图
+        {
+            let centerId = $("g.center").attr("id");
+            let nodeId;
+            for (let n in instance_model.relations[relationId].roles) {
+                nodeId = instance_model.relations[relationId].roles[n].node_id;
+                if (nodeId != centerId) break;
+            }
 
-        let centerId = $("g.center").attr("id");
-        let nodeId;
-        for (let n in instance_model.relations[relationId].roles) {
-            nodeId = instance_model.relations[relationId].roles[n].node_id;
-            if (nodeId != centerId) break;
-        }
-
-        //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
-        if (!prepareNewEntity(instance_model, !svgPending, isGetRcmd)) {
-            let notRecommendation = $("g.center.isCentralized").attr("id");
-            if (svgPending > 0) {
-                svgPending--;
-                if (svgPending == 0) {
-                    console.log(isGetRcmd);
-                    if (isGetRcmd) {
-                        isGetRcmd = false;
-                        svg.svg.select("g.entity.center").classed("isCentralized", true)
-                        $("g.entity.center").trigger("dblclick");
-                    } else {
-                        $('.properties-revise .button-ok').trigger("click");
+            //if(!prepareNewEntity(instance_model,true,isGetRcmd)){
+            if (!prepareNewEntity(instance_model, !svgPending, isGetRcmd)) {
+                let notRecommendation = $("g.center.isCentralized").attr("id");
+                if (svgPending > 0) {
+                    svgPending--;
+                    if (svgPending == 0) {
+                        console.log(isGetRcmd);
+                        if (isGetRcmd) {
+                            isGetRcmd = false;
+                            svg.svg.select("g.entity.center").classed("isCentralized", true)
+                            $("g.entity.center").trigger("dblclick");
+                        } else {
+                            $('.properties-revise .button-ok').trigger("click");
+                        }
                     }
+                    return;
                 }
-                return;
-            }
-            if (!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
-                $("#" + centerId).click();
-                network.setData();
-                return;
-            } else {
-                $("#" + centerId).click();
-                network.setData();
-                //transAnimation(centerId,nodeId,relationId,instance_model);
+                if (!notRecommendation) {//如果实在推荐的状态下，就直接刷新中心节点吧。一般为添加属性的情况。
+                    $("#" + centerId).click();
+                    network.setData();
+                    return;
+                } else {
+                    $("#" + centerId).click();
+                    network.setData();
+                    //transAnimation(centerId,nodeId,relationId,instance_model);
+                }
             }
         }
+
         return;
     }
 }

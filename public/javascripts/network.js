@@ -3,7 +3,12 @@ function networkObj() {
     //this.colorsArray = ["#778899","#F08080","#008B8B","#D2E5FF"]
 
     let that = this;
-    this.network = new vis.Network(that.getContainer(), that.getData(), that.getOptions());
+    //console.log('draw begin');
+    //let container = that.getContainer() , data = that.getData() , options = that.getOptions();
+    //console.log("data end");
+    this.network = new vis.Network(that.getContainer(),that.getData(),that.getOptions());
+    //console.log("draw end");
+
 
     this.network.on("click", function (params) {
         if (params.nodes.length == 1) {
@@ -78,6 +83,9 @@ networkObj.prototype.getOptions = function () {
                     background: '#F9D456',
                     border: '#f0ad4e'
                 }
+            },
+            shapeProperties: {
+                interpolation: false    // 'true' for intensive zooming
             }
         },
         edges: {
@@ -88,8 +96,41 @@ networkObj.prototype.getOptions = function () {
         },
         groups: {},
         layout:{
-            improvedLayout:false
+            improvedLayout:false,
+        },
+        physics:{
+            enabled: true,
+            stabilization: {
+                iterations: 20
+            }
         }
+        // tooltip: {
+        //     delay: 50,
+        //     fontColor: "black",
+        //     fontSize: 14,
+        //     fontFace: "verdana",
+        //     color: {
+        //         border: "#666",
+        //         background: "#FFFFC6"
+        //     }
+        // },
+        // clustering: {
+        //     enabled: false,
+        //     clusterEdgeThreshold: 50
+        // },
+        // physics:{
+        //     barnesHut:{
+        //         gravitationalConstant: -60000,
+        //         springConstant:0.02
+        //     }
+        // },
+        // smoothCurves: {dynamic:false},
+        // hideEdgesOnDrag: true,
+        // stabilize: true,
+        // stabilizationIterations: 100,
+        // zoomExtentOnStabilize: true,
+        // navigation: true,
+        // keyboard: true,
     };
 
     let i = 0;

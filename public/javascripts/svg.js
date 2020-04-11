@@ -404,6 +404,7 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             if (data.dataType) dataType = data.dataType;
             return dataType
         })
+        .attr("datatext",data.value);
         //.append("circle")
         //.attr("r", r)
     //绘制图元
@@ -428,6 +429,7 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
     }
     //添加文本
     if(type=="relation" && data.value.length>2) {
+    //if(data.value.length>2){
         this.svg.select("[id='" + data.id+"']")
             .append("text")
             .text(data.value[0]+data.value[1])
@@ -440,13 +442,15 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             .attr("font-size", "12px")
             .attr("text-anchor", "middle")
             .attr("dy", "1em");
+
     }else{
-        this.svg.select("[id='" + data.id+"']")
-            .append("text")
-            .text(data.value)
-            .attr("font-size", "12px")
-            .attr("text-anchor", "middle")
-            .attr("dy", "0.4em");
+        // this.svg.select("[id='" + data.id+"']")
+        //     .append("text")
+        //     .text(data.value)
+        //     .attr("font-size", "12px")
+        //     .attr("text-anchor", "middle")
+        //     .attr("dy", "0.4em");
+        ellipsisDisplay(this.svg.select("[id='" + data.id+"']"),5,4,data.value);
     }
     //核心节点
     if (isCenter) {

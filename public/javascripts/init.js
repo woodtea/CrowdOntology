@@ -52,6 +52,10 @@ io_test2 = function (msg = "hello") {
     connection.socket.emit('iotest', msg);
 }
 
+io_test3 = function(data){
+
+
+}
 let msg = {
     operation: 'mget',  //先这么用着再说吧
     user_id: user,
