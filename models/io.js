@@ -1472,7 +1472,7 @@ function mcreate_empty_project_with_name(projectName) {
 }
 
 let classmap={},promap={},remap={};
-let timeout=5000;
+let timeout=1000;
 function mcreate_epi_project(socket,projectName="流行病学图谱")
 {
     msg1 = {
@@ -1632,12 +1632,13 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
 
                     if(item['@type']=='http://www.w3.org/2000/01/rdf-schema#Class')
                     {
-                        classmap[item['@id']]={};
                         let label=item['label']['@value'];
+                        console.log('labbb'+label);
+                        if(label!='国家政策事件') continue;
+                        classmap[item['@id']]={};
                         classmap[item['@id']]['label']=label;
                         let tmpid=item['@id'];
                         dm.handle(mcreate_node("Entity", label, projectName), function (rep) {
-                            console.log(tmpid);
                             for (let key in rep.migrate) classmap[tmpid]['id']=rep.migrate[key];
                             roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "label", node_id : symbolId}]
                             dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
@@ -1647,6 +1648,15 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
                         });
                     }
                 }
+                // dm.handle(mcreate_node("Entity", "主题", projectName), function (rep) {
+                //     let tmpid;
+                //     for (let key in rep.migrate) tmpid=rep.migrate[key];
+                //     roles = [{rolename : "", node_id : tmpid}, {rolename : "主题名", node_id : symbolId}]
+                //     dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                //         for (let key in rep.migrate) relationId = rep.migrate[key];
+                //         dm.handle(madd_key_attr(node_id=tmpid,[relationId],user_id="",project_id=projectName),function(rep){});
+                //     });
+                // });
             })
         });
         await new Promise(resolve => setTimeout(resolve, timeout));
@@ -1667,7 +1677,10 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
                 {
                     for(let role2 of range)
                     {
-                        //console.log("outrole1____"+role1+'_____'+label);
+                        console.log("outrole1____"+role1+'_____'+label);
+                        console.log(classmap[role1]);
+                        if(classmap[role1]===undefined) continue;
+                        if(classmap[role2]) continue;
                         let role1id=classmap[role1]['id'],role2id;
                         if(classmap[role2]) role2id=classmap[role2]['id'];
                         else role2id=symbolId; //目前数据类型只有string
@@ -1684,10 +1697,13 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
     });
 
 }
-function create_policy_project(socket,projectName="新冠热点事件图谱")
+function create_policy_project(socket,projectName="新冠政策知识图谱")
 {
     console.log('herehere');
     console.log(promap);
+    console.log(classmap);
+    let fresult={};
+    fresult['entities']=[];fresult['relations']=[];fresult['attrs']=[];
     fs.readFile('../data/event.json',async function(err,data){
         if(err){
             console.error(err);
@@ -1708,15 +1724,18 @@ function create_policy_project(socket,projectName="新冠热点事件图谱")
                 }
                 else delete item['P6'];
                 remap[item['@id']]['label']=label;
-                let msg={};
-                msg['operation']="add_entity"
-                msg['type']=classmap[item['@type']]['label'];
-                msg['entity']=label;
-                socket.emit("iotest",msg);
-                await new Promise(resolve => setTimeout(resolve, timeout));
+                console.log("bbb"+label);
+                console.log(fresult);
+                fresult['entities'].push(label);
+                // let msg={};
+                // msg['operation']="add_entity"
+                // msg['type']=classmap[item['@type']]['label'];
+                // msg['entity']=label;
+                // socket.emit("iotest",msg);
+                //await new Promise(resolve => setTimeout(resolve, timeout));
             }
         }
-        await new Promise(resolve => setTimeout(resolve, timeout));
+        //await new Promise(resolve => setTimeout(resolve, timeout));
         for(let item of glist) //添加实例层,第二轮添加属性和关系
         {
             if(classmap[item['@type']])
@@ -1728,26 +1747,27 @@ function create_policy_project(socket,projectName="新冠热点事件图谱")
                     {
                         if(!remap[item[key]])//属性
                         {
-                            let msg={};
-                            msg['operation']='add_attr';
-                            msg['type']=promap[prosupple+key]['label'];
-                            msg['value']=item[key];
-                            msg['entity']=label;
-                            //console.log(prosupple+key);
-                            console.log('target'+promap[prosupple+key]['label']+'______'+msg['value']);
-                            socket.emit("iotest",msg);
+                            // let msg={};
+                            // msg['operation']='add_attr';
+                            // msg['type']=promap[prosupple+key]['label'];
+                            // msg['value']=item[key];
+                            // msg['entity']=label;
+                            // //console.log(prosupple+key);
+                            // console.log('target'+promap[prosupple+key]['label']+'______'+msg['value']);
+                            fresult['attrs'].push([label,promap[prosupple+key]['label'],item[key]])
+                            //socket.emit("iotest",msg);
                         }
-                        else{//关系
-                            let msg={};
-                            msg['operation']='add_relation';
-                            msg['type']=promap[prosupple+key]['label'];
-                            msg['roles']=[];
-                            msg['roles'][0]=label;
-                            msg['roles'][1]=remap[item[key]]['label']
-                            console.log('target');
-                            socket.emit("iotest",msg);
-                        }
-                        await new Promise(resolve => setTimeout(resolve, timeout));
+                        // else{//关系
+                        //     let msg={};
+                        //     msg['operation']='add_relation';
+                        //     msg['type']=promap[prosupple+key]['label'];
+                        //     msg['roles']=[];
+                        //     msg['roles'][0]=label;
+                        //     msg['roles'][1]=remap[item[key]]['label']
+                        //     console.log('target');
+                        //     socket.emit("iotest",msg);
+                        // }
+                        // await new Promise(resolve => setTimeout(resolve, timeout));
 
                     }
 
@@ -1755,10 +1775,11 @@ function create_policy_project(socket,projectName="新冠热点事件图谱")
             }
 
         }
-        await new Promise(resolve => setTimeout(resolve, timeout));
+        //await new Promise(resolve => setTimeout(resolve, timeout));
         //socket.emit("iotest","fresh");
-
+        fs.writeFileSync('../data/policy.json',JSON.stringify(fresult,"","\t"));
     });
+
 }
 
 function mcreate_event_project(socket,projectName="新冠热点事件图谱")

@@ -115,20 +115,31 @@ $(function () {
     $(document).on("click", ".btn.filter-apply", function () {
         svg.valuelist.fresh = false;
         svg.valuelist.init();
-        $(".filter-checkbox:checkbox").each(function(){
+        $(".filter-checkbox.entity:checkbox").each(function(){
             if($(this).prop("checked")){
-                if($(this).hasClass('entity')) svg.valuelist.entity.add($(this).attr("value"));
-                if($(this).hasClass('relation')) svg.valuelist.relation.add($(this).attr("value"));
+                svg.valuelist.entity.add($(this).attr("value"));
+                svg.mutelist.entity.delete($(this).attr("value"));
+            }
+            else
+            {
+                svg.mutelist.entity.add($(this).attr("value"));
             }
         });
-        let centerNode = $(".entity.center");
-        let id= centerNode.attr("id");
+        $(".filter-checkbox.relation:checkbox").each(function(){
+            if($(this).prop("checked")){
+                svg.valuelist.relation.add($(this).attr("value"));
+                svg.mutelist.relation.delete($(this).attr("value"));
+            }
+            else
+            {
+                svg.mutelist.relation.add($(this).attr("value"));
+            }
+        });
+        let id= svg.centerNode.id;
         if($(".btn.recommend").hasClass("active"))
         {
-            console.log("drawrecomm");
             svg.drawRecommendation(id);
         }else{
-            console.log("drawent");
             svg.drawEntity(id);
         }
         svg.valuelist.fresh=true;
@@ -1344,4 +1355,38 @@ function ellipsisDisplay(node, line, space, str,basicem=0.5)
             .attr("text-anchor", "middle")
             .attr("dy", (basicem+actualine-1)+"em");
     }
+}
+
+function svgRepaint()
+{
+    svg.valuelist.fresh = false;
+    svg.valuelist.init();
+    $(".filter-checkbox.entity:checkbox").each(function(){
+        if($(this).prop("checked")){
+            svg.valuelist.entity.add($(this).attr("value"));
+            svg.mutelist.entity.delete($(this).attr("value"));
+        }
+        else
+        {
+            svg.mutelist.entity.add($(this).attr("value"));
+        }
+    });
+    $(".filter-checkbox.relation:checkbox").each(function(){
+        if($(this).prop("checked")){
+            svg.valuelist.relation.add($(this).attr("value"));
+            svg.mutelist.relation.delete($(this).attr("value"));
+        }
+        else
+        {
+            svg.mutelist.relation.add($(this).attr("value"));
+        }
+    });
+    let id= svg.centerNode.id;
+    if($(".btn.recommend").hasClass("active"))
+    {
+        svg.drawRecommendation(id);
+    }else{
+        svg.drawEntity(id);
+    }
+    svg.valuelist.fresh=true;
 }

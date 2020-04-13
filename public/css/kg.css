@@ -1640,6 +1640,9 @@ span.twitter-typeahead .tt-hint {
 ul {
   list-style-type: none;
 }
+li {
+  list-style-type: none;
+}
 
 /* 设置checkbox的样式 */
 .container-check input:indeterminate~.checkmark {

@@ -34,6 +34,10 @@ function svgObj(svg=""){
             this.relation = new Set();
         }
     }
+    this.mutelist = { //过滤列表，保持筛选器记忆
+        entity: new Set(),
+        relation: new Set()
+    }
 
 
 }
@@ -84,13 +88,19 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
 
-    if(this.valuelist.fresh) this.freshFilter();
-
     this.centerNode = {
         id: id,
         x: this.width/2,
         y: this.height/2
     }
+
+    if(this.valuelist.fresh)
+    {
+        this.freshFilter();
+        svgRepaint();
+        return;
+    }
+
 
     this.svg.selectAll("*").remove()
     //this.openZoom();
@@ -118,7 +128,18 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     let entity2 = this.getEntity(id, tmpModel);
     if (entity2 == undefined) return false;  //如果不是实体的话
 
-    if(this.valuelist.fresh) this.freshFilter();
+    this.centerNode = {
+        id: id,
+        x: this.width/2,
+        y: this.height/2
+    }
+
+    if(this.valuelist.fresh)
+    {
+        this.freshFilter();
+        $(".btn.filter-apply").trigger("click");
+        return;
+    }
 
     if(checkRcmd){
         checkRcmd = false;
@@ -128,7 +149,6 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     }
 
     let rcmdLen = getJsonLength(entity1.relations);
-    console.log("www"+rcmdLen+"   "+this.rcmd.showLen);
     if(rcmdLen > this.rcmd.showLen)
     {
         let begin=this.rcmd.jumpLen%rcmdLen;
@@ -162,11 +182,6 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
         showLen: this.rcmd.showLen,
     }
 
-    this.centerNode = {
-        id: id,
-        x: this.width/2,
-        y: this.height/2
-    }
 
     this.svg.selectAll("*").remove()
     //this.openZoom();
@@ -208,12 +223,14 @@ svgObj.prototype.freshFilter = function(){
     //let list=$("<ul></ul>");
     let typeList=$("<ul></ul>");
     let relationList=$("<ul></ul>");
-    //let types=$("<li ></li>");
-    //let relations=$("<li ></li>");
-    let types=$("<div class=\"col-xs-6\" ></div>");
-    let relations=$("<div class=\"col-xs-6\" ></div>");
+    let types=$("<li ></li>");
+    let relations=$("<li ></li>");
+    let typesarea=$("<div class=\"col-xs-6\" ></div>");
+    let relationsarea=$("<div class=\"col-xs-6\" ></div>");
     //list.addClass("list-unstyled");
-    temp.append(types).append(relations);
+    temp.append(typesarea).append(relationsarea);
+    typesarea.append(types); relationsarea.append(relations);
+
     types.append(foldButton+"<label class='container-check' for='entities'><input id='entities' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
         "      实体</label>").append(typeList);
     relations.append(foldButton+"<label class='container-check' for='relations'><input id='relations' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
@@ -240,6 +257,7 @@ svgObj.prototype.freshFilter = function(){
             "                <input id='entity"+ventity+"'class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
             "                <span class='checkmark'></span>\n" +
                 ventity+"</label>            </li>");
+        if(this.mutelist.entity.has(value)) $('.filter-checkbox.entity#entity'+ventity).trigger('click');
 
     }
     for(let value of this.valuelist.relation)
@@ -249,6 +267,7 @@ svgObj.prototype.freshFilter = function(){
             "                <input id='relation"+value+"'class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
             "                <span class='checkmark'></span>\n" +
             value+"</label>            </li>");
+        if(this.mutelist.relation.has(value)) $('.filter-checkbox.relation#relation'+value).trigger('click');
     }
     //temp.append(list);
 }
