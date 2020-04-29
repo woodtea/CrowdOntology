@@ -64,7 +64,7 @@ networkObj.prototype.setData = function () {
 networkObj.prototype.showNodeDetail = function (nodeId) {
     //$("#modalNetwork").modal('hide')
     svg.drawEntity(nodeId, instance_model); //画出中心区域
-    $("#" + nodeId).trigger("click");
+    //$("#" + nodeId).trigger("click"); //这条好像不需要
     showLocal();
 }
 
