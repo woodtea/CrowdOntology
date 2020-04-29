@@ -93,10 +93,7 @@ function ioConfig(server){
                         return socket.emit("insModel",rep);
                     });
                     break;
-                case 'cite_rcmd':
-                    console.log("receive>>>>>>>>>>>>>>>>>>")
-                    socket.emit('insModel',msg);
-                    break;
+
                 case 'create_node':
                     emitMsg = io_create_insModel_node(msg,function(emitMsg){
                         //console.log(emitMsg);
@@ -152,6 +149,9 @@ function ioConfig(server){
                         logger.trace(JSON.stringify(rep))
                         return socket.emit("insModel",rep);
                     });
+                    break;
+                default:
+                    socket.emit('insModel',msg);
                     break;
             }
             //console.log(emitMsg);
@@ -616,8 +616,12 @@ function io_remove_insModel_relation(rcvMsg,callback){
 
 
 function io_recommend_insModel(rcvMsg,callback){
+    console.log('bde');
+    console.log(rcvMsg);
     let newMsg = formatExchange.web2Server(rcvMsg);
     newMsg.operation = "new_rcmd";  //使用new_rcmd，弃用rcmd
+    console.log("ade");
+    console.log(newMsg);
     dm.handle(newMsg, function(rep){
         let emitMsg = emitMsgHeader(rcvMsg,null,null);
         emitMsg.operation = "rcmd";//使用new_rcmd，弃用rcmd
@@ -1607,6 +1611,7 @@ function create_epi_project(socket,projectName="流行病学图谱")
 }
 
 let prosupple='http://www.openkg.cn/2019-nCoV/event/property/';
+let validproperty=['政策发文字号','政策发文机构','政策发布日期'];
 function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
 {
     msg1 = {
@@ -1640,8 +1645,8 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
                         let tmpid=item['@id'];
                         dm.handle(mcreate_node("Entity", label, projectName), function (rep) {
                             for (let key in rep.migrate) classmap[tmpid]['id']=rep.migrate[key];
-                            roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "label", node_id : symbolId}]
-                            dm.handle(mcreate_relation(value="label",roles,project_id=projectName),function(rep){
+                            roles = [{rolename : "", node_id : classmap[tmpid]['id']}, {rolename : "政策标题", node_id : symbolId}]
+                            dm.handle(mcreate_relation(value="政策标题",roles,project_id=projectName),function(rep){
                                 for (let key in rep.migrate) relationId = rep.migrate[key];
                                 dm.handle(madd_key_attr(node_id=classmap[tmpid]['id'],[relationId],user_id="",project_id=projectName),function(rep){});
                             });
@@ -1667,6 +1672,7 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
             {
                 promap[item['@id']]={};
                 let label=item['label']['@value'];
+                if(validproperty.indexOf(label)==-1) continue;
                 promap[item['@id']]['label']=label;
                 let domain = item['domain'];
                 let range = item['range'];
@@ -1692,6 +1698,17 @@ function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
 
             }
         }
+        let policyid=classmap['http://www.openkg.cn/2019-nCoV/event/class/C3']['id'];
+        roles = [{rolename : "当前政策", node_id : policyid}, {rolename : "前期政策", node_id : policyid}]
+        dm.handle(mcreate_relation('前期政策', roles, project_id = projectName),function (rep) {});
+
+        roles = [{rolename : "当前政策", node_id : policyid}, {rolename : "政策依据", node_id : policyid}]
+        dm.handle(mcreate_relation('政策依据', roles, project_id = projectName),function (rep) {});
+
+        roles = [{rolename : "", node_id : policyid}, {rolename : "来源", node_id : symbolId}]
+        dm.handle(mcreate_relation("来源",roles,project_id=projectName),function(rep){});
+
+        await new Promise(resolve => setTimeout(resolve, timeout));
         socket.emit("iotest","fresh");
 
     });

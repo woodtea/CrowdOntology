@@ -9,13 +9,50 @@ function getIndexArray(tmpModel = instance_model) {
     return indexArray;
 }
 
-function setIndexTypeahead(array) {
+function setIndexTypeahead(array,tmpModel = instance_model) {
+
     $('#stigmod-search-left-input').typeahead({
-        source: array,
+        source: function(query, process) {
+            let returnArray=[];
+            for(let id in tmpModel.nodes)
+            {
+                if (data.isEntity(id)) {
+                    if(tmpModel.nodes[id].value.indexOf(query)!=-1) returnArray.push(tmpModel.nodes[id].value);
+                }
+            }
+            for(let i in tmpModel.relations)
+            {
+                let flag = false;
+                for(let i1 of tmpModel.relations[i].roles)
+                {
+                    let id = i1.node_id;
+                    if(tmpModel.nodes[id].value.indexOf(query)!=-1)
+                    {
+                        flag= true;
+                        break;
+                    }
+                }
+                if(!flag) continue;
+                for(let i1 of tmpModel.relations[i].roles)
+                {
+                    let id = i1.node_id;
+                    if (data.isEntity(id)) {
+                        if(returnArray.indexOf(tmpModel.nodes[id].value)==-1)
+                        {
+                            returnArray.push(tmpModel.nodes[id].value);
+                        }
+                    }
+                }
+            }
+            return process(returnArray);
+        },
         minLength: 0,
+        matcher: function (item) {
+            return true;
+        },
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true,
+        autoSelect: false,
         items: 8
     });
 }
@@ -37,7 +74,7 @@ function setClassTypeTypeahead(array) {
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false
     });
 }
 
@@ -64,7 +101,7 @@ function setClassValueTypeahead() {
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false
         /*
          , afterSelect: function (item) {
          //选择项之后的事件 ，item是当前选中的。
@@ -133,7 +170,7 @@ function setAttributeTypeTypeahead(array) {
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false
     });
 }
 /*
@@ -143,7 +180,7 @@ function setAttributeTypeTypeahead(array) {
  minLength: 0,
  showHintOnFocus: true,
  fitToElement: true,
- autoSelect: true
+ autoselect: false
  });
  }
  */
@@ -200,7 +237,7 @@ function setRelationTypeTypeahead(array) {
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false
     });
 }
 
@@ -210,7 +247,8 @@ function setRawRelationRoleValueTypeahead(item,tmpModel = instance_model){
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false,
+
     });}
 
 //
@@ -254,27 +292,67 @@ function getRelationValues(nodeId) {
  minLength: 0,
  showHintOnFocus: true,
  fitToElement: true,
- autoSelect: true
+ autoselect: false
  });
  }
  */
 
-function setRelationRoleValueTypeahead(item, entities, nodeId) {
+function setRelationRoleValueTypeahead(item, entities, nodeId, tmpModel = instance_model) {
     $(item).find('input.typeahead').typeahead({
-        source: function (querry, process) {
+        //TODO 可能存在效率问题
+        //edited by cui on 2020/4/27，支持对于属性的搜索，可能存在效率问题
+        // source: function (querry, process) {
+        //     let type = $(item).find(".tag").attr("value");
+        //     if (entities[type] == undefined) {
+        //         array = [];
+        //         console.log("Alert:entities." + type + " is empty")
+        //     } else {
+        //         array = entities[type];
+        //     }
+        //     return process(array);
+        // },
+        source: function(query, process) {
+            let returnArray=[];
             let type = $(item).find(".tag").attr("value");
-            if (entities[type] == undefined) {
-                array = [];
-                console.log("Alert:entities." + type + " is empty")
-            } else {
-                array = entities[type];
+            for(let id in tmpModel.nodes)
+            {
+                if (data.isEntity(id)) {
+                    if(tmpModel.nodes[id].value.indexOf(query)!=-1&&tmpModel.nodes[id].tags[0]==type) returnArray.push(tmpModel.nodes[id].value);
+                }
             }
-            return process(array);
+            for(let i in tmpModel.relations)
+            {
+                let flag = false;
+                for(let i1 of tmpModel.relations[i].roles)
+                {
+                    let id = i1.node_id;
+                    if(tmpModel.nodes[id].value.indexOf(query)!=-1)
+                    {
+                        flag= true;
+                        break;
+                    }
+                }
+                if(!flag) continue;
+                for(let i1 of tmpModel.relations[i].roles)
+                {
+                    let id = i1.node_id;
+                    if (data.isEntity(id)) {
+                        if(returnArray.indexOf(tmpModel.nodes[id].value)==-1&&tmpModel.nodes[id].tags[0]==type)
+                        {
+                            returnArray.push(tmpModel.nodes[id].value);
+                        }
+                    }
+                }
+            }
+            return process(returnArray);
+        },
+        matcher: function (item) {
+            return true;
         },
         minLength: 0,
         showHintOnFocus: true,
         fitToElement: true,
-        autoSelect: true
+        autoselect: false,
     });
 }
 

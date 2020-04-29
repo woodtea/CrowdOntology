@@ -7,6 +7,7 @@ var mutex = 0;
 var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
+var switching = false; //不好
 
 $(function () {
 
@@ -24,6 +25,7 @@ $(function () {
     })
 
     $(document).on("click", ".btn-group.workspace", function () {
+        switching=true;
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
             if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
@@ -41,27 +43,46 @@ $(function () {
             $(".btn.filter-btn").hide();
         } else {
             //局部图谱
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").removeClass('active') //关掉全局图谱推荐状态
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
         }
+        switching = false;
     })
 
     $(document).on("click", ".btn.recommend", function () {
-        if ($(this).hasClass("active")) {
-            //$(this).removeClass("active");
-            let rcmdNode = $(".entity.center.isCentralized");
-            if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
-            $(".change-btn").hide();
-        } else {//推荐时需要显示局部图谱
-            //$(this).addClass("active");
-            showLocal();
-            checkRcmd = true;
-            let rcmdNode = $(".entity.center.isCentralized");
-            if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
-            $(".change-btn").show();
+        if((!!$(".btn-group.workspace").children(".btn-default").hasClass('off'))^switching)
+        {//全局图谱
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+                network.recommend = false;
+                network.setData();
+            } else {//全局图谱推荐
+                $(this).addClass("active");
+                network.recommend = true;
+                network.setData();
+                network.recommend = false;
+            }
+
+        }else{
+            //局部图谱
+            if ($(this).hasClass("active")) {
+                //$(this).removeClass("active");
+                let rcmdNode = $(".entity.center.isCentralized");
+                if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
+                $(".change-btn").hide();
+            } else {//推荐时需要显示局部图谱
+                //$(this).addClass("active");
+                showLocal();
+                checkRcmd = true;
+                let rcmdNode = $(".entity.center.isCentralized");
+                if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
+                $(".change-btn").show();
+            }
         }
+
     })
 
     //筛选栏层级选择效果
@@ -1314,7 +1335,7 @@ relationCompare = function (relations,relation){
 function generateNewRole(role, node, tag, relationId,needTrash=true){
     let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
         '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
-        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>';
     if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
     html+= '<span class="tag" style="display: none" value=' + tag + '>' +
         '<span class="relation" style="display: none" value=' + relationId + '>' +
@@ -1324,6 +1345,14 @@ function generateNewRole(role, node, tag, relationId,needTrash=true){
 
 function ellipsisDisplay(node, line, space, str,basicem=0.5)
 {
+    var regex = /^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+    if(regex.test(str))
+    {
+        let tempstr=str;
+        node.on('click',function(){
+            window.open(tempstr);
+        })
+    }
     let len=str.length;
     let nowline=1;
     let actualine=Math.ceil(len/space);
@@ -1355,38 +1384,76 @@ function ellipsisDisplay(node, line, space, str,basicem=0.5)
             .attr("text-anchor", "middle")
             .attr("dy", (basicem+actualine-1)+"em");
     }
+
+
 }
 
-function svgRepaint()
-{
-    svg.valuelist.fresh = false;
-    svg.valuelist.init();
-    $(".filter-checkbox.entity:checkbox").each(function(){
-        if($(this).prop("checked")){
-            svg.valuelist.entity.add($(this).attr("value"));
-            svg.mutelist.entity.delete($(this).attr("value"));
-        }
-        else
-        {
-            svg.mutelist.entity.add($(this).attr("value"));
-        }
-    });
-    $(".filter-checkbox.relation:checkbox").each(function(){
-        if($(this).prop("checked")){
-            svg.valuelist.relation.add($(this).attr("value"));
-            svg.mutelist.relation.delete($(this).attr("value"));
-        }
-        else
-        {
-            svg.mutelist.relation.add($(this).attr("value"));
-        }
-    });
-    let id= svg.centerNode.id;
-    if($(".btn.recommend").hasClass("active"))
-    {
-        svg.drawRecommendation(id);
-    }else{
-        svg.drawEntity(id);
-    }
-    svg.valuelist.fresh=true;
-}
+
+// function svgRepaint()
+// {
+//     svg.valuelist.fresh = false;
+//     svg.valuelist.init();
+//     $(".filter-checkbox.entity:checkbox").each(function(){
+//         if($(this).prop("checked")){
+//             svg.valuelist.entity.add($(this).attr("value"));
+//             svg.mutelist.entity.delete($(this).attr("value"));
+//         }
+//         else
+//         {
+//             svg.mutelist.entity.add($(this).attr("value"));
+//         }
+//     });
+//     $(".filter-checkbox.relation:checkbox").each(function(){
+//         if($(this).prop("checked")){
+//             svg.valuelist.relation.add($(this).attr("value"));
+//             svg.mutelist.relation.delete($(this).attr("value"));
+//         }
+//         else
+//         {
+//             svg.mutelist.relation.add($(this).attr("value"));
+//         }
+//     });
+//     let id= svg.centerNode.id;
+//     if($(".btn.recommend").hasClass("active"))
+//     {
+//         svg.drawRecommendation(id);
+//     }else{
+//         svg.drawEntity(id);
+//     }
+//     svg.valuelist.fresh=true;
+// }
+//
+// function hierarchyFilter(checkbox){
+//     var checked = checkbox.prop("checked"),
+//         container = checkbox.parent().parent(),
+//         siblings = container.siblings();
+//     container.find('input[type="checkbox"]').prop({
+//         indeterminate: false,
+//         checked: checked
+//     });
+//     function checkSiblings(el) {
+//         var parent = el.parent().parent(),
+//             all = true;
+//         el.siblings().each(function() {
+//             let returnValue = all = (checkbox.children().children('input[type="checkbox"]').prop("checked") === checked);
+//             return returnValue;
+//         });
+//         if (all && checked) {
+//             parent.children().children('input[type="checkbox"]').prop({
+//                 indeterminate: false,
+//                 checked: checked
+//             });
+//             checkSiblings(parent);
+//         } else if (all && !checked) {
+//             parent.children().children('input[type="checkbox"]').prop("checked", checked);
+//             parent.children().children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
+//             checkSiblings(parent);
+//         } else {
+//             el.parents("li").children().children('input[type="checkbox"]').prop({
+//                 indeterminate: true,
+//                 checked: false
+//             });
+//         }
+//     }
+//     checkSiblings(container);
+// }

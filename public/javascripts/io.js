@@ -7,6 +7,7 @@ function ioObj() {
         on: []
     };
     this.testmode=0;
+    this.initmode=0;
 }
 
 ioObj.prototype.init = function () {
@@ -110,7 +111,7 @@ ioObj.prototype.init = function () {
                 that.io_get_insModel_done(msg);
                 break;
             case 'cite_rcmd':
-                that.io_cite_recommend_done(msg);
+                that.io_normal_done(msg);
                 break;
             case 'create_node':
                 that.io_create_insModel_node_done(msg);
@@ -141,6 +142,8 @@ ioObj.prototype.init = function () {
                 break;
             case 'rcmd_entity':
                 that.io_recommend_insModel_entity_done(msg);
+            case 'report_rcmd':
+                that.io_normal_done(msg);
                 break;
         }
     });
@@ -391,6 +394,13 @@ ioObj.prototype.io_cite_recommend = function (status) {
     this.socketEmitArray('insModel',msg);
 }
 
+ioObj.prototype.io_report_recommend = function (relations) {
+    let msg = this.emitMsgHeader('report_rcmd');
+    msg['relations']=relations;
+    msg['count']=getJsonLength(relations);
+    this.socketEmitArray('insModel',msg);
+}
+
 ioObj.prototype.io_create_insModel_entity = function (entity) {
 
     //生成Entity节点
@@ -529,19 +539,28 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
         prepareNewEntity();
         //prepareNewEntity(instance_model,false);
         //detail.drawIndex();
-        showGlobal();//不知道为什么，动态宽高后，直接显示network不正常。
+        this.initmode=1;
+        let msg4 = {
+            operation: 'rcmd',
+            user: user,
+            project : project,
+            operation_id: 'op4',
+        }
+        this.socketEmit("insModel",msg4);
+        //showGlobal();//不知道为什么，动态宽高后，直接显示network不正常。
         detail.rightColumnShow(index);
     }
 }
 
-ioObj.prototype.io_cite_recommend_done = function (msg) {
+ioObj.prototype.io_normal_done = function (msg) {
     if (msg.error) {
         return
     } else {
         this.tmpMsgPop(msg.operationId);
-        console.log("pop>>>>>>>>>>>>>");
+        //console.log("pop>>>>>>>>>>>>>");
     }
 }
+
 
 ioObj.prototype.io_create_insModel_node_done = function (msg) {
     if (msg.error) {
@@ -669,28 +688,35 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
             "relations": msg.relations
         }
 
-        let centerId = $("g.center").attr("id");
-        recommend_model.nodes[centerId] = instance_model.nodes[centerId];
+        if(this.initmode==1)//初始化recommend_model以实现高亮
+        {
+            this.initmode=0;
+            showGlobal();
+        }
+        else{//正常描绘推荐
+            let centerId = $("g.center").attr("id");
+            recommend_model.nodes[centerId] = instance_model.nodes[centerId];
 
-        data.completeRcmdModel(recommend_model);
+            data.completeRcmdModel(recommend_model);
 
 
 
-        prepareNewEntity(recommend_model, false);
+            prepareNewEntity(recommend_model, false);
 
-        // for(key in recommend_model.nodes)
-        // {
-        //     console.log(recommend_model.nodes[key].value);
-        //     if(recommend_model.nodes[key].value=="") delete recommend_model.nodes[key];
-        // }
-        // console.log(recommend_model);
+            // for(key in recommend_model.nodes)
+            // {
+            //     console.log(recommend_model.nodes[key].value);
+            //     if(recommend_model.nodes[key].value=="") delete recommend_model.nodes[key];
+            // }
+            // console.log(recommend_model);
 
-        //let centerId = $("g.center").attr("id");
-        let entity = svg.getEntity(centerId, recommend_model);
-        //svg.drawEntity(centerId,recommend_model);
-        svg.drawRecommendation(centerId, recommend_model, instance_model)
-        //drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
-        //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
+            //let centerId = $("g.center").attr("id");
+            let entity = svg.getEntity(centerId, recommend_model);
+            //svg.drawEntity(centerId,recommend_model);
+            svg.drawRecommendation(centerId, recommend_model, instance_model)
+            //drawRecommendation(entity.neighbours, instance_model);    //绘制推荐模型
+            //drawRecommendation(recommend_model, instance_model);    //绘制推荐模型
+        }
         return;
     }
 }

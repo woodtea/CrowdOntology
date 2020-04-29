@@ -50,7 +50,10 @@ function networkObj() {
 
     this.network.on("afterDrawing", function() {
         that.loading("hide");
+
     });
+
+    this.recommend = false;
 }
 
 networkObj.prototype.setData = function () {
@@ -161,27 +164,55 @@ networkObj.prototype.getOptions = function () {
 networkObj.prototype.getData = function () {
 
     let nodes = [], edges = [];
+    let nodeSet = new Set();
     for (let id in instance_model.nodes) {
         if (data.isEntity(id)) {
-            nodes.push({
-                id: id,
-                label: instance_model.nodes[id].value,
-                group: instance_model.nodes[id].tags[0]
-            })
+            let width=1;
+            let hidden = false;
+            if(this.recommend) hidden = true;
+            // let node = {}
+            // node[id] = eval('(' + JSON.stringify(instance_model.nodes[id]) + ')');
+            // connection.io_recommend_insModel_node(node);
+            out:for (let relationId in recommend_model.relations) {
+                for (let roleIndex in recommend_model.relations[relationId].roles) {
+                    if (id == recommend_model.relations[relationId].roles[roleIndex].node_id) {
+                        width=5;
+                        hidden = false;
+                        break out;
+                    }
+                }
+            }
+            if(!hidden)
+            {
+                nodeSet.add(id);
+                nodes.push({
+                    id: id,
+                    label: instance_model.nodes[id].value,
+                    group: instance_model.nodes[id].tags[0],
+                    // color:{
+                    //     border: '#000000',
+                    // }
+                    borderWidth:width,
+                })
+            }
         }
     }
 
     for (let id in instance_model.relations) {
         let isAttribute = false;
+        let hidden = false;
+        if(this.recommend) hidden = true;
         let roles = instance_model.relations[id].roles;
         for (let i in roles) {
             if (!data.isEntity(roles[i].node_id)) {
                 isAttribute = true;
                 break;
             }
+            if(nodeSet.has(roles[i].node_id)) hidden=false;
         }
 
         if (isAttribute) continue;
+        if(hidden) continue;
 
         nodes.push({
             id: id,

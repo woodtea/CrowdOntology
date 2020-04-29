@@ -38,7 +38,14 @@ function svgObj(svg=""){
         entity: new Set(),
         relation: new Set()
     }
-
+    let muterelations=['政策成文日期','政策对象','政策落款','政策有关事项','政策内容'];
+    for(let r of muterelations)
+    {
+        if(project=='新冠政策知识图谱')
+        {
+            this.mutelist.relation.add(r);
+        }
+    }
 
 }
 
@@ -97,8 +104,8 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
     if(this.valuelist.fresh)
     {
         this.freshFilter();
-        svgRepaint();
-        return;
+        $(".btn.filter-apply").trigger("click");
+        return true;
     }
 
 
@@ -133,12 +140,14 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
         x: this.width/2,
         y: this.height/2
     }
-
-    if(this.valuelist.fresh)
+    //console.log('drawRecommendation'+this.valuelist.fresh+this.rcmd.fresh)
+    if(this.valuelist.fresh&&(this.rcmd.fresh!==false))
     {
+        //console.log('drawRecommendation'+this.valuelist.fresh+this.rcmd.fresh)
+        connection.io_report_recommend(JSON.parse(JSON.stringify(entity1.relations)));
         this.freshFilter();
         $(".btn.filter-apply").trigger("click");
-        return;
+        return true;
     }
 
     if(checkRcmd){
@@ -156,7 +165,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
         let pointer=0;
         for(let key in entity1.relations)
         {
-            console.log(begin+"   "+end+"  "+pointer);
+            //console.log(begin+"   "+end+"  "+pointer);
             if(begin<end)
             {
                 if(pointer<begin||pointer>end) delete entity1.relations[key];
@@ -216,6 +225,7 @@ svgObj.prototype.openZoom = function(){
 }
 
 svgObj.prototype.freshFilter = function(){
+    console.log('freshFilter');
     let foldButton="<span class=\"filter-fold glyphicon glyphicon-chevron-down\"></span>"
     let hideButton="<span class=\"filter-fold glyphicon glyphicon-chevron-right\"></span>"
     let temp=$(".filter-panel");
@@ -238,8 +248,8 @@ svgObj.prototype.freshFilter = function(){
     for(let value of this.valuelist.entity)
     {
         //console.log(value);
-        let ventity=value.split(/\s+/)[0];
-        let vtype=value.split(/\s+/)[1];
+        let ventity=value.split('\t')[0];
+        let vtype=value.split('\t')[1];
         let entities,entityList;
         entities=typeList.children("[value='"+vtype+"']");
         if(entities.length>0) {
@@ -269,6 +279,10 @@ svgObj.prototype.freshFilter = function(){
             value+"</label>            </li>");
         if(this.mutelist.relation.has(value)) $('.filter-checkbox.relation#relation'+value).trigger('click');
     }
+    $('.filter-checkbox.entity:first').trigger('click');
+    $('.filter-checkbox.entity:first').trigger('click');
+    $('.filter-checkbox.relation:first').trigger('click');
+    $('.filter-checkbox.relation:first').trigger('click');
     //temp.append(list);
 }
 
@@ -604,11 +618,11 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
                     let tmpRole = tmpModel.relations[relationId].roles[roleIndex1];
                     if(data.isEntity(tmpRole.node_id,tmpModel)){
                         if(this.valuelist.fresh) {
-                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0]);
+                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0]);
                             //这里选用实体的第一个tag作为它的类型
                         }
                         else{
-                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0])){
+                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0])){
                                 toShowE = true;
                             }
                         }
