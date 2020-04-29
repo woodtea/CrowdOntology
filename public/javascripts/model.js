@@ -147,6 +147,7 @@ modelObj.prototype.getEntityIdByValue = function (value, tmpModel = instance_mod
                 if(type != tmpModel.nodes[id].tags[0]) continue;
             }
             ids.push(id);
+
         }
     }
 

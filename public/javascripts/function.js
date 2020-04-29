@@ -7,6 +7,7 @@ var mutex = 0;
 var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
+var switching = false; //不好
 
 $(function () {
 
@@ -24,6 +25,7 @@ $(function () {
     })
 
     $(document).on("click", ".btn-group.workspace", function () {
+        switching=true;
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
             if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
@@ -41,26 +43,46 @@ $(function () {
             $(".btn.filter-btn").hide();
         } else {
             //局部图谱
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").removeClass('active') //关掉全局图谱推荐状态
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
         }
+        switching = false;
     })
 
     $(document).on("click", ".btn.recommend", function () {
-        if ($(this).hasClass("active")) {
-            //$(this).removeClass("active");
-            let rcmdNode = $(".entity.center.isCentralized");
-            if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
-        } else {//推荐时需要显示局部图谱
-            //$(this).addClass("active");
-            showLocal();
-            checkRcmd = true;
-            let rcmdNode = $(".entity.center.isCentralized");
-            if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
+        if((!!$(".btn-group.workspace").children(".btn-default").hasClass('off'))^switching)
+        {//全局图谱
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+                network.recommend = false;
+                network.setData();
+            } else {//全局图谱推荐
+                $(this).addClass("active");
+                network.recommend = true;
+                network.setData();
+                network.recommend = false;
+            }
 
+        }else{
+            //局部图谱
+            if ($(this).hasClass("active")) {
+                //$(this).removeClass("active");
+                let rcmdNode = $(".entity.center.isCentralized");
+                if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
+                $(".change-btn").hide();
+            } else {//推荐时需要显示局部图谱
+                //$(this).addClass("active");
+                showLocal();
+                checkRcmd = true;
+                let rcmdNode = $(".entity.center.isCentralized");
+                if ($(rcmdNode).length) $(".entity.center").trigger("dblclick");
+                $(".change-btn").show();
+            }
         }
+
     })
 
     //筛选栏层级选择效果
@@ -114,14 +136,27 @@ $(function () {
     $(document).on("click", ".btn.filter-apply", function () {
         svg.valuelist.fresh = false;
         svg.valuelist.init();
-        $(".filter-checkbox:checkbox").each(function(){
+        $(".filter-checkbox.entity:checkbox").each(function(){
             if($(this).prop("checked")){
-                if($(this).hasClass('entity')) svg.valuelist.entity.add($(this).attr("value"));
-                if($(this).hasClass('relation')) svg.valuelist.relation.add($(this).attr("value"));
+                svg.valuelist.entity.add($(this).attr("value"));
+                svg.mutelist.entity.delete($(this).attr("value"));
+            }
+            else
+            {
+                svg.mutelist.entity.add($(this).attr("value"));
             }
         });
-        let centerNode = $(".entity.center");
-        let id= centerNode.attr("id");
+        $(".filter-checkbox.relation:checkbox").each(function(){
+            if($(this).prop("checked")){
+                svg.valuelist.relation.add($(this).attr("value"));
+                svg.mutelist.relation.delete($(this).attr("value"));
+            }
+            else
+            {
+                svg.mutelist.relation.add($(this).attr("value"));
+            }
+        });
+        let id= svg.centerNode.id;
         if($(".btn.recommend").hasClass("active"))
         {
             svg.drawRecommendation(id);
@@ -129,6 +164,15 @@ $(function () {
             svg.drawEntity(id);
         }
         svg.valuelist.fresh=true;
+    })
+
+    $(document).on("click",".btn.change-btn",function(){
+        svg.rcmd.fresh=false;
+        svg.rcmd.jumpLen+=svg.rcmd.showLen;
+        let centerNode = $(".entity.center");
+        let id= centerNode.attr("id");
+        svg.drawRecommendation(id);
+        svg.rcmd.fresh=true;
     })
 
     $(document).on("click",".filter-fold.glyphicon",function(){
@@ -166,6 +210,7 @@ $(function () {
 
     $(document).on("click", '#modalCiteRcmd .btn-primary', function () {
         $("#modalCiteRcmd").modal('hide')
+        connection.io_cite_recommend(0);
         for (let i in rcmd_pending.entities) {
             connection.io_create_insModel_entity(rcmd_pending.entities[i]);
         }
@@ -175,6 +220,7 @@ $(function () {
         if (getJsonLength(rcmd_pending.relations) > 0) {
             connection.io_create_insModel_relation(rcmd_pending.relations);
         }
+        connection.io_cite_recommend(1);
     })
 
     $(document).on("click", '#modalRevise button', function () {
@@ -302,6 +348,10 @@ $(function () {
 
     //双击节点
     $(document).on("dblclick", 'g', function () {
+        if (d3.select(this).classed("element-group") == true)
+        {
+            return;
+        }
         if (d3.select(this).classed("isRecommendation") == true) { //双击推荐信息 -> 引用推荐
             clickTimeout.clear();
 
@@ -493,7 +543,9 @@ $(function () {
         let type = $(this).val();
         let array = getEntityTypes();
         if (array.indexOf(type) == -1) {
-            if ($(this).parent().children("ul").css("display") == 'none' && $(this).is(":focus")) {
+            //console.log($(this).parent().children("ul").css("display")+"      "+$(this).is(":focus"))
+            if (($(this).parent().children("ul").css("display") == 'none'||$(this).parent().children("ul").css("display") == undefined) && $(this).is(":focus")) {
+            //if (($(this).parent().children("ul").css("display") == 'none') && $(this).is(":focus")) {
                 let content = '<p>是否新建实体类型?</p>';
                 content += '<div href="#" style="text-align: center" class="addEntityInModel">' +
                     '<span class="button-ok" type="ok"><button class="btn btn-default btn-sm" type="button" >是</button></span>' +
@@ -549,6 +601,7 @@ $(function () {
                 break;
             }
         }
+        //if(valueId==undefined) valueId=0;
         let entity = {
             "nodeId": generateFrontNodeID(),
             "relationId": generateFrontRelationID(),
@@ -1026,6 +1079,7 @@ let tagReformat = {
         if (msg.relations) {
             //alert(relations)
             for (let relationId in msg.relations) {
+                //TODO 此处有问题，在判断relation时（如，一个entity和它属性的关系)不应该只看relation的名字
                 let tmp = msg.relations[relationId].type; //前后不统一
                 msg.relations[relationId].type = getValueId(tmp, model.relations);
             }
@@ -1281,10 +1335,125 @@ relationCompare = function (relations,relation){
 function generateNewRole(role, node, tag, relationId,needTrash=true){
     let html = '<div class="list-group-item stigmod-hovershow-trig row ">' +
         '<span class="col-xs-4 role vcenter" style="padding: 0px"><input type="text" class="stigmod-input" placeholder="角色名" value=' + role + '></input></span>' +
-        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担着" value=' + node + '></input></span>';
+        '<span class="col-xs-7 node vcenter" style="padding: 0px"><input type="text" class="stigmod-input typeahead" placeholder="承担者" value=' + node + '></input></span>';
     if(needTrash) html+= '<span class="col-xs-1 glyphicon glyphicon-trash vcenter"</span>'
     html+= '<span class="tag" style="display: none" value=' + tag + '>' +
         '<span class="relation" style="display: none" value=' + relationId + '>' +
         '</div>';
     return html;
 }
+
+function ellipsisDisplay(node, line, space, str,basicem=0.5)
+{
+    var regex = /^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+    if(regex.test(str))
+    {
+        let tempstr=str;
+        node.on('click',function(){
+            window.open(tempstr);
+        })
+    }
+    let len=str.length;
+    let nowline=1;
+    let actualine=Math.ceil(len/space);
+    if(actualine>line) actualine=line;
+    basicem=basicem-(actualine-1)/2.0;
+    for(let i=1;i<actualine;i++)
+    {
+        node.append("text")
+            .text(str.substring(0,space))
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+i-1)+"em");
+        str=str.substring(space);
+    }
+    if(str.length>space)
+    {
+        node.append("text")
+            .text("...")
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+actualine-1)+"em");
+        node.classed("ellipsis","true");
+    }
+    else
+    {
+        node.append("text")
+            .text(str)
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .attr("dy", (basicem+actualine-1)+"em");
+    }
+
+
+}
+
+
+// function svgRepaint()
+// {
+//     svg.valuelist.fresh = false;
+//     svg.valuelist.init();
+//     $(".filter-checkbox.entity:checkbox").each(function(){
+//         if($(this).prop("checked")){
+//             svg.valuelist.entity.add($(this).attr("value"));
+//             svg.mutelist.entity.delete($(this).attr("value"));
+//         }
+//         else
+//         {
+//             svg.mutelist.entity.add($(this).attr("value"));
+//         }
+//     });
+//     $(".filter-checkbox.relation:checkbox").each(function(){
+//         if($(this).prop("checked")){
+//             svg.valuelist.relation.add($(this).attr("value"));
+//             svg.mutelist.relation.delete($(this).attr("value"));
+//         }
+//         else
+//         {
+//             svg.mutelist.relation.add($(this).attr("value"));
+//         }
+//     });
+//     let id= svg.centerNode.id;
+//     if($(".btn.recommend").hasClass("active"))
+//     {
+//         svg.drawRecommendation(id);
+//     }else{
+//         svg.drawEntity(id);
+//     }
+//     svg.valuelist.fresh=true;
+// }
+//
+// function hierarchyFilter(checkbox){
+//     var checked = checkbox.prop("checked"),
+//         container = checkbox.parent().parent(),
+//         siblings = container.siblings();
+//     container.find('input[type="checkbox"]').prop({
+//         indeterminate: false,
+//         checked: checked
+//     });
+//     function checkSiblings(el) {
+//         var parent = el.parent().parent(),
+//             all = true;
+//         el.siblings().each(function() {
+//             let returnValue = all = (checkbox.children().children('input[type="checkbox"]').prop("checked") === checked);
+//             return returnValue;
+//         });
+//         if (all && checked) {
+//             parent.children().children('input[type="checkbox"]').prop({
+//                 indeterminate: false,
+//                 checked: checked
+//             });
+//             checkSiblings(parent);
+//         } else if (all && !checked) {
+//             parent.children().children('input[type="checkbox"]').prop("checked", checked);
+//             parent.children().children('input[type="checkbox"]').prop("indeterminate", (parent.find('input[type="checkbox"]:checked').length > 0));
+//             checkSiblings(parent);
+//         } else {
+//             el.parents("li").children().children('input[type="checkbox"]').prop({
+//                 indeterminate: true,
+//                 checked: false
+//             });
+//         }
+//     }
+//     checkSiblings(container);
+// }

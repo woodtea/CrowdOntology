@@ -3,7 +3,12 @@ function networkObj() {
     //this.colorsArray = ["#778899","#F08080","#008B8B","#D2E5FF"]
 
     let that = this;
-    this.network = new vis.Network(that.getContainer(), that.getData(), that.getOptions());
+    //console.log('draw begin');
+    //let container = that.getContainer() , data = that.getData() , options = that.getOptions();
+    //console.log("data end");
+    this.network = new vis.Network(that.getContainer(),that.getData(),that.getOptions());
+    //console.log("draw end");
+
 
     this.network.on("click", function (params) {
         if (params.nodes.length == 1) {
@@ -45,7 +50,10 @@ function networkObj() {
 
     this.network.on("afterDrawing", function() {
         that.loading("hide");
+
     });
+
+    this.recommend = false;
 }
 
 networkObj.prototype.setData = function () {
@@ -78,6 +86,9 @@ networkObj.prototype.getOptions = function () {
                     background: '#F9D456',
                     border: '#f0ad4e'
                 }
+            },
+            shapeProperties: {
+                interpolation: false    // 'true' for intensive zooming
             }
         },
         edges: {
@@ -88,8 +99,41 @@ networkObj.prototype.getOptions = function () {
         },
         groups: {},
         layout:{
-            improvedLayout:false
+            improvedLayout:false,
+        },
+        physics:{
+            enabled: true,
+            stabilization: {
+                iterations: 20
+            }
         }
+        // tooltip: {
+        //     delay: 50,
+        //     fontColor: "black",
+        //     fontSize: 14,
+        //     fontFace: "verdana",
+        //     color: {
+        //         border: "#666",
+        //         background: "#FFFFC6"
+        //     }
+        // },
+        // clustering: {
+        //     enabled: false,
+        //     clusterEdgeThreshold: 50
+        // },
+        // physics:{
+        //     barnesHut:{
+        //         gravitationalConstant: -60000,
+        //         springConstant:0.02
+        //     }
+        // },
+        // smoothCurves: {dynamic:false},
+        // hideEdgesOnDrag: true,
+        // stabilize: true,
+        // stabilizationIterations: 100,
+        // zoomExtentOnStabilize: true,
+        // navigation: true,
+        // keyboard: true,
     };
 
     let i = 0;
@@ -120,27 +164,55 @@ networkObj.prototype.getOptions = function () {
 networkObj.prototype.getData = function () {
 
     let nodes = [], edges = [];
+    let nodeSet = new Set();
     for (let id in instance_model.nodes) {
         if (data.isEntity(id)) {
-            nodes.push({
-                id: id,
-                label: instance_model.nodes[id].value,
-                group: instance_model.nodes[id].tags[0]
-            })
+            let width=1;
+            let hidden = false;
+            if(this.recommend) hidden = true;
+            // let node = {}
+            // node[id] = eval('(' + JSON.stringify(instance_model.nodes[id]) + ')');
+            // connection.io_recommend_insModel_node(node);
+            out:for (let relationId in recommend_model.relations) {
+                for (let roleIndex in recommend_model.relations[relationId].roles) {
+                    if (id == recommend_model.relations[relationId].roles[roleIndex].node_id) {
+                        width=5;
+                        hidden = false;
+                        break out;
+                    }
+                }
+            }
+            if(!hidden)
+            {
+                nodeSet.add(id);
+                nodes.push({
+                    id: id,
+                    label: instance_model.nodes[id].value,
+                    group: instance_model.nodes[id].tags[0],
+                    // color:{
+                    //     border: '#000000',
+                    // }
+                    borderWidth:width,
+                })
+            }
         }
     }
 
     for (let id in instance_model.relations) {
         let isAttribute = false;
+        let hidden = false;
+        if(this.recommend) hidden = true;
         let roles = instance_model.relations[id].roles;
         for (let i in roles) {
             if (!data.isEntity(roles[i].node_id)) {
                 isAttribute = true;
                 break;
             }
+            if(nodeSet.has(roles[i].node_id)) hidden=false;
         }
 
         if (isAttribute) continue;
+        if(hidden) continue;
 
         nodes.push({
             id: id,

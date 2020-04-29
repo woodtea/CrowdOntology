@@ -1575,6 +1575,7 @@ DataManager.prototype.recommend = function (msg, callback) {
 /*
 先找到与实体相连，并且没有被当前用户引用的关系（一级关系））
 */
+//TODO 现在返回的是全局图谱，可能存在效率问题，恢复注释内容可以针对性地返回推荐图谱
 DataManager.prototype.newRecommend = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var rcmd_nodes = [];//先保证一个
@@ -1583,13 +1584,20 @@ DataManager.prototype.newRecommend = function (msg, callback) {
     }
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
     MATCH (u:User {name: {uname}})\n\
-    MATCH (p)-[:has]->(i)<-[:refer]-(u) WHERE id(i)={rcmd_id}\n\
+    MATCH (p)-[:has]->(i)<-[:refer]-(u) \n\
     MATCH (i)<-[:has_role]-(ri:RelInst)-[:has_role]->(l1i) WHERE NOT (ri)<-[:refer]-(u)\n\
     MATCH (ri)<-[:refer]-(ou)\n\
     OPTIONAL MATCH (l1i)-[:from]->(:inst_of)-[:to]->(tag)\n\
-    RETURN l1i, collect(distinct id(tag)) AS tags'.format({
-        rcmd_id: rcmd_nodes[0]
-    });
+    RETURN l1i, collect(distinct id(tag)) AS tags';
+    // var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    // MATCH (u:User {name: {uname}})\n\
+    // MATCH (p)-[:has]->(i)<-[:refer]-(u) WHERE id(i)={rcmd_id}\n\
+    // MATCH (i)<-[:has_role]-(ri:RelInst)-[:has_role]->(l1i) WHERE NOT (ri)<-[:refer]-(u)\n\
+    // MATCH (ri)<-[:refer]-(ou)\n\
+    // OPTIONAL MATCH (l1i)-[:from]->(:inst_of)-[:to]->(tag)\n\
+    // RETURN l1i, collect(distinct id(tag)) AS tags'.format({
+    //     rcmd_id: rcmd_nodes[0]
+    // });
 
     console.log('[CYPHER]');
     console.log(cypher);

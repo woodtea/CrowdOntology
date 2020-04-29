@@ -12,13 +12,14 @@
           <button class="btn btn-default toggle recommend">图谱推荐</button>
           <button style="display:none" class="btn btn-default toggle filter-btn" data-toggle="modal" data-target="#filter-window">筛选</button>
           <div class="modal fade" id="filter-window" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
+            <div class="modal-dialog modal-custom">
               <div class="modal-content">
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                   <h4 class="modal-title" id="myModalLabel">选择图中需要出现的元素</h4>
                 </div>
-                <div class="modal-body filter-panel">
+                <div class="modal-body">
+                  <div class="filter-panel row"></div>
                   <!--div class="checkbox">
                     <label>
                       <input type="checkbox" checked> 请打勾
@@ -32,6 +33,7 @@
               </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
           </div>
+          <button style="display:none" class="btn btn-default change-btn" >换</button>
           <!-- TODO 可能会引起全屏布局问题-->
         </div>
         <div class="col-xs-4 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
@@ -296,9 +298,11 @@
 <script src="/javascripts/modal.js"></script>
 <script src="/javascripts/test.js"></script>
 
+
 <script src="/javascripts/init.js"></script>
 
 
 <script language="javascript">
     window.onbeforeunload = function() {}
+
 </script>

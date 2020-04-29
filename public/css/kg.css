@@ -1640,6 +1640,9 @@ span.twitter-typeahead .tt-hint {
 ul {
   list-style-type: none;
 }
+li {
+  list-style-type: none;
+}
 
 /* 设置checkbox的样式 */
 .container-check input:indeterminate~.checkmark {
@@ -1764,4 +1767,13 @@ ul {
 /* 折叠图标样式 */
 .filter-fold{
   color: #aaaaaa;
+}
+
+.modal-custom{
+  position: relative;
+  display: table; /* This is important */
+  overflow-y: auto;
+  overflow-x: auto;
+  width: auto;
+  min-width: 400px;
 }

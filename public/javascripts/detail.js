@@ -522,7 +522,7 @@ detailObj.prototype.relationReviseSubmit = function (item) {
         let span = "";
         for (let i = 0; i < notExistArray.length; i++) {
             string += '<p>实体' + notExistArray[i].node + '（类型：' + notExistArray[i].tag + '）</p>';
-            span += '<span style="display: none;"><input class="type-input" type="text" value=' + notExistArray[i].tag + '><input class="value-input" type="text" value=' + notExistArray[i].node + '></span>';
+            span += '<span style="display: none;"><input class="type-input" type="text" value="' + notExistArray[i].tag + '"><input class="value-input" type="text" value="' + notExistArray[i].node + '"></span>';
         }
         let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
         html += '<h4>以下实体尚未创建</h4>';
@@ -658,10 +658,10 @@ detailObj.prototype.generateContent = function (type, value, nodeId = "", relati
     //alert(nodeId);
     //alert(relationId);
     let html = '<a href="#" class="list-group-item stigmod-hovershow-trig">' +
-        '<span class="nodeId" value=' + nodeId + '></span>' +
-        '<span class="relationId" value=' + relationId + '></span>' +
-        '<span class="type" value=' + type + '>' + type + '</span>' + ' : ' +
-        '<span class="value" value=' + value + '>' + value + '</span>' +
+        '<span class="nodeId" value="' + nodeId + '"></span>' +
+        '<span class="relationId" value="' + relationId + '"></span>' +
+        '<span class="type" value="' + type + '">' + type + '</span>' + ' : ' +
+        '<span class="value" value="' + value + '">' + value + '</span>' +
         '<span class="pull-right stigmod-hovershow-cont">' +
         '<span class="fa fa-edit"></span>' +
         '</span></a>';
@@ -712,7 +712,7 @@ detailObj.prototype.rightColumnShow = function (item) {
 detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=instance_model) {
 
     let relations = []
-    for (let id in rawRelations) {
+    out:for (let id in rawRelations) {
         let rawRelation = rawRelations[id];
         if (relationTypeArray.indexOf(rawRelation.type) != -1) {
             let nodeId = [];
@@ -730,7 +730,13 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
                     mutex++;
                 }
             }
-
+            for(let eachvalue of value)
+            {
+                if(eachvalue=="")
+                {
+                    continue out;
+                }
+            }
             relations.push({
                 relationId: id,
                 nodeId: nodeId,

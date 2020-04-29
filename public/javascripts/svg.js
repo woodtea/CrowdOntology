@@ -8,17 +8,22 @@ function svgObj(svg=""){
     if(svg == ""){
         this.svg = d3.select("body .graph-row .middle-content svg")
     }else{
-        this.svg = svg
+        this.supersvg = svg
+        this.svg=this.supersvg.append("g")
+        this.svg.attr("class","element-group");
     }
 
     this.setSize();
-
+    this.openZoom();
     this.rcmd = {
         isRcmd: false,      //true时表示要处理rcmd
         drawRcmd: false,    //true时表示当前绘制的是rcmd
         tmpLen: 0,          //当前图谱中，节点连接关系的个数
         rcmdLen: 0,         //推荐中，节点连接关系的个数
         wholeLen: 0,        //=tmpLen+rcmdLen
+        jumpLen: 0,         //需要跳过的推荐节点个数
+        showLen: 10,        //最大推荐个数
+        fresh: true,
     }
     this.valuelist = {//表示当前要显示的元素的列表
         fresh: true, //true时表示要刷新过滤列表
@@ -27,6 +32,18 @@ function svgObj(svg=""){
         init: function(){
             this.entity= new Set();
             this.relation = new Set();
+        }
+    }
+    this.mutelist = { //过滤列表，保持筛选器记忆
+        entity: new Set(),
+        relation: new Set()
+    }
+    let muterelations=['政策成文日期','政策对象','政策落款','政策有关事项','政策内容'];
+    for(let r of muterelations)
+    {
+        if(project=='新冠政策知识图谱')
+        {
+            this.mutelist.relation.add(r);
         }
     }
 
@@ -78,16 +95,22 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
 
-    if(this.valuelist.fresh) this.freshFilter();
-
     this.centerNode = {
         id: id,
         x: this.width/2,
         y: this.height/2
     }
 
-    this.svg.selectAll("*").remove()
+    if(this.valuelist.fresh)
+    {
+        this.freshFilter();
+        $(".btn.filter-apply").trigger("click");
+        return true;
+    }
 
+
+    this.svg.selectAll("*").remove()
+    //this.openZoom();
     this.drawCircle(this.width / 2, this.height / 2, this.R);
     this.drawCircle(this.width / 2, this.height / 2, this.R2);
 
@@ -95,12 +118,16 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
     this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity.relations, 0, tmpModel);
     this.svgBringAllToFront();
 
+
+
+
     return true;
 }
 
 svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
     if(this.valuelist.fresh) this.valuelist.init();
+    if(this.rcmd.fresh) this.rcmd.jumpLen=0;
 
     let entity1 = this.getEntity(id, rcmdModel);
     if (entity1 == undefined) return false;  //如果不是实体的话
@@ -108,7 +135,20 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     let entity2 = this.getEntity(id, tmpModel);
     if (entity2 == undefined) return false;  //如果不是实体的话
 
-    if(this.valuelist.fresh) this.freshFilter();
+    this.centerNode = {
+        id: id,
+        x: this.width/2,
+        y: this.height/2
+    }
+    //console.log('drawRecommendation'+this.valuelist.fresh+this.rcmd.fresh)
+    if(this.valuelist.fresh&&(this.rcmd.fresh!==false))
+    {
+        //console.log('drawRecommendation'+this.valuelist.fresh+this.rcmd.fresh)
+        connection.io_report_recommend(JSON.parse(JSON.stringify(entity1.relations)));
+        this.freshFilter();
+        $(".btn.filter-apply").trigger("click");
+        return true;
+    }
 
     if(checkRcmd){
         checkRcmd = false;
@@ -118,24 +158,42 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     }
 
     let rcmdLen = getJsonLength(entity1.relations);
-    let tmpLen = getJsonLength(entity2.relations);
+    if(rcmdLen > this.rcmd.showLen)
+    {
+        let begin=this.rcmd.jumpLen%rcmdLen;
+        let end=(this.rcmd.jumpLen+this.rcmd.showLen-1)%rcmdLen;
+        let pointer=0;
+        for(let key in entity1.relations)
+        {
+            //console.log(begin+"   "+end+"  "+pointer);
+            if(begin<end)
+            {
+                if(pointer<begin||pointer>end) delete entity1.relations[key];
+            }
+            else
+            {
+                if(pointer>end&&pointer<begin) delete entity1.relations[key];
+            }
+            pointer++;
+        }
+        rcmdLen=getJsonLength(entity1.relations);
+    }
 
+    let tmpLen = getJsonLength(entity2.relations);
+    let jumpLen=this.rcmd.jumpLen,showLen=this.rcmd.showLen;
     this.rcmd = {
         isRcmd: true,
         drawRcmd: false,
         tmpLen: tmpLen,
         rcmdLen: rcmdLen,
         wholeLen: tmpLen+rcmdLen,
+        jumpLen: this.rcmd.jumpLen,
+        showLen: this.rcmd.showLen,
     }
 
-    this.centerNode = {
-        id: id,
-        x: this.width/2,
-        y: this.height/2
-    }
 
     this.svg.selectAll("*").remove()
-
+    //this.openZoom();
     this.drawMask(this.width / 2, this.height / 2);
 
     this.drawCircle(this.width / 2, this.height / 2, this.R);
@@ -151,54 +209,38 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
 
     this.rcmdDestroy();
 
+
+
     return true;
 }
 
+svgObj.prototype.openZoom = function(){
+    let zoom= d3.zoom()
+        .scaleExtent([0.3, 3])
+        .on('zoom', () => {
+            this.svg.attr('transform', d3.event.transform);
+        })
+    this.supersvg.call(zoom).on("dblclick.zoom", null);;
+    console.log("zoomed");
+}
+
 svgObj.prototype.freshFilter = function(){
+    console.log('freshFilter');
     let foldButton="<span class=\"filter-fold glyphicon glyphicon-chevron-down\"></span>"
+    let hideButton="<span class=\"filter-fold glyphicon glyphicon-chevron-right\"></span>"
     let temp=$(".filter-panel");
     temp.empty();
-    let list=$("<ul></ul>");
+    //let list=$("<ul></ul>");
     let typeList=$("<ul></ul>");
     let relationList=$("<ul></ul>");
-    let types=$("<li></li>");
-    let relations=$("<li></li>");
-    list.addClass("list-unstyled");
-    list.append(types).append(relations);
-    // types.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-    //     "            <scan>实体</scan>").append(typeList);
-    // relations.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-    //     "            <scan>关系</scan>").append(relationList);
-    // for(let value of this.valuelist.entity)
-    // {
-    //     //console.log(value);
-    //     let ventity=value.split(/\s+/)[0];
-    //     let vtype=value.split(/\s+/)[1];
-    //     let entities,entityList;
-    //     entities=typeList.children("[value='"+vtype+"']");
-    //     if(entities.length>0) {
-    //         entityList=entities.children("ul");
-    //     }else {
-    //         entities=$("<li></li>");
-    //         entityList=$("<ul></ul>");
-    //         entities.append("<input class=\"filter-checkbox\" type=\"checkbox\" checked>\n" +
-    //             "            <scan>"+vtype+"</scan>").append(entityList);
-    //         entities.attr("value",vtype);
-    //         typeList.append(entities);
-    //     }
-    //     entityList.append("<li>\n" +
-    //         "                <input class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
-    //         "                <scan>"+ventity+"</scan>\n" +
-    //         "            </li>");
-    //
-    // }
-    // for(let value of this.valuelist.relation)
-    // {
-    //     relationList.append("<li>\n" +
-    //         "                <input class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
-    //         "                <scan>"+value+"</scan>\n" +
-    //         "            </li>")
-    // }
+    let types=$("<li ></li>");
+    let relations=$("<li ></li>");
+    let typesarea=$("<div class=\"col-xs-6\" ></div>");
+    let relationsarea=$("<div class=\"col-xs-6\" ></div>");
+    //list.addClass("list-unstyled");
+    temp.append(typesarea).append(relationsarea);
+    typesarea.append(types); relationsarea.append(relations);
+
     types.append(foldButton+"<label class='container-check' for='entities'><input id='entities' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
         "      实体</label>").append(typeList);
     relations.append(foldButton+"<label class='container-check' for='relations'><input id='relations' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
@@ -206,16 +248,16 @@ svgObj.prototype.freshFilter = function(){
     for(let value of this.valuelist.entity)
     {
         //console.log(value);
-        let ventity=value.split(/\s+/)[0];
-        let vtype=value.split(/\s+/)[1];
+        let ventity=value.split('\t')[0];
+        let vtype=value.split('\t')[1];
         let entities,entityList;
         entities=typeList.children("[value='"+vtype+"']");
         if(entities.length>0) {
             entityList=entities.children("ul");
         }else {
             entities=$("<li></li>");
-            entityList=$("<ul></ul>");
-            entities.append(foldButton+"<label class='container-check' for='type"+vtype+"'><input id='type"+vtype+"' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
+            entityList=$("<ul style=\"display:none\"></ul>");
+            entities.append(hideButton+"<label class='container-check' for='type"+vtype+"'><input id='type"+vtype+"' type='checkbox' class='filter-checkbox' checked><span class='checkmark'></span>\n" +
                 vtype+"</label>").append(entityList);
             entities.attr("value",vtype);
             typeList.append(entities);
@@ -225,6 +267,7 @@ svgObj.prototype.freshFilter = function(){
             "                <input id='entity"+ventity+"'class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
             "                <span class='checkmark'></span>\n" +
                 ventity+"</label>            </li>");
+        if(this.mutelist.entity.has(value)) $('.filter-checkbox.entity#entity'+ventity).trigger('click');
 
     }
     for(let value of this.valuelist.relation)
@@ -234,8 +277,13 @@ svgObj.prototype.freshFilter = function(){
             "                <input id='relation"+value+"'class=\"filter-checkbox relation\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
             "                <span class='checkmark'></span>\n" +
             value+"</label>            </li>");
+        if(this.mutelist.relation.has(value)) $('.filter-checkbox.relation#relation'+value).trigger('click');
     }
-    temp.append(list);
+    $('.filter-checkbox.entity:first').trigger('click');
+    $('.filter-checkbox.entity:first').trigger('click');
+    $('.filter-checkbox.relation:first').trigger('click');
+    $('.filter-checkbox.relation:first').trigger('click');
+    //temp.append(list);
 }
 
 svgObj.prototype.drawRelations = function(centX, centY, r, R, relations, startAngle = 0, tmpModel = instance_model){
@@ -389,6 +437,7 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             if (data.dataType) dataType = data.dataType;
             return dataType
         })
+        .attr("datatext",data.value);
         //.append("circle")
         //.attr("r", r)
     //绘制图元
@@ -413,6 +462,7 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
     }
     //添加文本
     if(type=="relation" && data.value.length>2) {
+    //if(data.value.length>2){
         this.svg.select("[id='" + data.id+"']")
             .append("text")
             .text(data.value[0]+data.value[1])
@@ -425,13 +475,15 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             .attr("font-size", "12px")
             .attr("text-anchor", "middle")
             .attr("dy", "1em");
+
     }else{
-        this.svg.select("[id='" + data.id+"']")
-            .append("text")
-            .text(data.value)
-            .attr("font-size", "12px")
-            .attr("text-anchor", "middle")
-            .attr("dy", "0.4em");
+        // this.svg.select("[id='" + data.id+"']")
+        //     .append("text")
+        //     .text(data.value)
+        //     .attr("font-size", "12px")
+        //     .attr("text-anchor", "middle")
+        //     .attr("dy", "0.4em");
+        ellipsisDisplay(this.svg.select("[id='" + data.id+"']"),5,4,data.value);
     }
     //核心节点
     if (isCenter) {
@@ -566,11 +618,11 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
                     let tmpRole = tmpModel.relations[relationId].roles[roleIndex1];
                     if(data.isEntity(tmpRole.node_id,tmpModel)){
                         if(this.valuelist.fresh) {
-                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0]);
+                            this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0]);
                             //这里选用实体的第一个tag作为它的类型
                         }
                         else{
-                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+" "+tmpModel.nodes[tmpRole.node_id].tags[0])){
+                            if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0])){
                                 toShowE = true;
                             }
                         }
@@ -850,6 +902,8 @@ svgObj.prototype.rcmdDestroy = function(){
         tmpLen: 0,          //当前图谱中，节点连接关系的个数
         rcmdLen: 0,         //推荐中，节点连接关系的个数
         wholeLen: 0,        //=tmpLen+rcmdLen
+        jumpLen: this.rcmd.jumpLen,
+        showLen: this.rcmd.showLen,
     }
 }
 
