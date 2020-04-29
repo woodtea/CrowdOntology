@@ -787,6 +787,12 @@ $(function () {
                 item = $("#roles").children().last();
                 setRelationRoleValueTypeahead(item, entities, centerId);
             }
+            //对《新冠政策知识图谱》进行特殊处理，保证"当前政策"在前
+            if (project.substring(0,8) == "新冠政策知识图谱") {
+                if ($("#roles").children().eq(1).children("span").eq(0).attr("value") == "当前政策") {
+                    $("#roles").children().eq(1).prependTo("#roles");
+                }
+            }
         }
         //默认填充当前节点
         let centerTag = instance_model.nodes[centerId].tags[0];
