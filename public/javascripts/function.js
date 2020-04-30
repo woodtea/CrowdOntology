@@ -8,6 +8,8 @@ var indexMutex = false;
 var faEditClicked = false; //很不好
 var isRevise = false; //很不好
 var switching = false; //不好
+var defaultLocalRec = true; //默认局部推荐 开
+var defaultGlobalRec = false; //默认全局推荐 关
 
 $(function () {
 
@@ -28,10 +30,20 @@ $(function () {
         switching=true;
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
-            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐
+            //if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐 //严重怀疑，一条好像不需要
+            if ($(".btn.recommend").hasClass("active")) {//当前是推荐的状态的话先关闭推荐 //严重怀疑，一条好像不需要
+                $(".btn.recommend").removeClass("active");
+                $(".btn.change-btn").hide();
+            }
 
-            $("svg.local").hide()
+            $("svg.local").hide();
+            if(defaultGlobalRec) {// 根据defult判断是否推荐
+                $(".btn.recommend").addClass("active");
+                network.recommend = true;
+            }
             network.setData();
+            network.recommend = false;
+
             $("div.global").show();
             let item = $(index).find(".active");
             let id = $(item).children(".nodeId").attr("value");
@@ -43,11 +55,21 @@ $(function () {
             $(".btn.filter-btn").hide();
         } else {
             //局部图谱
-            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").removeClass('active') //关掉全局图谱推荐状态
+            if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").removeClass('active') //关掉全局图谱推荐状态//严重怀疑，一条好像不需要
             $("div.global").hide()
             //$("svg.local").show()
             $("svg.local").css("display", "block");
             $(".btn.filter-btn").show();
+
+            if(defaultLocalRec & d3.select(".entity.center").classed("isRecommendation") == false) {// 根据defult判断是否推荐
+                $(".btn.recommend").addClass("active");
+                $(".btn.change-btn").show();
+                let nodeId = $(".entity.center").attr("id");
+                let node = {}
+                node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+                //console.log(node);
+                connection.io_recommend_insModel_node(node);
+            }
         }
         switching = false;
     })
@@ -57,10 +79,12 @@ $(function () {
         {//全局图谱
             if ($(this).hasClass("active")) {
                 $(this).removeClass("active");
+                if(!switching) defaultGlobalRec = false; //非转换状态下，重新定义默认推荐
                 network.recommend = false;
                 network.setData();
             } else {//全局图谱推荐
                 $(this).addClass("active");
+                if(!switching) defaultGlobalRec = true; //非转换状态下，重新定义默认推荐
                 network.recommend = true;
                 network.setData();
                 network.recommend = false;
@@ -70,11 +94,13 @@ $(function () {
             //局部图谱
             if ($(this).hasClass("active")) {
                 //$(this).removeClass("active");
+                if(!switching) defaultLocalRec = false;  //非转换状态下，重新定义默认推荐
                 let rcmdNode = $(".entity.center.isCentralized");
                 if (!$(rcmdNode).length) $(".entity.center").trigger("dblclick");
                 $(".change-btn").hide();
             } else {//推荐时需要显示局部图谱
                 //$(this).addClass("active");
+                if(!switching) defaultLocalRec = true;  //非转换状态下，重新定义默认推荐
                 showLocal();
                 checkRcmd = true;
                 let rcmdNode = $(".entity.center.isCentralized");
@@ -159,7 +185,16 @@ $(function () {
         let id= svg.centerNode.id;
         if($(".btn.recommend").hasClass("active"))
         {
-            svg.drawRecommendation(id);
+            if ($(".entity.center").attr("id") == id){  //如果就是当前推荐的话，直接画
+                svg.drawRecommendation(id);
+            }
+            else {  //如果是非当前元素的话，先画元素；然后再画推荐
+                svg.drawEntity(id);
+                let node = {}
+                node[id] = eval('(' + JSON.stringify(instance_model.nodes[id]) + ')');
+                connection.io_recommend_insModel_node(node);
+                svg.drawRecommendation(id);
+            }
         }else{
             svg.drawEntity(id);
         }
@@ -272,10 +307,9 @@ $(function () {
 
     //单击节点
     $(document).on("click", 'g.entity', function () {
-
         svg.svg.selectAll("g.relation").classed("active", false);
         svg.svg.selectAll("path").classed("active", false);
-        $(".btn.recommend").removeClass("active");
+        //$(".btn.recommend").removeClass("active"); //保持原来的推荐状态
         let item = this;
         if (d3.select(this).classed("isRecommendation") == true) {
             clickTimeout.set(function () {
@@ -296,6 +330,7 @@ $(function () {
                 }
             });
         }
+        $(".popover.fade.right.in").hide(); //隐藏不必要的popover
     })
 
     $(document).on("click", 'g.relation', function () {
@@ -363,11 +398,12 @@ $(function () {
         } else {
             clickTimeout.clear();
 
-            if (d3.select(this).classed("isCentralized") == false) {
+            if (d3.select(this).classed("isCentralized") == false) {//推荐状态的节点
+                if (d3.select(this).classed("center") == true)
+                    $(".btn.recommend").removeClass("active");    //保持推荐状态
                 $(this).trigger("click");
-                $(".btn.recommend").removeClass("active");
                 return;
-            } else {
+            } else {//非推荐状态
                 $(".btn.recommend").addClass("active");
                 let nodeId = $(this).attr("id");
                 let node = {}
@@ -750,6 +786,12 @@ $(function () {
 
                 item = $("#roles").children().last();
                 setRelationRoleValueTypeahead(item, entities, centerId);
+            }
+            //对《新冠政策知识图谱》进行特殊处理，保证"当前政策"在前
+            if (project.substring(0,8) == "新冠政策知识图谱") {
+                if ($("#roles").children().eq(1).children("span").eq(0).attr("value") == "当前政策") {
+                    $("#roles").children().eq(1).prependTo("#roles");
+                }
             }
         }
         //默认填充当前节点

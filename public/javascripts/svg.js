@@ -118,9 +118,6 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
     this.drawRelations(this.width / 2, this.height / 2, this.r, this.R, entity.relations, 0, tmpModel);
     this.svgBringAllToFront();
 
-
-
-
     return true;
 }
 
