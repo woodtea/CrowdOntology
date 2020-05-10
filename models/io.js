@@ -88,7 +88,8 @@ function ioConfig(server){
                     });*/
                     console.log("insModel")
                     dm.handle(msg, function(rep){
-                        console.log(rep)
+                        //console.log(rep)
+                        //printInsmodel(msg,rep);
                         logger.trace(JSON.stringify(rep))
                         return socket.emit("insModel",rep);
                     });
@@ -1955,3 +1956,37 @@ function create_event_project(socket,projectName="新冠热点事件图谱")
 }
 
 module.exports = ioConfig;
+
+function printInsmodel(msg,rep)
+{
+    let nodes = rep.nodes;
+    let relations = rep.relations;
+    let user = msg.user_id;
+    let fresult="";
+    console.log('heyman');
+    //console.log(rep);
+    for(let key in nodes)
+    {
+        let node = nodes[key];
+        console.log(node);
+        if(node.tags[0]=='国家政策事件'&&node.value!="")
+        {
+            console.log('writenode');
+            fresult+=(user+'\t'+node.value+'\t'+key+'\n')
+        }
+    }
+    //console.log(relations);
+    for(let key in relations) {
+        let relation = relations[key];
+        let type = relation.type;
+        //console.log(type);
+        if (type != '政策依据' && type != '前期政策') continue;
+        let thisone, otherone;
+        for (let role of relation.roles) {
+            if (role.rolename == '当前政策') thisone = nodes[role.node_id].value;
+            else otherone = nodes[role.node_id].value;
+        }
+        if (thisone != "" && otherone != "") fresult+=(user + '\t' + type + '\t' + thisone + '\t' + otherone + '\t' + key+'\n');
+    }
+    fs.writeFileSync('../data/'+user+'.log',fresult);
+}

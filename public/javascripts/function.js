@@ -165,11 +165,34 @@ $(function () {
         $(".filter-checkbox.entity:checkbox").each(function(){
             if($(this).prop("checked")){
                 svg.valuelist.entity.add($(this).attr("value"));
-                svg.mutelist.entity.delete($(this).attr("value"));
+                //svg.mutelist.entity.delete($(this).attr("value"));
+                if(svg.mape2r!=undefined)
+                {
+                    if(svg.mape2r[$(this).attr("value")]!=undefined)
+                    {
+                        for(let r of svg.mape2r[$(this).attr("value")])
+                        {
+                            network.muterelations.delete(r);
+                        }
+                    }
+                }
             }
             else
             {
-                svg.mutelist.entity.add($(this).attr("value"));
+                //if(!svg.mutelist.entity.has($(this).attr("value")))
+                {
+                    if(svg.mape2r!=undefined)
+                    {
+                        if(svg.mape2r[$(this).attr("value")]!=undefined)
+                        {
+                            for(let r of svg.mape2r[$(this).attr("value")])
+                            {
+                                network.muterelations.add(r);
+                            }
+                        }
+                    }
+                }
+                //svg.mutelist.entity.add($(this).attr("value"));
             }
         });
         $(".filter-checkbox.relation:checkbox").each(function(){
