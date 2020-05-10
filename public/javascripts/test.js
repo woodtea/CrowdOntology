@@ -1,3 +1,29 @@
+outputPolicy = function(){
+    let nodes = instance_model.nodes;
+    let relations = instance_model.relations;
+    for(let key in nodes)
+    {
+        let node = nodes[key];
+        if(node.tags[0]=='国家政策事件'&&node.value!="") console.log(user+'\t'+node.value+'\t'+key)
+    }
+    //console.log(relations);
+    for(let key in relations)
+    {
+        let relation = relations[key];
+        let type = relation.type;
+        //console.log(type);
+        if(type!='政策依据'&&type!='前期政策') continue;
+        let thisone,otherone;
+        for(let role of relation.roles)
+        {
+            if(role.rolename=='当前政策') thisone=nodes[role.node_id].value;
+            else otherone=nodes[role.node_id].value;
+        }
+        if(thisone!=""&&otherone!="") console.log(user+'\t'+type+'\t'+thisone+'\t'+otherone+'\t'+key);
+    }
+}
+
+
 testFunc = function(){
     //吴京
     entity0 = {

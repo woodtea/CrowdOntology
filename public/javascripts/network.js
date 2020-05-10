@@ -54,6 +54,8 @@ function networkObj() {
     });
 
     this.recommend = false;
+
+    this.muterelations = new Set();
 }
 
 networkObj.prototype.setData = function () {
@@ -65,6 +67,7 @@ networkObj.prototype.showNodeDetail = function (nodeId) {
     //$("#modalNetwork").modal('hide')
     svg.drawEntity(nodeId, instance_model); //画出中心区域
     //$("#" + nodeId).trigger("click"); //这条好像不需要
+    drawNodeDetails(nodeId);
     showLocal();
 }
 
@@ -174,6 +177,7 @@ networkObj.prototype.getData = function () {
             // node[id] = eval('(' + JSON.stringify(instance_model.nodes[id]) + ')');
             // connection.io_recommend_insModel_node(node);
             out:for (let relationId in recommend_model.relations) {
+                if(this.muterelations.has(relationId)) continue;
                 for (let roleIndex in recommend_model.relations[relationId].roles) {
                     if (id == recommend_model.relations[relationId].roles[roleIndex].node_id) {
                         width=5;

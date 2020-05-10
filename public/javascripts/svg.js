@@ -35,18 +35,18 @@ function svgObj(svg=""){
         }
     }
     this.mutelist = { //过滤列表，保持筛选器记忆
-        entity: new Set(),
+        //entity: new Set(),
         relation: new Set()
     }
-    let muterelations=['政策成文日期','政策对象','政策落款','政策有关事项','政策内容'];
-    for(let r of muterelations)
-    {
-        if(project=='新冠政策知识图谱')
-        {
-            this.mutelist.relation.add(r);
-        }
-    }
-
+    // let muterelations=['政策成文日期','政策对象','政策落款','政策有关事项','政策内容'];
+    // for(let r of muterelations)
+    // {
+    //     if(project=='新冠政策知识图谱')
+    //     {
+    //         this.mutelist.relation.add(r);
+    //     }
+    // }
+    this.mape2r={};
 }
 
 svgObj.prototype.initSVG = function(){//好像从来没用过
@@ -92,6 +92,8 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
     if(this.valuelist.fresh) this.valuelist.init();
 
+    this.mape2r = undefined;
+
     let entity = this.getEntity(id, tmpModel);
     if (entity == undefined) return false;  //如果不是实体的话
 
@@ -123,8 +125,13 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
 svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
-    if(this.valuelist.fresh) this.valuelist.init();
+    if(this.valuelist.fresh)
+    {
+        this.valuelist.init();
+        this.mape2r = {};
+    }
     if(this.rcmd.fresh) this.rcmd.jumpLen=0;
+
 
     let entity1 = this.getEntity(id, rcmdModel);
     if (entity1 == undefined) return false;  //如果不是实体的话
@@ -177,15 +184,16 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     }
 
     let tmpLen = getJsonLength(entity2.relations);
-    let jumpLen=this.rcmd.jumpLen,showLen=this.rcmd.showLen;
+    let jumpLen=this.rcmd.jumpLen,showLen=this.rcmd.showLen,fresh=this.rcmd.fresh;
     this.rcmd = {
         isRcmd: true,
         drawRcmd: false,
         tmpLen: tmpLen,
         rcmdLen: rcmdLen,
         wholeLen: tmpLen+rcmdLen,
-        jumpLen: this.rcmd.jumpLen,
-        showLen: this.rcmd.showLen,
+        jumpLen: jumpLen,
+        showLen: showLen,
+        fresh: fresh
     }
 
 
@@ -264,7 +272,7 @@ svgObj.prototype.freshFilter = function(){
             "                <input id='entity"+ventity+"'class=\"filter-checkbox entity\" type=\"checkbox\" value=\""+value+"\" checked>\n" +
             "                <span class='checkmark'></span>\n" +
                 ventity+"</label>            </li>");
-        if(this.mutelist.entity.has(value)) $('.filter-checkbox.entity#entity'+ventity).trigger('click');
+        //if(this.mutelist.entity.has(value)) $('.filter-checkbox.entity#entity'+ventity).trigger('click');
 
     }
     for(let value of this.valuelist.relation)
@@ -617,6 +625,12 @@ svgObj.prototype.getEntity = function(id, tmpModel = instance_model) {
                         if(this.valuelist.fresh) {
                             this.valuelist.entity.add(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0]);
                             //这里选用实体的第一个tag作为它的类型
+                            if(tmpModel==recommend_model&&this.mape2r!=undefined)
+                            {
+                                let nodevalue = tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0];
+                                if(this.mape2r[nodevalue]==undefined) this.mape2r[nodevalue]=[];
+                                this.mape2r[nodevalue].push(relationId);
+                            }
                         }
                         else{
                             if(this.valuelist.entity.has(tmpModel.nodes[tmpRole.node_id].value+"\t"+tmpModel.nodes[tmpRole.node_id].tags[0])){
@@ -901,6 +915,7 @@ svgObj.prototype.rcmdDestroy = function(){
         wholeLen: 0,        //=tmpLen+rcmdLen
         jumpLen: this.rcmd.jumpLen,
         showLen: this.rcmd.showLen,
+        fresh: this.rcmd.fresh
     }
 }
 
