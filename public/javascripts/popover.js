@@ -17,18 +17,6 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
 
 $('[data-popover="popover"]').popover()
 
-$(document).on("mouseover",".ellipsis",function(){
-    $(this).popover({
-        "animation": true,
-        "trigger": "hover",
-        "container": 'body',
-        "html": true,
-        "content": $(this).attr('datatext')
-    })
-    $(this).popover("show")
-})
-
-
 $(document).on("mouseover", '.showPopover li', function () {
 
     let nodeId = data.getEntityIdByValue($(this).text())[0];
@@ -48,6 +36,41 @@ $(document).on("mouseover", '.showPopover li', function () {
 })
 
 $(document).on("mouseover", '.entity.isRecommendation', function () {
+
+    let id = $(this).attr('id');
+    id = id.split("-")["0"];
+    let content = generatePoperContent(id,recommend_model);
+
+    console.log(content)
+
+    $(this).popover({
+        "animation": true,
+        "title": "详情",
+        "trigger": "hover",
+        "placement": "left",
+        "container": 'body',
+        "html": true,
+        "content": content
+    })
+
+    $(this).popover("show")
+})
+
+$(document).on("mouseover",".ellipsis",function(){
+    // 放在.entity.isRecommendation之后，优先显示ellipsis内容
+    $(this).popover({
+        "animation": true,
+        "trigger": "hover",
+        "container": 'body',
+        "html": true,
+        "content": $(this).attr('datatext')
+    })
+    $(this).popover("show")
+})
+
+$(document).on("click", '.entity.isRecommendation', function () {
+
+    alert("click")
 
     let id = $(this).attr('id');
     id = id.split("-")["0"];
@@ -168,3 +191,4 @@ popoverHide = function(){
 $(document).on("click", '.popover', function () {
     $(this).hide();
 })
+
