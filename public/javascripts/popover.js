@@ -68,27 +68,6 @@ $(document).on("mouseover",".ellipsis",function(){
     $(this).popover("show")
 })
 
-$(document).on("click", '.entity.isRecommendation', function () {
-
-    alert("click")
-
-    let id = $(this).attr('id');
-    id = id.split("-")["0"];
-    let content = generatePoperContent(id,recommend_model);
-
-    $(this).popover({
-        "animation": true,
-        "title": "详情",
-        "trigger": "hover",
-        "placement": "left",
-        "container": 'body',
-        "html": true,
-        "content": content
-    })
-
-    $(this).popover("show")
-})
-
 $(document).on("mouseover", '.rcmdMask', function () {
     $(this).popover({
         "animation": true,

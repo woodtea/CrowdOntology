@@ -338,6 +338,7 @@ $(function () {
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
                 //alert("双击节点可以直接节点与对应关系");
+                // 就是这里
             });
         } else {
             clickTimeout.set(function () {
@@ -402,6 +403,36 @@ $(function () {
         let nodeId = $(item).find(".nodeId").attr("value");
         showLocal();
         $("#" + nodeId).click();    //点击中心节点
+    })
+
+    // 响应推荐事件
+    // $(document).on("click", '.entity.isRecommendation', function () {
+    $(document).on("click", 'g.isRecommendation', function () {
+        // 初始化
+        let item = $("#modalRec .modal-body")
+        let id = $(this).attr("id");
+
+        clickTimeout.set(function () {
+
+            $(item).children().remove();
+
+            let ids = id.split("-");
+            let nodeId = ids[0]
+            let relationId = ids[ids.length - 1];
+
+            // 获取构建信息
+            rcmd_pending = detail.getRecommendationDetail(relationId)
+            // let content = detail.getRecommendationContent(relationId, rcmd_pending)
+            content = detail.getRecommendationContentEntity(relationId, rcmd_pending)
+            content += detail.getRecommendationContentRel(relationId, rcmd_pending)
+            $(item).append(content)
+
+            // 获取推荐实体信息
+            // content = generatePoperContent(nodeId,recommend_model);
+            // $(item).append(content)
+
+            $("#modalRec").modal("show")
+        });
     })
 
     //双击节点
