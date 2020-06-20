@@ -748,25 +748,16 @@ detailObj.prototype.filterRelations = function (rawRelations,centerId,tmpModel=i
     return relations;
 }
 
-detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recommend_model) {
-
-    isGetRcmd = true;
-    svgPending = 0;
-
-    popoverHide();
-
+detailObj.prototype.getRecommendationDetail = function (relationId, tmpModel = recommend_model) {
+    console.log(tmpModel)
     if (tmpModel.relations[relationId] == undefined) {
         console.log("citeRecommendation error!");
         return;
     }
 
-    let entitiesStr = "";
-    let nodesStr = "";
-    let relationsStr = "";
-
-    rcmd_pending = {
+    let rcmd_pending = {
         "entities": [],
-        "nodes": {},
+        "nodes": {},    //其实nodes也可以有多个的
         "relations": {}
     }
 
@@ -777,9 +768,6 @@ detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recomm
         let nodeId = tmpModel.relations[relationId].roles[i].node_id;   //找到每一个承担者
 
         if (instance_model["nodes"][nodeId] == undefined) {   //不存在节点的话创建
-
-            relationsStr += recommend_model["nodes"][nodeId].value + ","
-
             if (data.isEntity(nodeId, recommend_model)) {//是实体节点，需要创建3重信息
                 let value = recommend_model["nodes"][nodeId].value
                 let entity = {
@@ -789,55 +777,195 @@ detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recomm
                     valueId: generateFrontNodeID(value, "v"),
                     relationId: generateFrontRelationID(relationIdShift++)
                 }
-                //connection.io_create_insModel_entity(entity);
-                entitiesStr += value + ",";
                 rcmd_pending.entities.push(entity);
                 svgPending++;//每个实体都会有主属性的关系
             } else {//不是实体节点，需要创建节点信息
                 let value = recommend_model["nodes"][nodeId].value
                 let nodes = {};
-                //let nodeId = generateFrontNodeID(value);
                 nodes[nodeId] = {
                     "dataType": recommend_model["nodes"][nodeId].tags,
                     "value": value
                 }
-                //connection.io_create_insModel_node(nodes)
-                nodesStr += value + ",";
                 rcmd_pending.nodes = nodes;
             }
-        } else {
-            relationsStr += instance_model["nodes"][nodeId].value + ","
         }
     }
 
     //创建关系
     let relations = {};
     relations[relationId] = tmpModel.relations[relationId]
-    //connection.io_create_insModel_relation(relations);
-    relationsStr = " [" + tmpModel.relations[relationId].type + "] " + relationsStr;
     rcmd_pending.relations = relations;
     svgPending++;
 
-    $("#modalCiteRcmd .modal-body").children().remove();
-    let string = "";
-    if (entitiesStr.length > 0) {
-        string += "<p><b>实体: </b>" + entitiesStr.substring(0, entitiesStr.length - 1) + "</p>";
-    }
-    if (nodesStr.length > 0) {
-        string += "<p><b>属性: </b>" + nodesStr.substring(0, nodesStr.length - 1) + "</p>";
-    }
-    if (relationsStr.length > 0) {
-        string += "<p><b>关系: </b>" + relationsStr.substring(0, relationsStr.length - 1) + "</p>";
+    return rcmd_pending
+}
+
+detailObj.prototype.getRecommendationContentEntity = function (relationId, rcmd_pending, tmpModel = recommend_model) {
+
+    popoverHide()   // 避免问题
+
+    let content = ""
+
+    if (rcmd_pending.entities.length != 0){
+        entityStr = ""
+        for (entity in rcmd_pending.entities){
+            entityStr += entity.value + ","
+        }
+        content += "<h4>实体</h4><p>" + entityStr.substring(0, entityStr.length - 1) + "</p>";
     }
 
-    let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+    return content
+}
+
+detailObj.prototype.getRecommendationContentRel = function (relationId, rcmd_pending, tmpModel = recommend_model) {
+
+    popoverHide()   // 避免问题
+
+    let content = ""
+
+    if (rcmd_pending.relations.length != 0){
+        content += "<h4>关系: " + rcmd_pending.relations[relationId].type + "</h4>"
+
+        let roles = rcmd_pending.relations[relationId].roles
+        for (role of roles){
+            let nodeId = role["node_id"]
+            let value = recommend_model["nodes"][nodeId].value
+            if (instance_model["nodes"][nodeId] == undefined) {   //不存在节点的话创建
+                value = recommend_model["nodes"][nodeId].value
+            } else {
+                value = instance_model["nodes"][nodeId].value
+            }
+            content += "<p><b>" + role["rolename"] + "</b>:" + value + "</p>"
+        }
+    }
+
+    return content
+}
+
+
+detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recommend_model) {
+
+    console.log("双击事件:" + relationId)
+    // 回传后画面更新问题
+    isGetRcmd = true;   //跟显示图元有关
+    svgPending = 0; // 用于处理Cite时页面响应问题？
+
+    let item = $("#modalCiteRcmd .modal-body")
+    $(item).children().remove();
+
+    // 清空popover
+    popoverHide();
+    // 生成数据
+    rcmd_pending = this.getRecommendationDetail(relationId, tmpModel)
+    // content = this.getRecommendationContent(relationId, rcmd_pending, tmpModel)
+    content = this.getRecommendationContentEntity(relationId, rcmd_pending, tmpModel)
+    content += this.getRecommendationContentRel(relationId, rcmd_pending, tmpModel)
+
+    // 加入页面
+    let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>';
     html += '<h4>将要创建以下信息</h4>';
     html += '<br/>';
-    html += string
+    html += content
     html += '<br/>';
     html += '<h5>是否创建？</h5>';
 
-    $("#modalCiteRcmd .modal-body").append(html)
+    $(item).append(html)
     $("#modalCiteRcmd").modal("show");
 
 }
+
+
+
+// detailObj.prototype.citeRecommendation = function (relationId, tmpModel = recommend_model) {
+//
+//     isGetRcmd = true;
+//     svgPending = 0; // 用于处理Cite时页面响应问题？
+//
+//     popoverHide();
+//
+//     if (tmpModel.relations[relationId] == undefined) {
+//         console.log("citeRecommendation error!");
+//         return;
+//     }
+//
+//     let entitiesStr = "";
+//     let nodesStr = "";
+//     let relationsStr = "";
+//
+//     rcmd_pending = {
+//         "entities": [],
+//         "nodes": {},
+//         "relations": {}
+//     }
+//
+//     let relationIdShift = 0;
+//
+//     for (let i in tmpModel.relations[relationId].roles) {
+//
+//         let nodeId = tmpModel.relations[relationId].roles[i].node_id;   //找到每一个承担者
+//
+//         if (instance_model["nodes"][nodeId] == undefined) {   //不存在节点的话创建
+//
+//             relationsStr += recommend_model["nodes"][nodeId].value + ","
+//
+//             if (data.isEntity(nodeId, recommend_model)) {//是实体节点，需要创建3重信息
+//                 let value = recommend_model["nodes"][nodeId].value
+//                 let entity = {
+//                     tags: recommend_model["nodes"][nodeId].tags,
+//                     value: value,
+//                     nodeId: nodeId,
+//                     valueId: generateFrontNodeID(value, "v"),
+//                     relationId: generateFrontRelationID(relationIdShift++)
+//                 }
+//                 //connection.io_create_insModel_entity(entity);
+//                 entitiesStr += value + ",";
+//                 rcmd_pending.entities.push(entity);
+//                 svgPending++;//每个实体都会有主属性的关系
+//             } else {//不是实体节点，需要创建节点信息
+//                 let value = recommend_model["nodes"][nodeId].value
+//                 let nodes = {};
+//                 //let nodeId = generateFrontNodeID(value);
+//                 nodes[nodeId] = {
+//                     "dataType": recommend_model["nodes"][nodeId].tags,
+//                     "value": value
+//                 }
+//                 //connection.io_create_insModel_node(nodes)
+//                 nodesStr += value + ",";
+//                 rcmd_pending.nodes = nodes;
+//             }
+//         } else {
+//             relationsStr += instance_model["nodes"][nodeId].value + ","
+//         }
+//     }
+//
+//     //创建关系
+//     let relations = {};
+//     relations[relationId] = tmpModel.relations[relationId]
+//     //connection.io_create_insModel_relation(relations);
+//     relationsStr = " [" + tmpModel.relations[relationId].type + "] " + relationsStr;
+//     rcmd_pending.relations = relations;
+//     svgPending++;
+//
+//     $("#modalCiteRcmd .modal-body").children().remove();
+//     let string = "";
+//     if (entitiesStr.length > 0) {
+//         string += "<p><b>实体: </b>" + entitiesStr.substring(0, entitiesStr.length - 1) + "</p>";
+//     }
+//     if (nodesStr.length > 0) {
+//         string += "<p><b>属性: </b>" + nodesStr.substring(0, nodesStr.length - 1) + "</p>";
+//     }
+//     if (relationsStr.length > 0) {
+//         string += "<p><b>关系: </b>" + relationsStr.substring(0, relationsStr.length - 1) + "</p>";
+//     }
+//
+//     let html = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+//     html += '<h4>将要创建以下信息</h4>';
+//     html += '<br/>';
+//     html += string
+//     html += '<br/>';
+//     html += '<h5>是否创建？</h5>';
+//
+//     $("#modalCiteRcmd .modal-body").append(html)
+//     $("#modalCiteRcmd").modal("show");
+//
+// }
