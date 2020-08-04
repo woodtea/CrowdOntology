@@ -142,7 +142,14 @@ ioObj.prototype.init = function () {
                 break;
             case 'rcmd_entity':
                 that.io_recommend_insModel_entity_done(msg);
+                break;
             case 'report_rcmd':
+                that.io_normal_done(msg);
+                break;
+            case 'reject_relation':
+                that.io_reject_rcmdModel_relation_done(msg);
+                break;
+            default:
                 that.io_normal_done(msg);
                 break;
         }
@@ -167,7 +174,7 @@ ioObj.prototype.socketEmitArray = function (type, msg) {
     tagReformat.value2id(msg);
     this.tmpMsg.emit.push(msg);
     this.tmpMsg.type.push(type);
-    console.log(JSON.stringify(msg));
+    //console.log(JSON.stringify(msg));
     if (!this.socket_mutex) {
         this.socketEmit(type, msg)
     }
@@ -486,8 +493,33 @@ ioObj.prototype.generate_msg_base = function (user_id, projectId, operation) {
     }
     return msg;
 }
-
+ioObj.prototype.io_create_insModel_relation = function (relations) {
+    let msg = this.emitMsgHeader('create_relation');
+    msg["relations"] = relations;
+    this.socketEmitArray('insModel', msg);
+}
+ioObj.prototype.io_reject_rcmdModel_relation = function(relations){
+    let msg = this.emitMsgHeader('reject_relation');
+    msg['relations'] = relations;
+    this.socketEmitArray('insModel',msg);
+}
 /* socket on */
+/* rcmd model */
+ioObj.prototype.io_reject_rcmdModel_relation_done = function(msg)
+{
+    //TODO 模型重绘,暂时使用直接刷新的简单方案，优化效率请参考引用推荐关系
+    if (msg.error) {
+        return
+    } else {
+        this.tmpMsgPop(msg.operationId);
+        // $("g.entity.center").trigger("dblclick");
+        // $("g.entity.center").trigger("dblclick");
+        let nodeId = $('g.entity.center').attr("id");
+        let node = {}
+        node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+        connection.io_recommend_insModel_node(node);
+    }
+}
 /* model */
 ioObj.prototype.io_get_model_done = function (msg) {
     this.socket_mutex = false;

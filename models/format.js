@@ -45,6 +45,7 @@ formatExchange.prototype.web2Server = function(msg,type=""){
         case 'rcmdIndex':
             newMsg = format_recommend_insModel(msg);
             break;
+
     }
 
     return newMsg;

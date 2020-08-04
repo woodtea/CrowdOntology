@@ -125,6 +125,7 @@ svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
 svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, tmpModel = instance_model) {
 
+    //console.log('drawrcmd');
     if(this.valuelist.fresh)
     {
         this.valuelist.init();

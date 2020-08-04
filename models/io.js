@@ -151,6 +151,11 @@ function ioConfig(server){
                         return socket.emit("insModel",rep);
                     });
                     break;
+                case 'reject_relation':
+                    dm.handle(msg,function(rep){
+                        //logger.info() 先用公用的logger吧
+                        return socket.emit('insModel',rep);
+                    })
                 default:
                     socket.emit('insModel',msg);
                     break;
