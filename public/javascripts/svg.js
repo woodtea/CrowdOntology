@@ -88,9 +88,23 @@ svgObj.prototype.setSize = function () {
     this.zoomH = 1.75;
 }
 
+function record(id)
+{
+    let index = historylist.indexOf(id);
+    if(index!=-1) historylist.splice(index,1);
+    historylist.push(id);
+    if(historylist.length>10) historylist.shift();
+
+}
+
+
 svgObj.prototype.drawEntity = function(id, tmpModel = instance_model) {
 
-    if(this.valuelist.fresh) this.valuelist.init();
+    if(this.valuelist.fresh)
+    {
+        this.valuelist.init();
+        record(id);
+    }
 
     this.mape2r = undefined;
 
@@ -130,6 +144,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     {
         this.valuelist.init();
         this.mape2r = {};
+        record(id);
     }
     if(this.rcmd.fresh) this.rcmd.jumpLen=0;
 

@@ -85,7 +85,13 @@ DataManager.prototype.handle = function (msg, callback) {
                 break;
             case 'reject_relation':
                 this.rejectRelation(msg,callback);
-                brekal
+                break;
+            case 'recover_relation':
+                this.recoverRelation(msg,callback);
+                break;
+            case 'get_reject':
+                this.getReject(msg,callback);
+                break;
             case 'get_tags':
                 this.getTags(msg, callback);
                 break;
@@ -1258,8 +1264,7 @@ DataManager.prototype.removeRelation = function (msg, callback) {
         });
 }
 DataManager.prototype.rejectRelation =  function(msg,callback){
-    console.log('reject');
-    console.log(msg);
+
     var session = ogmneo.Connection.session();
     //i的node label 是inst， iof 的 node label 是inst_of
     //TODO 是否没有加入project的限定？ cui
@@ -1297,6 +1302,154 @@ DataManager.prototype.rejectRelation =  function(msg,callback){
             resp.msg = 'Success';
             resp.migrate = {};
             //resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+DataManager.prototype.rejectRelation =  function(msg,callback){
+
+    var session = ogmneo.Connection.session();
+    //i的node label 是inst， iof 的 node label 是inst_of
+    //TODO 是否没有加入project的限定？ cui
+    let reject_id;
+    for(let key in msg.relations)
+    {
+        reject_id = key;
+        break;
+    }
+
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (i:RelInst) WHERE id(i)={reject_id}\n\
+    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+    MERGE (u)-[:reject]->(iof)\n\
+    MERGE (u)-[:reject]->(i)'.format({
+        reject_id: reject_id
+    });
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project,
+            uname: msg.user
+
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            //resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
+DataManager.prototype.recoverRelation =  function(msg,callback){
+
+    var session = ogmneo.Connection.session();
+    //i的node label 是inst， iof 的 node label 是inst_of
+    let reject_id=msg.id;
+
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (i:RelInst) WHERE id(i)={reject_id}\n\
+    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+    MATCH (u)-[r1:reject]->(iof)\n\
+    MATCH (u)-[r2:reject]->(i)\n\
+    DELETE r1,r2'.format({
+        reject_id: reject_id
+    });
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project,
+            uname: msg.user
+
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            //resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+DataManager.prototype.getReject =  function(msg,callback){
+
+    var session = ogmneo.Connection.session();
+
+    var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (p)-[:has]->(role)<-[hr:has_role]-(rel)<-[:reject]-(u)\n\
+            MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
+            RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags'
+
+    var resp = {};
+    resp.error = false;
+    session
+        .run(relationCypher, {
+            pname: msg.project,
+            uname: msg.user
+        })
+        .then(function(res){
+            var relations = {};
+            var nodes = {};
+            for (var i = 0; i < res.records.length; i++){
+                var rec = res.records[i];
+                var rid = rec.get('rel').identity.toString();
+                var roles = rec.get('roles');
+                var role_tmp = [];
+                for (var j in roles){
+                    var rname = roles[j][0];
+                    var rnode = roles[j][1];
+                    var roleid = rnode.identity.toString();
+                    if (nodes[roleid] == undefined)
+                        nodes[roleid] = {};
+                    for (let k in rnode.properties){
+                        nodes[roleid][k] = rnode.properties[k];
+                    }
+                    // nodes[roleid] = rnode.properties;
+                    role_tmp.push({
+                        rolename: rname,
+                        node_id: roleid
+                    });
+                }
+                relations[rid] = rec.get('rel').properties;
+                relations[rid]['roles'] = role_tmp;
+                relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
+            }
+
+
+            session.close();
+            resp.msg = 'Success';
+            resp.nodes = nodes;
+            resp.relations = relations;
             callback(resp);
         })
         .catch(function (err) {

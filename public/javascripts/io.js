@@ -149,6 +149,9 @@ ioObj.prototype.init = function () {
             case 'reject_relation':
                 that.io_reject_rcmdModel_relation_done(msg);
                 break;
+            case 'get_reject':
+                that.io_get_reject_done(msg);
+                break;
             default:
                 that.io_normal_done(msg);
                 break;
@@ -503,6 +506,11 @@ ioObj.prototype.io_reject_rcmdModel_relation = function(relations){
     msg['relations'] = relations;
     this.socketEmitArray('insModel',msg);
 }
+ioObj.prototype.io_recover_relation = function(id){
+    let msg = this.emitMsgHeader('recover_relation');
+    msg['id'] = id;
+    this.socketEmitArray('insModel',msg);
+}
 /* socket on */
 /* rcmd model */
 ioObj.prototype.io_reject_rcmdModel_relation_done = function(msg)
@@ -518,6 +526,58 @@ ioObj.prototype.io_reject_rcmdModel_relation_done = function(msg)
         let node = {}
         node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
         connection.io_recommend_insModel_node(node);
+    }
+}
+ioObj.prototype.io_get_reject = function(){
+    let msg = this.emitMsgHeader('get_reject');
+    this.socketEmitArray('insModel',msg);
+}
+ioObj.prototype.io_get_reject_done = function(msg){
+    if (msg.error) {
+        return;
+    } else {
+        //alert(JSON.stringify(msg));
+        this.tmpMsgPop(msg.operationId);
+
+        let reject_model = {
+            "nodes": msg.nodes,
+            "relations": msg.relations
+        }
+        data.completeRcmdModel(reject_model);
+        //console.log(JSON.stringify(reject_model));
+        data.completeRcmdModel(reject_model,recommend_model);
+        //console.log(JSON.stringify(reject_model));
+        //todo 理论上并不能完全解决insmodel里缺失的情况下不全的问题，需要解决
+        //alert(JSON.stringify(reject_model));
+        //prepareNewEntity(reject_model, false);
+        //alert(JSON.stringify(reject_model));
+        let list= $('#reject-list');
+        list.empty();
+        let relations = reject_model.relations;
+        for(let key in relations)
+        {
+            let type = relations[key].type;
+            let content=$("<li ></li>");
+            let area=$('<div class="col-xs-12"></div>')
+            let rel=type+'：';
+            let flag = false
+            for(let role of relations[key].roles)
+            {
+                if(flag) rel+=',';
+                else flag= true;
+                let user = reject_model.nodes[role['node_id']].value;
+                rel+=user;
+            }
+            let text=$('<h5></h5>');
+            text.append(rel);
+            let button='<button class="btn btn-primary pull-right recover-reject btn-sm" value="'+key+'">恢复</button>'
+
+            content.append(area);
+            area.append(text)
+            area.append(button);
+            list.append(content);
+        }
+        return;
     }
 }
 /* model */
@@ -713,6 +773,7 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
     if (msg.error) {
         return;
     } else {
+
         this.tmpMsgPop(msg.operationId);
 
         recommend_model = {
@@ -720,8 +781,11 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
             "relations": msg.relations
         }
 
-        if(this.initmode==1)//初始化recommend_model以实现高亮
+        if(this.initmode==1)//初始化recommend_model以实现network高亮
         {
+            //alert(JSON.stringify(recommend_model));
+            data.completeRcmdModel(recommend_model);
+            prepareNewEntity(recommend_model, false);
             this.initmode=0;
             showGlobal();
         }
@@ -732,8 +796,10 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
             data.completeRcmdModel(recommend_model);
 
 
-
             prepareNewEntity(recommend_model, false);
+
+
+            //alert(JSON.stringify(recommend_model));
 
             // for(key in recommend_model.nodes)
             // {

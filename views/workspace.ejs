@@ -1,5 +1,6 @@
 <!--div class="row search-row" style="padding:10px"></div-->
 <div class="row graph-row">
+  <!--div class="col-xs-2 left-content"></div-->
   <div class="col-xs-9" >
     <div class="middle-content" style="border:1px solid;">
       <div class="row" style="margin-top: 8px;padding-left: 5px;padding-right: 5px" >
@@ -20,11 +21,6 @@
                 </div>
                 <div class="modal-body">
                   <div class="filter-panel row"></div>
-                  <!--div class="checkbox">
-                    <label>
-                      <input type="checkbox" checked> 请打勾
-                    </label>
-                  </div-->
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default filter-cancel" data-dismiss="modal">取消</button>
@@ -37,7 +33,7 @@
           <!-- TODO 可能会引起全屏布局问题-->
         </div>
         <div class="col-xs-4 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
-        <div class="col-xs-3 col-md-offset-1">
+        <div class="col-xs-4">
           <div class="input-group showPopover" style="margin:auto;">
             <input type="text" class="form-control typeahead" id="stigmod-search-left-input" placeholder="Search">
             <span class="input-group-btn">
@@ -45,11 +41,33 @@
                 <button class="btn btn-default" type="button" id="stigmod-add-left-btn" data-popover="popover"><span class="fa fa-plus" aria-hidden="true"></span></button>
                 <!--button class="btn btn-default" type="button" id="stigmod-search-left-btn" data-tooltip="tooltip" data-placement="top" title="搜索"><span class="glyphicon glyphicon-search"></span></button>
                 <button type="button" class="btn btn-default" style="width: 40px" data-tooltip="tooltip" data-placement="top" title="实体新建" content='123'><span class="fa fa-plus" aria-hidden="true" type="class"></span></button>
-                <!--div class="btn-group">
+                < div class="btn-group">
                   <button type="button" class="btn btn-default" aria-label="Index" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" data-tooltip="tooltip" data-placement="top" title="实体索引"><span class="glyphicon glyphicon-list"></span></button>
                   <ul class="dropdown-menu index" style="max-height:320px;overflow:auto;"></ul>
                 </div-->
-                <button class="btn btn-default" type="button" id="stigmod-fullscreen-btn" title="全屏"><span class="glyphicon glyphicon-fullscreen"></span></button>
+                <!--button class="btn btn-default" type="button" id="stigmod-fullscreen-btn" title="全屏"><span class="glyphicon glyphicon-fullscreen"></span></button-->
+                <button class="btn btn-default" type="button" id="stigmod-mute-btn" title="屏蔽列表" data-toggle="modal" data-target="#mute-window"><span class="glyphicon glyphicon-ban-circle"></span></button>
+                <div class="modal fade" id="mute-window" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-custom">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                      <h4 class="modal-title" id="myModalLabel">屏蔽列表</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mute-panel row">
+                        <ul id="reject-list" style="margin: 0px;padding: 0px">
+                        </ul>
+                      </div>
+                    </div>
+
+                  </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+                </div>
+                <button class="btn btn-default dropdown-toggle" type="button" id="stigmod-history-btn" title="历史记录" data-toggle="dropdown"><span class="glyphicon glyphicon-time" ></span></button>
+                <ul class="dropdown-menu" id="history-list" role="menu">
+                     <li class="historyitem" value="344"><a>刘镇伟</a></li>
+                </ul>
             </span>
           </div>
         </div>

@@ -16,6 +16,7 @@ if(groupB.indexOf(user) != -1) {
     console.log("Group B")
     project= $("#project").text()+'groupb';
 }
+var historylist = [];
 //model
 var instance_model = {nodes: {}, relations: {}}
 var model = {nodes: {}, relations: {}}

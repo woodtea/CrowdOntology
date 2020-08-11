@@ -26,6 +26,52 @@ $(function () {
         }
     })
 
+    $(document).on("click", '#stigmod-history-btn', function () {
+        let list = $('#history-list');
+        list.empty();
+        for(let i=historylist.length-1;i>=0;i--)
+        {
+            let id = historylist[i];
+            if(instance_model.nodes[id]==undefined) continue;
+            let value = instance_model.nodes[id].value;
+            let content= ' <li class="historyitem" value="'+id+'"><a>'+value+'</a></li> ';
+            list.append(content);
+        }
+    })
+
+    $(document).on('click','.historyitem',function(){
+        let id = $(this).attr('value');
+        clickTimeout.set(function () {
+            if (instance_model.nodes[id] == undefined) {//这个是要干嘛??
+                $(".properties-revise .button-left").click();
+                $(properties).children().remove();
+                detail.drawIndex();
+                svg.drawEntity(id);
+
+            } else {//大多数时候执行这个
+                drawNodeDetails(id);
+            }
+        });
+    })
+
+    $('#mute-window').on('show.bs.modal', function () {
+        connection.io_get_reject();
+    })
+
+    $('#mute-window').on('hide.bs.modal',function(){
+        //TODO 模型重绘,暂时使用直接刷新的简单方案，优化效率请参考引用推荐关系
+        let nodeId = $('g.entity.center').attr("id");
+        let node = {}
+        node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+        connection.io_recommend_insModel_node(node);
+    })
+
+    $(document).on("click", ".btn.recover-reject", function () {
+        connection.io_recover_relation($(this).attr('value'));
+        $(this).prop('disabled',true);
+    })
+
+
     $(document).on("click", ".btn-group.workspace", function () {
         switching=true;
         if ($(this).children(".btn-default").hasClass("off")) {
@@ -380,6 +426,7 @@ $(function () {
                     $(properties).children().remove();
                     detail.drawIndex();
                     svg.drawEntity(id);
+
                 } else {//大多数时候执行这个
                     drawNodeDetails(id);
                 }

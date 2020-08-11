@@ -154,8 +154,21 @@ function ioConfig(server){
                 case 'reject_relation':
                     dm.handle(msg,function(rep){
                         //logger.info() 先用公用的logger吧
+                        msg2rep(rep,msg);
                         return socket.emit('insModel',rep);
                     })
+                    break;
+                case 'recover_relation':
+                    dm.handle(msg,function(rep){
+                        msg2rep(rep,msg);
+                        return socket.emit('insModel',rep);
+                    })
+                case 'get_reject':
+                    dm.handle(msg,function(rep){
+                        msg2rep(rep,msg);
+                        return socket.emit('insModel',rep)
+                    })
+                    break;
                 default:
                     socket.emit('insModel',msg);
                     break;
@@ -504,6 +517,11 @@ function ioConfig(server){
     });
 }
 
+function msg2rep(rep,msg)
+{
+    rep.operation=msg.operation;
+    rep.operationId=msg.operationId;
+}
 
 function reviseMsg(msg){
 /*

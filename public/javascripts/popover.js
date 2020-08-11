@@ -14,10 +14,20 @@ $('#stigmod-add-left-btn[data-popover="popover"]').popover({
     // "content":'<div class="btn-group" data-toggle="buttons"><label class="btn btn-primary active"> <input type="checkbox" autocomplete="off" checked>实体</label><label class="btn btn-primary"><input type="checkbox" autocomplete="off">关系</label></div>'
 })
 
+// $('#stigmod-history-btn').popover({
+//     "animation": true,
+//     "trigger": "focus",
+//     "placement": "bottom",
+//     "container": 'body',
+//     'min-width': '2000px',
+//     "html": true,
+//
+// })
+
 
 $('[data-popover="popover"]').popover()
 
-$(document).on("mouseover", '.showPopover li', function () {
+$(document).on("mouseover", '.showPopover.li', function () {
 
     let nodeId = data.getEntityIdByValue($(this).text())[0];
     let content = generatePoperContent(nodeId);
