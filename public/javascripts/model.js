@@ -100,11 +100,14 @@ modelObj.prototype.getAttrTags = function (nodeId, attribute) {
     return ["String"];
 }
 
-modelObj.prototype.isEntity = function (id, model = instance_model) {
+modelObj.prototype.isEntity = function (id, model = instance_model, alertmode=true) {
 
     if (model.nodes[id] == undefined) {
-        console.log("Alert: entity not found!")
-        console.log("entity id:" + id);
+        if(alertmode)
+        {
+            console.log("Alert: entity not found!")
+            console.log("entity id:" + id);
+        }
         return;
     }
     if (model.nodes[id].tags == undefined) return; //数据结构异常

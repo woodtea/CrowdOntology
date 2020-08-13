@@ -230,7 +230,20 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
 
     this.rcmdDestroy();
 
-
+    $('g.entity.isRecommendation').contextmenu({
+        target:'#reject-entity',
+        before: function(e,context) {
+            e.preventDefault();
+            $('popover').hide();
+            // execute code before context menu if shown
+        },
+        onItem: function(context,e) {
+            let id=context.attr('id')
+            id= id.split("-")["0"];
+            connection.io_reject_rcmdModel_entity(id)
+            // execute on menu item selection
+        }
+    })
 
     return true;
 }
@@ -440,6 +453,8 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             }
         }
     }
+
+
 
     //添加图元
     this.svg

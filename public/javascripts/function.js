@@ -404,6 +404,14 @@ $(function () {
         drawEntity(id, instance_model); //画出中心区域
         $("#" + id).click();    //点击中心节点
     })
+    $(document).on('mouseover','g.entity.isRecommendation',function(){
+        let id = $(this).attr('id');
+        id = id.split("-")["0"];
+        if(data.isEntity(id,instance_model,false)) $(this).attr("fill","white");
+    })
+    $(document).on('mouseout','g.entity.isRecommendation',function(){
+       $(this).attr("fill","black");
+    })
 
     //单击节点
     $(document).on("click", 'g.entity', function () {
@@ -414,8 +422,10 @@ $(function () {
         if (d3.select(this).classed("isRecommendation") == true) {
             clickTimeout.set(function () {
                 let id = $(item).attr('id');
+                id = id.split("-")["0"];
                 //alert("双击节点可以直接节点与对应关系");
                 // 就是这里
+                if(data.isEntity(id,instance_model,false)) drawNodeDetails(id);
             });
         } else {
             clickTimeout.set(function () {

@@ -89,6 +89,9 @@ DataManager.prototype.handle = function (msg, callback) {
             case 'recover_relation':
                 this.recoverRelation(msg,callback);
                 break;
+            case 'reject_entity':
+                this.rejectEntity(msg,callback);
+                breakl
             case 'get_reject':
                 this.getReject(msg,callback);
                 break;
@@ -1310,21 +1313,16 @@ DataManager.prototype.rejectRelation =  function(msg,callback){
             callback(resp);
         });
 }
-DataManager.prototype.rejectRelation =  function(msg,callback){
+DataManager.prototype.rejectEntity =  function(msg,callback){
 
     var session = ogmneo.Connection.session();
     //i的node label 是inst， iof 的 node label 是inst_of
     //TODO 是否没有加入project的限定？ cui
-    let reject_id;
-    for(let key in msg.relations)
-    {
-        reject_id = key;
-        break;
-    }
+    let reject_id=msg.id;
 
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
     MATCH (u:User {name: {uname}})\n\
-    MATCH (i:RelInst) WHERE id(i)={reject_id}\n\
+    MATCH (i:Inst) WHERE id(i)={reject_id}\n\
     MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
     MERGE (u)-[:reject]->(iof)\n\
     MERGE (u)-[:reject]->(i)'.format({
@@ -1840,7 +1838,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
             var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
             MATCH (i) WHERE id(i) in {id_list} \n\
-            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT ((rel)<-[:refer]-(u) OR (rel)<-[:reject]-(u))\n\
+            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT ((rel)<-[:refer]-(u) OR (rel)<-[:reject]-(u) OR (u)-[:reject]->()<-[:has_role]-(rel))\n\
             MATCH (rel)-[hr:has_role]->(role)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({

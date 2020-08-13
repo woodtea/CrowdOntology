@@ -146,6 +146,7 @@ ioObj.prototype.init = function () {
             case 'report_rcmd':
                 that.io_normal_done(msg);
                 break;
+            case 'reject_entity':
             case 'reject_relation':
                 that.io_reject_rcmdModel_relation_done(msg);
                 break;
@@ -506,6 +507,11 @@ ioObj.prototype.io_reject_rcmdModel_relation = function(relations){
     msg['relations'] = relations;
     this.socketEmitArray('insModel',msg);
 }
+ioObj.prototype.io_reject_rcmdModel_entity = function(entityId){
+    let msg = this.emitMsgHeader('reject_entity');
+    msg['id'] = entityId;
+    this.socketEmitArray('insModel',msg);
+}
 ioObj.prototype.io_recover_relation = function(id){
     let msg = this.emitMsgHeader('recover_relation');
     msg['id'] = id;
@@ -547,7 +553,7 @@ ioObj.prototype.io_get_reject_done = function(msg){
         //console.log(JSON.stringify(reject_model));
         data.completeRcmdModel(reject_model,recommend_model);
         //console.log(JSON.stringify(reject_model));
-        //todo 理论上并不能完全解决insmodel里缺失的情况下不全的问题，需要解决
+        //todo 理论上并不能完全解决insmodel里缺失的情况下不全的问题，需要解决,可能需要获取一个不包含拒绝的完整模型进行补全
         //alert(JSON.stringify(reject_model));
         //prepareNewEntity(reject_model, false);
         //alert(JSON.stringify(reject_model));
