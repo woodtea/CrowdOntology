@@ -1406,8 +1406,12 @@ DataManager.prototype.getReject =  function(msg,callback){
             MATCH (u:User {name: {uname}})\n\
             MATCH (p)-[:has]->(role)<-[hr:has_role]-(rel)<-[:reject]-(u)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
+            MATCH (p)-[:has]->(ent)<-[:reject]-(u)\
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags'
-
+    var entityCypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (p)-[:has]->(ent)<-[:reject]-(u)\
+            RETURN ent'
     var resp = {};
     resp.error = false;
     session
@@ -1443,7 +1447,7 @@ DataManager.prototype.getReject =  function(msg,callback){
                 relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
             }
 
-
+            session.run()
             session.close();
             resp.msg = 'Success';
             resp.nodes = nodes;
