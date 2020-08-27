@@ -1358,7 +1358,7 @@ DataManager.prototype.rejectEntity =  function(msg,callback){
 }
 
 //todo  recover实体和关系的功能可以合并
-DataManager.prototype.recoverRelation =  function(msg,callback){ /
+DataManager.prototype.recoverRelation =  function(msg,callback){
 
     var session = ogmneo.Connection.session();
     //i的node label 是inst， iof 的 node label 是inst_of
