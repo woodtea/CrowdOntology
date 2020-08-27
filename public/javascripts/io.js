@@ -148,7 +148,7 @@ ioObj.prototype.init = function () {
                 break;
             case 'reject_entity':
             case 'reject_relation':
-                that.io_reject_rcmdModel_relation_done(msg);
+                that.io_reject_rcmdModel_done(msg);
                 break;
             case 'get_reject':
                 that.io_get_reject_done(msg);
@@ -517,9 +517,14 @@ ioObj.prototype.io_recover_relation = function(id){
     msg['id'] = id;
     this.socketEmitArray('insModel',msg);
 }
+ioObj.prototype.io_recover_entity = function(id){
+    let msg = this.emitMsgHeader('recover_entity');
+    msg['id'] = id;
+    this.socketEmitArray('insModel',msg);
+}
 /* socket on */
 /* rcmd model */
-ioObj.prototype.io_reject_rcmdModel_relation_done = function(msg)
+ioObj.prototype.io_reject_rcmdModel_done = function(msg)
 {
     //TODO 模型重绘,暂时使用直接刷新的简单方案，优化效率请参考引用推荐关系
     if (msg.error) {
@@ -553,13 +558,14 @@ ioObj.prototype.io_get_reject_done = function(msg){
         //console.log(JSON.stringify(reject_model));
         data.completeRcmdModel(reject_model,recommend_model);
         //console.log(JSON.stringify(reject_model));
-        //todo 理论上并不能完全解决insmodel里缺失的情况下不全的问题，需要解决,可能需要获取一个不包含拒绝的完整模型进行补全
         //alert(JSON.stringify(reject_model));
         //prepareNewEntity(reject_model, false);
         //alert(JSON.stringify(reject_model));
         let list= $('#reject-list');
         list.empty();
         let relations = reject_model.relations;
+        let entities = msg.entities;
+        console.log(msg);
         for(let key in relations)
         {
             let type = relations[key].type;
@@ -577,6 +583,22 @@ ioObj.prototype.io_get_reject_done = function(msg){
             let text=$('<h5></h5>');
             text.append(rel);
             let button='<button class="btn btn-primary pull-right recover-reject btn-sm" value="'+key+'">恢复</button>'
+
+            content.append(area);
+            area.append(text)
+            area.append(button);
+            list.append(content);
+        }
+
+        for(let key of entities)
+        {
+            let content=$("<li ></li>");
+            let area=$('<div class="col-xs-12"></div>')
+            let rel='实体：';
+            rel+=reject_model.nodes[key].value;
+            let text=$('<h5></h5>');
+            text.append(rel);
+            let button='<button class="btn btn-primary pull-right recover-entity btn-sm" value="'+key+'">恢复</button>'
 
             content.append(area);
             area.append(text)
@@ -629,7 +651,6 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
             topk: 100
         }
         this.socketEmit("insModel", msg3);
-
         instance_model = {
             "nodes": msg.nodes,
             "relations": msg.relations

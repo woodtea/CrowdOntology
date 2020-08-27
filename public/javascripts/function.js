@@ -71,6 +71,10 @@ $(function () {
         $(this).prop('disabled',true);
     })
 
+    $(document).on("click", ".btn.recover-entity", function () {
+        connection.io_recover_entity($(this).attr('value'));
+        $(this).prop('disabled',true);
+    })
 
     $(document).on("click", ".btn-group.workspace", function () {
         switching=true;
@@ -1353,6 +1357,7 @@ getValueId = function (value, item) {
     return value;//可能会出问题
 }
 
+//该函数将缺失主属性的实体补全
 function prepareNewEntity(model = instance_model, refreshSvg = true, getRcmd = false, showIndex = false) {
 
     let hasCenterNode = false, centerNode;

@@ -163,6 +163,13 @@ function ioConfig(server){
                         msg2rep(rep,msg);
                         return socket.emit('insModel',rep);
                     })
+                    break;
+                case 'recover_entity':
+                    dm.handle(msg,function(rep){
+                        msg2rep(rep,msg);
+                        return socket.emit('insModel',rep);
+                    })
+                    break;
                 case 'reject_entity':
                     dm.handle(msg,function(rep){
                         msg2rep(rep,msg);

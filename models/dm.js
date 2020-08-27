@@ -91,7 +91,10 @@ DataManager.prototype.handle = function (msg, callback) {
                 break;
             case 'reject_entity':
                 this.rejectEntity(msg,callback);
-                breakl
+                break;
+            case 'recover_entity':
+                this.recoverEntity(msg,callback);
+                break;
             case 'get_reject':
                 this.getReject(msg,callback);
                 break;
@@ -1089,7 +1092,6 @@ DataManager.prototype.get = function (msg, callback) {
 
     var resp = extractBasic(msg);
     resp.error = false;
-
     session
         .run(nodeCypher, {
             pname: msg.project_id,
@@ -1097,7 +1099,7 @@ DataManager.prototype.get = function (msg, callback) {
         })
         .then(function (res) {
             var nodes = {};
-            console.log("[Node]");
+            //console.log("[Node]");
             for (var i = 0; i < res.records.length; i++) {
                 var rec = res.records[i];
                 var nodeId = rec.get('nodeId').toString();
@@ -1106,7 +1108,7 @@ DataManager.prototype.get = function (msg, callback) {
                 prop['tags'] = [];
                 nodes[nodeId] = prop;
 
-                console.log(nodeId);
+                //console.log(nodeId);
             }
             session.run(relationCypher, {
                     pname: msg.project_id,
@@ -1114,7 +1116,6 @@ DataManager.prototype.get = function (msg, callback) {
                 })
                 .then(function (res) {
                     var relations = {};
-
                     for (var i = 0; i < res.records.length; i++) {
                         var rec = res.records[i];
                         var relationId = rec.get('relationId').toString();
@@ -1356,7 +1357,8 @@ DataManager.prototype.rejectEntity =  function(msg,callback){
         });
 }
 
-DataManager.prototype.recoverRelation =  function(msg,callback){
+//todo  recover实体和关系的功能可以合并
+DataManager.prototype.recoverRelation =  function(msg,callback){ /
 
     var session = ogmneo.Connection.session();
     //i的node label 是inst， iof 的 node label 是inst_of
@@ -1398,6 +1400,50 @@ DataManager.prototype.recoverRelation =  function(msg,callback){
             callback(resp);
         });
 }
+
+DataManager.prototype.recoverEntity =  function(msg,callback){
+
+    var session = ogmneo.Connection.session();
+    //i的node label 是inst， iof 的 node label 是inst_of
+    let reject_id=msg.id;
+
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (i:Inst) WHERE id(i)={reject_id}\n\
+    MATCH (i)-[:from]->(iof:inst_of)-[:to]->(tag)\n\
+    MATCH (u)-[r1:reject]->(iof)\n\
+    MATCH (u)-[r2:reject]->(i)\n\
+    DELETE r1,r2'.format({
+        reject_id: reject_id
+    });
+
+    console.log('[CYPHER]');
+    console.log(cypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+
+    session
+        .run(cypher, {
+            pname: msg.project,
+            uname: msg.user
+
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            session.close();
+            resp.msg = 'Success';
+            resp.migrate = {};
+            //resp.migrate[msg.node.front_id] = msg.node.refer_id;
+            callback(resp);
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+}
+
 DataManager.prototype.getReject =  function(msg,callback){
 
     var session = ogmneo.Connection.session();
@@ -1410,7 +1456,7 @@ DataManager.prototype.getReject =  function(msg,callback){
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags'
     var entityCypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
-            MATCH (p)-[:has]->(ent)<-[:reject]-(u)\
+            MATCH (p)-[:has]->(ent:Inst)<-[:reject]-(u)\
             RETURN ent'
     var resp = {};
     resp.error = false;
@@ -1422,6 +1468,7 @@ DataManager.prototype.getReject =  function(msg,callback){
         .then(function(res){
             var relations = {};
             var nodes = {};
+            var entities = [];
             for (var i = 0; i < res.records.length; i++){
                 var rec = res.records[i];
                 var rid = rec.get('rel').identity.toString();
@@ -1447,12 +1494,32 @@ DataManager.prototype.getReject =  function(msg,callback){
                 relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
             }
 
-            session.run()
-            session.close();
-            resp.msg = 'Success';
-            resp.nodes = nodes;
-            resp.relations = relations;
-            callback(resp);
+            session.run(
+                entityCypher, {
+                    pname: msg.project,
+                    uname: msg.user
+                }
+            ).then(function(res){
+
+
+                for (var i = 0; i < res.records.length; i++){
+                    var rec = res.records[i];
+                    var entnode = rec.get('ent')
+                    var entid = entnode.identity.toString();
+                    entities.push(entid);
+                    if (nodes[entid] == undefined)
+                        nodes[entid] = {};
+                    for (let k in entnode.properties){
+                        nodes[entid][k] = entnode.properties[k];
+                    }
+                }
+                session.close();
+                resp.msg = 'Success';
+                resp.nodes = nodes;
+                resp.relations = relations;
+                resp.entities = entities;
+                callback(resp);
+            })
         })
         .catch(function (err) {
             resp.error = true;
@@ -1842,7 +1909,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
             var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\
             MATCH (i) WHERE id(i) in {id_list} \n\
-            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE NOT ((rel)<-[:refer]-(u) OR (rel)<-[:reject]-(u) OR (u)-[:reject]->()<-[:has_role]-(rel))\n\
+            MATCH (i)<-[:has_role]-(rel)<-[:refer]-(ou) WHERE (NOT ((rel)<-[:refer]-(u) OR (rel)<-[:reject]-(u) OR (u)-[:reject]->()<-[:has_role]-(rel))) OR (rel)-[:from]->(:inst_of)-[:to]->()<-[:has_key_attr]-()\n\
             MATCH (rel)-[hr:has_role]->(role)\n\
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({
