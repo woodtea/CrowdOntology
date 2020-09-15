@@ -29,7 +29,7 @@
               </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
           </div>
-          <button style="display:none" class="btn btn-default change-btn" >换</button>
+          <button style="display:none" class="btn btn-default change-btn" ><span class="glyphicon glyphicon-refresh" ></span></button>
           <!-- TODO 可能会引起全屏布局问题-->
         </div>
         <div class="col-xs-4 title" style="text-align: center" id="project"><h4><%= locals.project %></h4></div>
@@ -46,19 +46,29 @@
                   <ul class="dropdown-menu index" style="max-height:320px;overflow:auto;"></ul>
                 </div-->
                 <!--button class="btn btn-default" type="button" id="stigmod-fullscreen-btn" title="全屏"><span class="glyphicon glyphicon-fullscreen"></span></button-->
-                <button class="btn btn-default" type="button" id="stigmod-mute-btn" title="屏蔽列表" data-toggle="modal" data-target="#mute-window"><span class="glyphicon glyphicon-ban-circle"></span></button>
+                <button class="btn btn-default" type="button" id="stigmod-mute-btn" title="拒绝列表" data-toggle="modal" data-target="#mute-window"><span class="glyphicon glyphicon-ban-circle"></span></button>
                 <div class="modal fade" id="mute-window" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-custom">
                   <div class="modal-content">
                     <div class="modal-header">
                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                      <h4 class="modal-title" id="myModalLabel">屏蔽列表</h4>
+                      <h4 class="modal-title" id="myModalLabel">拒绝列表</h4>
                     </div>
-                    <div class="modal-body">
-                      <div class="mute-panel row">
-                        <ul id="reject-list" style="margin: 0px;padding: 0px">
+                    <div class="modal-body container-fluid">
+
+                        <ul id="myTab" class="nav nav-tabs" role="tablist" style="font-size: 14px">
+                          <li class="active"><a href="#r-relation" role="tab" data-toggle="tab">关系</a></li>
+                            <li><a href="#r-entity" role="tab" data-toggle="tab">实体</a></li>
                         </ul>
-                      </div>
+                      <!--reject list -->
+                        <div id="rejectContent" class="tab-content">
+                          <div class="tab-pane active" id="r-relation">
+                            <ul id="reject-list" style="margin: 0px;padding: 0px"></ul>
+                          </div>
+                          <div class="tab-pane " id="r-entity">
+                            <ul id="reject-entity-list" style="margin: 0px;padding: 0px"></ul>
+                          </div>
+                        </div>
                     </div>
 
                   </div><!-- /.modal-content -->
@@ -112,6 +122,9 @@
     </div>
   </div>
 </div>
+
+
+
 
 <!-- Modal -->
 <!--div class="modal fade" id="modalWorkspace" tabindex="-1" role="dialog">
@@ -314,7 +327,9 @@
 
 <div id="reject-entity">
   <ul class="dropdown-menu" role="menu">
-    <li><a tabindex="-1">拒绝该实体</a></li>
+    <li><a tabindex="-1" id="a-r">引用该关系</a></li>
+    <li><a tabindex="-1" id="r-r">拒绝该关系</a></li>
+    <li><a tabindex="-1" id="r-e">拒绝该实体</a></li>
   </ul>
 </div>
 <!--script src="https://d3js.org/d3.v4.min.js"></script-->

@@ -321,7 +321,6 @@ $(function () {
         $("#modalRec").modal('hide')
         isGetRcmd = true;   //跟显示图元有关
         connection.io_cite_recommend(0);
-        console.log(rcmd_pending);
         for (let i in rcmd_pending.entities) {
             connection.io_create_insModel_entity(rcmd_pending.entities[i]);
         }

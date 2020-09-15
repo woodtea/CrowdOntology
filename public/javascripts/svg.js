@@ -238,9 +238,38 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
             // execute code before context menu if shown
         },
         onItem: function(context,e) {
+            let operate=$(e.target).attr('id');
             let id=context.attr('id')
-            id= id.split("-")["0"];
-            connection.io_reject_rcmdModel_entity(id)
+            let ids=id.split('-');
+            if(operate=='r-e') {
+                id= ids[0];
+                connection.io_reject_rcmdModel_entity(id)
+            }else{
+                id= ids[ids.length - 1];
+                rcmd_pending = detail.getRecommendationDetail(id);
+                if(operate=='a-r'){
+                    isGetRcmd = true;   //跟显示图元有关
+                    connection.io_cite_recommend(0);
+                    for (let i in rcmd_pending.entities) {
+                        connection.io_create_insModel_entity(rcmd_pending.entities[i]);
+                    }
+                    if (getJsonLength(rcmd_pending.nodes) > 0) {
+                        connection.io_create_insModel_node(rcmd_pending.nodes)
+                    }
+                    if (getJsonLength(rcmd_pending.relations) > 0) {
+                        connection.io_create_insModel_relation(rcmd_pending.relations);
+                        //console.log(rcmd_pending.relations);
+                    }
+                    connection.io_cite_recommend(1);
+                }else{
+                    if (getJsonLength(rcmd_pending.relations) > 0) {
+                        //connection.io_create_insModel_relation(rcmd_pending.relations);
+                        //console.log(rcmd_pending.relations);
+                        connection.io_reject_rcmdModel_relation(rcmd_pending.relations);
+                    }
+                }
+            }
+
             // execute on menu item selection
         }
     })
@@ -272,6 +301,7 @@ svgObj.prototype.freshFilter = function(){
     let typesarea=$("<div class=\"col-xs-6\" ></div>");
     let relationsarea=$("<div class=\"col-xs-6\" ></div>");
     //list.addClass("list-unstyled");
+
     temp.append(typesarea).append(relationsarea);
     typesarea.append(types); relationsarea.append(relations);
 

@@ -589,7 +589,8 @@ ioObj.prototype.io_get_reject_done = function(msg){
             area.append(button);
             list.append(content);
         }
-
+        list = $('#reject-entity-list');
+        list.empty();
         for(let key of entities)
         {
             let content=$("<li ></li>");
