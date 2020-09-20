@@ -110,9 +110,6 @@ ioObj.prototype.init = function () {
             case 'get':
                 that.io_get_insModel_done(msg);
                 break;
-            case 'cite_rcmd':
-                that.io_normal_done(msg);
-                break;
             case 'create_node':
                 that.io_create_insModel_node_done(msg);
                 break;
@@ -146,9 +143,10 @@ ioObj.prototype.init = function () {
             case 'report_rcmd':
                 that.io_normal_done(msg);
                 break;
+            case 'cite_rcmd':
             case 'reject_entity':
             case 'reject_relation':
-                that.io_reject_rcmdModel_done(msg);
+                that.io_refresh_rcmdModel_done(msg);
                 break;
             case 'get_reject':
                 that.io_get_reject_done(msg);
@@ -524,7 +522,7 @@ ioObj.prototype.io_recover_entity = function(id){
 }
 /* socket on */
 /* rcmd model */
-ioObj.prototype.io_reject_rcmdModel_done = function(msg)
+ioObj.prototype.io_refresh_rcmdModel_done = function(msg)
 {
     //TODO 模型重绘,暂时使用直接刷新的简单方案，优化效率请参考引用推荐关系
     if (msg.error) {

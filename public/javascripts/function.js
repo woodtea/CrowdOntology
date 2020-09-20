@@ -320,18 +320,7 @@ $(function () {
         //console.log('clicked');
         $("#modalRec").modal('hide')
         isGetRcmd = true;   //跟显示图元有关
-        connection.io_cite_recommend(0);
-        for (let i in rcmd_pending.entities) {
-            connection.io_create_insModel_entity(rcmd_pending.entities[i]);
-        }
-        if (getJsonLength(rcmd_pending.nodes) > 0) {
-            connection.io_create_insModel_node(rcmd_pending.nodes)
-        }
-        if (getJsonLength(rcmd_pending.relations) > 0) {
-            connection.io_create_insModel_relation(rcmd_pending.relations);
-            //console.log(rcmd_pending.relations);
-        }
-        connection.io_cite_recommend(1);
+        data.citeRelation();
     })
 
 

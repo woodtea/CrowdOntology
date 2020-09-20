@@ -298,8 +298,8 @@
   </div>
 </div>
 
-<div class="modal fade bs-example-modal-sm" id="modalRec" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+<div class="modal fade " id="modalRec" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document" style="width:400px">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -325,11 +325,19 @@
   <div class="loading-overlay-content">等待，全局图谱绘制中...</div>
 </div>
 
-<div id="reject-entity">
+<div id="entity-menu">
   <ul class="dropdown-menu" role="menu">
     <li><a tabindex="-1" id="a-r">引用该关系</a></li>
     <li><a tabindex="-1" id="r-r">拒绝该关系</a></li>
     <li><a tabindex="-1" id="r-e">拒绝该实体</a></li>
+  </ul>
+</div>
+
+
+<div id="symbol-menu">
+  <ul class="dropdown-menu" role="menu">
+    <li><a tabindex="-1" id="a-r">引用该关系</a></li>
+    <li><a tabindex="-1" id="r-r">拒绝该关系</a></li>
   </ul>
 </div>
 <!--script src="https://d3js.org/d3.v4.min.js"></script-->

@@ -1778,3 +1778,7 @@ li {
   min-width: 400px;
   font-size: 14px;
 }
+
+.modal-narrow{
+  min-width: 400px
+}

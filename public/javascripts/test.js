@@ -23,6 +23,12 @@ outputPolicy = function(){
     }
 }
 
+loadTest = function(){
+    let nodeId = $('g.entity.center').attr("id");
+    let node = {}
+    node[nodeId] = eval('(' + JSON.stringify(instance_model.nodes[nodeId]) + ')');
+    setInterval(function(){connection.io_recommend_insModel_node(node)},10);
+}
 
 testFunc = function(){
     //吴京

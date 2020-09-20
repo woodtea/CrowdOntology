@@ -231,7 +231,7 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     this.rcmdDestroy();
 
     $('g.entity.isRecommendation').contextmenu({
-        target:'#reject-entity',
+        target:'#entity-menu',
         before: function(e,context) {
             e.preventDefault();
             $('popover').hide();
@@ -249,22 +249,9 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
                 rcmd_pending = detail.getRecommendationDetail(id);
                 if(operate=='a-r'){
                     isGetRcmd = true;   //跟显示图元有关
-                    connection.io_cite_recommend(0);
-                    for (let i in rcmd_pending.entities) {
-                        connection.io_create_insModel_entity(rcmd_pending.entities[i]);
-                    }
-                    if (getJsonLength(rcmd_pending.nodes) > 0) {
-                        connection.io_create_insModel_node(rcmd_pending.nodes)
-                    }
-                    if (getJsonLength(rcmd_pending.relations) > 0) {
-                        connection.io_create_insModel_relation(rcmd_pending.relations);
-                        //console.log(rcmd_pending.relations);
-                    }
-                    connection.io_cite_recommend(1);
+                    data.citeRelation()
                 }else{
                     if (getJsonLength(rcmd_pending.relations) > 0) {
-                        //connection.io_create_insModel_relation(rcmd_pending.relations);
-                        //console.log(rcmd_pending.relations);
                         connection.io_reject_rcmdModel_relation(rcmd_pending.relations);
                     }
                 }
@@ -274,6 +261,33 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
         }
     })
 
+    $('g.symbol.isRecommendation').contextmenu({
+        target:'#symbol-menu',
+        before: function(e,context) {
+            e.preventDefault();
+            $('popover').hide();
+            // execute code before context menu if shown
+        },
+        onItem: function(context,e) {
+            let operate=$(e.target).attr('id');
+            let id=context.attr('id')
+            let ids=id.split('-');
+            id= ids[ids.length - 1];
+            rcmd_pending = detail.getRecommendationDetail(id);
+            if(operate=='a-r'){
+                isGetRcmd = true;   //跟显示图元有关
+                data.citeRelation();
+            }else{
+                if (getJsonLength(rcmd_pending.relations) > 0) {
+                    //connection.io_create_insModel_relation(rcmd_pending.relations);
+                    //console.log(rcmd_pending.relations);
+                    connection.io_reject_rcmdModel_relation(rcmd_pending.relations);
+                }
+            }
+
+            // execute on menu item selection
+        }
+    })
     return true;
 }
 
@@ -411,7 +425,7 @@ svgObj.prototype.drawRelation = function(centX, centY, r, R, relation, startAngl
             nodes.push(node);
         }else{
             nData = tmpModel.nodes[relation.roles[i].node_id];
-            nData.id = relation.roles[i].node_id+"-"+relation.id;
+            nData.id = relation.roles[i].node_id+"-"+relation.id
             nData.type = "entity";
 
             node = this.getNode(rX, rY, R, nAngle, nData);//明明应该是对象，为什么return的是数组
@@ -484,8 +498,6 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
         }
     }
 
-
-
     //添加图元
     this.svg
         .append("g")
@@ -518,12 +530,15 @@ svgObj.prototype.drawNode = function(centX, centY, r, node, type, isCenter = fal
             .attr("stroke-dasharray", "1,0") //虚线宽度
             .attr("transform", "rotate(45)")
     }else{
+        let strokeAttr;
+        if(isRecommendation&&type!='symbol'&&(!modelData.isEntity(id.split('-')[0],instance_model,false))) strokeAttr='10,5';
+        else strokeAttr='1,0';  //对于尚未在insmodel中存在的节点以虚线描画
         this.svg.select("[id='"+data.id+"']")
             .append("circle")
             .attr("r", r)
             .attr("fill", fillColor)
             .attr("stroke", "gray")
-            .attr("stroke-dasharray", "1,0") //虚线宽度
+            .attr("stroke-dasharray", strokeAttr) //虚线宽度
             .attr("stroke-width", 1)
     }
     //添加文本

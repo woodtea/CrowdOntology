@@ -57,6 +57,7 @@ const index = $("body .graph-row .index");
 
 //JSFiles
 const data = new modelObj();
+const modelData  = data; //备用数据，有名称污染的情况
 const svg = new svgObj(d3.select("body .graph-row .middle-content svg"));
 const detail = new detailObj();
 const network = new networkObj();
