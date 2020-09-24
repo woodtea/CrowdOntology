@@ -1160,6 +1160,7 @@ DataManager.prototype.get = function (msg, callback) {
             // session.close();
         })
         .catch(function (err) {
+            console.log(err);
             resp.error = true;
             resp.msg = err;
             callback(resp);
@@ -1851,6 +1852,7 @@ DataManager.prototype.recommend = function (msg, callback) {
 */
 //TODO 现在返回的是全局图谱，可能存在效率问题，恢复注释内容可以针对性地返回推荐图谱
 DataManager.prototype.newRecommend = function (msg, callback) {
+    console.time('rcmdtime');
     var session = ogmneo.Connection.session();
     var rcmd_nodes = [];//先保证一个
     for (k in msg.nodes) {
@@ -1964,6 +1966,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                 resp.nodes = nodes;
                 resp.relations = relations;
                 resp.rcmd_list = rcmd_list;
+                console.timeEnd('rcmdtime');
                 callback(resp);
             })
             .catch(function (err) {

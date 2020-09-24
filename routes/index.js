@@ -29,20 +29,16 @@ router.get('/signin', function(req, res, next) {
     }
     else//带token情况，为统一平台返回
     {
-        console.log("request>>>>>>>>>>")
         request(
             `http://passport.pintu.fun/check_token?token=${token}&t=${new Date().getTime()}`,
             function (error, response, data) {
 
                 if (!error && response.statusCode === 200) {
-                    console.log("back2>>>>>>>>>>>>>>>>>>>>>>>")
                     data = JSON.parse(data);
                     console.log(data);
                     if (data.error === 0) {
-                        console.log("back22>>>>>>>>>>>>>>>>>>>>>>>")
                         let userId = data.username;
                         if (!userId) {
-                            console.log("nouserid>>>>>>>>>>>")
                             res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
                             return;
                         }
@@ -57,7 +53,6 @@ router.get('/signin', function(req, res, next) {
                         };
                         dm.handle(msg, function(rep){
                             console.log(rep)
-                            console.log("back3>>>>>>>>>>>>>>>>>>>>>>>")
                             if(rep.user_id != -1){//平台返回账号已在数据库中存在
                                 req.session['success'] = 'SignUp Success';
                                 res.redirect('/user');
@@ -76,7 +71,6 @@ router.get('/signin', function(req, res, next) {
                         });
                     } else {
                         // token 验证失败，重新去 passport 登录。
-                        console.log("back3>>>>>>>>>>>>>>>>>>>>>>>")
                         res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);
                     }
                 } else {
@@ -89,7 +83,6 @@ router.get('/signin', function(req, res, next) {
 
 router.post('/signin', function(req, res, next) {
     console.log(req.body)
-    console.log("login>>>>>>>>>>>>>>>>>>>>>>")
     if(req.body.method=="1")
     {
         res.redirect(`http://passport.pintu.fun/login?redirectUrl=${req.headers.host + req.originalUrl}`);

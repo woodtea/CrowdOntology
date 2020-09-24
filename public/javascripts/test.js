@@ -166,7 +166,74 @@ testFunc3 = function () {
     }
     console.log(candidate);
 }
+testPolicy =async function() { //建立项目的集成测试
+    let userlist=['T13@mail','T14@mail'];
+    for(let u of userlist)
+    {
+        while(connection.socket_mutex){
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        user = u;
+        connection.io_get_insModel()
+        while(connection.socket_mutex){
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        let candidate = 0;
+        connection.testmode=1;
+        for(let key of policy.entities){
+            let value = key;
+            let entity = {
+                tags: ["国家政策事件"],
+                value: value,
+                nodeId: generateFrontNodeID(value, "e"),
+                valueId: generateFrontNodeID(value, "v"),
+                relationId: generateFrontRelationID(candidate)
+            }
+            connection.io_create_insModel_entity(entity);
+            candidate++;
+        }
+        connection.io_get_insModel();
+        while(connection.socket_mutex){
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }//等待实体创建完成
+        candidate=0;
+        for(let key of policy.attrs){
 
+            if(key[0]==key[2]) continue;
+            if(key[2]=='') continue;
+            let entity = data.getEntityIdByValue(key[0])[0];
+            let type = key[1];
+            let value = key[2];
+
+            //生成节点
+            let nodes = {}
+            let nodeId = generateFrontNodeID(value)
+            let tags = data.getAttrTags(type)
+            nodes[nodeId] = {
+                "dataType": type,
+                "tags": tags,
+                "value": value
+            }
+            console.log('<<<nodes'+JSON.stringify(nodes));
+            connection.io_create_insModel_node(nodes)
+            //生成关系
+            let relationId = generateFrontRelationID(candidate);
+            let relations = {};
+            relations[relationId] = {
+                "type": type,
+                "roles": [
+                    {"rolename": "", "node_id": entity},
+                    {"rolename": type, "node_id": nodeId}
+                ]
+            }
+            console.log('<<<relations'+JSON.stringify(relations));
+            connection.io_create_insModel_relation(relations);
+            candidate++;
+        }
+        console.log(candidate);
+    }
+
+}
 testPolicy1 = function () {
     let candidate = 0;
     let value
@@ -535,7 +602,7 @@ var policy = {
         "关于印发《殡葬服务机构新型冠状病毒感染肺炎患者遗体处置及疫情防控工作指引(试行)》的通知",
         "关于新型冠状病毒感染肺炎疫情防控期间做好市场主体登记注册工作的通知",
         "关于疫情防控期间进一步便利技术进出口有关工作的通知",
-        "关于支持金融强化服务 做好新型冠状病毒感染肺炎疫情防控工作的通知",
+        "关于支持金融强化服务做好新型冠状病毒感染肺炎疫情防控工作的通知",
         "关于统筹做好春节后错峰返程疫情防控和交通运输保障工作的通知",
         "关于做好新型冠状病毒感染的肺炎疫情医疗污水和城镇污水监管工作的通知",
         "关于优化医疗保障经办服务 推动新型冠状病毒感染的肺炎疫情防控工作的通知",
@@ -2123,22 +2190,22 @@ var policy = {
             "2020年2月3日"
         ],
         [
-            "关于支持金融强化服务 做好新型冠状病毒感染肺炎疫情防控工作的通知",
+            "关于支持金融强化服务做好新型冠状病毒感染肺炎疫情防控工作的通知",
             "来源",
             "http://www.gov.cn/zhengce/zhengceku/2020-02/03/content_5474105.htm"
         ],
         [
-            "关于支持金融强化服务 做好新型冠状病毒感染肺炎疫情防控工作的通知",
+            "关于支持金融强化服务做好新型冠状病毒感染肺炎疫情防控工作的通知",
             "政策发文字号",
             "财金〔2020〕3号"
         ],
         [
-            "关于支持金融强化服务 做好新型冠状病毒感染肺炎疫情防控工作的通知",
+            "关于支持金融强化服务做好新型冠状病毒感染肺炎疫情防控工作的通知",
             "政策发文机构",
             "财政部"
         ],
         [
-            "关于支持金融强化服务 做好新型冠状病毒感染肺炎疫情防控工作的通知",
+            "关于支持金融强化服务做好新型冠状病毒感染肺炎疫情防控工作的通知",
             "政策发布日期",
             "2020年2月3日"
         ],

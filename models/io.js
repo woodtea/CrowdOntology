@@ -517,7 +517,9 @@ function ioConfig(server){
                 mcreate_empty_project_with_name(msg.substring(13,msg.length));
             }else if(msg=="mcreate_ontology"){
                 mcreate_ontology_project();
-            }else {
+            }else if(msg=='create_user'){
+                batch_create_user();
+            } else{
                 let msgArray = [msg0,msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9,msg10,msg11,msg12,msg13,msg14,msg15,msg16, msg17, msg18, msg19];
                 dm.handle(msgArray[msg], function(rep){
                     console.log('[CALLBACK]')
@@ -528,7 +530,19 @@ function ioConfig(server){
         })
     });
 }
-
+function batch_create_user()
+{
+    for(let i=0;i<100;i++)
+    {
+        let msg = {
+            operation: 'create_user',
+            operation_id: '',
+            name: 'T'+i+'@mail'
+        };
+        dm.handle(msg, function(rep){
+        });
+    }
+}
 function msg2rep(rep,msg)
 {
     rep.operation=msg.operation;

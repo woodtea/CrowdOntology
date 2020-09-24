@@ -81,6 +81,9 @@ ioObj.prototype.init = function () {
     });
 
     this.socket.on('model', function (msg) {
+        if(msg.error){
+            alert('出现错误，请刷新页面再试');
+        }
         switch (msg.operation) {
             //case 'get':
             case 'mget':
@@ -106,6 +109,10 @@ ioObj.prototype.init = function () {
     this.socket.on('insModel', function (msg) {
         tagReformat.id2value(msg);
         console.log(msg);
+        if(msg.error){
+            console.log(msg);
+            alert('出现错误，请刷新页面再试');
+        }
         switch (msg.operation) {
             case 'get':
                 that.io_get_insModel_done(msg);
@@ -392,7 +399,12 @@ ioObj.prototype.io_create_model_relation_done = function (msg) {
 
 /* insModel */
 ioObj.prototype.io_get_insModel = function (user_id, projectId) {
-    let msg = this.generate_msg_base(user_id, projectId, 'get');
+    let msg = {
+        operation: 'get',
+        user_id: user,
+        project_id: project,
+        operation_id: generateFrontOperationID()
+    }
     this.socketEmitArray('insModel', msg);
 }
 
@@ -609,10 +621,11 @@ ioObj.prototype.io_get_reject_done = function(msg){
 }
 /* model */
 ioObj.prototype.io_get_model_done = function (msg) {
-    this.socket_mutex = false;
+    //this.socket_mutex = false;
     if (msg.error) {
         return;
     } else {
+        this.tmpMsgPop(msg.operationId);
         model = {
             "nodes": msg.nodes,
             "relations": msg.relations
@@ -638,10 +651,11 @@ ioObj.prototype.io_save_model_done = function (msg) {
 }
 /* instanceModel */
 ioObj.prototype.io_get_insModel_done = function (msg) {
-    this.socket_mutex = false;
+    //this.socket_mutex = false;
     if (msg.error) {
         return;
     } else {
+        this.tmpMsgPop(msg.operationId);
         let msg3 = {
             operation: 'rcmd_entity',
             user_id: user,
@@ -846,7 +860,7 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
 }
 
 ioObj.prototype.io_recommend_insModel_index_done = function (msg) {
-    this.socket_mutex = false;
+    //this.socket_mutex = false;
     if (msg.error) {
         return;
     } else {
@@ -872,7 +886,7 @@ ioObj.prototype.io_recommend_insModel_index_done = function (msg) {
 }
 
 ioObj.prototype.io_recommend_insModel_entity_done = function (msg) {
-    this.socket_mutex = false;
+    //this.socket_mutex = false;
     if (msg.error) {
         return;
     } else {
