@@ -209,10 +209,10 @@ function checkSignIn(req,res){
         var platform=os.platform();
         if(platform == 'darwin'){
             //for test
-            req.session.user = {
-                mail:"user1@mail"
-            }
-            return true;
+            // req.session.user = {
+            //     mail:"user1@mail"
+            // }
+            // return true;
         }
         else{
             req.session['error'] = 'User is not signed in ';

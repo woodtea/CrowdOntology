@@ -17,7 +17,7 @@ console.log(platform);
  * Get port from environment and store in Express.
  */
 
-var tmpPORT = '3000';
+var tmpPORT = '4000';
 
 if(platform != 'darwin') tmpPORT = '80';
 
