@@ -150,7 +150,6 @@ ioObj.prototype.init = function () {
             case 'report_rcmd':
                 that.io_normal_done(msg);
                 break;
-            case 'cite_rcmd':
             case 'reject_entity':
             case 'reject_relation':
                 that.io_refresh_rcmdModel_done(msg);
@@ -158,6 +157,7 @@ ioObj.prototype.init = function () {
             case 'get_reject':
                 that.io_get_reject_done(msg);
                 break;
+            case 'cite_rcmd':
             default:
                 that.io_normal_done(msg);
                 break;
