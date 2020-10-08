@@ -507,7 +507,7 @@ function ioConfig(server){
                 mcreate_event_project(socket);
             }else if(msg=="create_event"){
                 create_event_project(socket);
-            }else if(msg=="mcreate_policy"){//新冠-热点事件图谱
+            }else if(msg=="mcreate_policy"){//新冠-政策知识图谱
                 mcreate_policy_project(socket);
             }else if(msg=="create_policy"){
                 create_policy_project(socket);
