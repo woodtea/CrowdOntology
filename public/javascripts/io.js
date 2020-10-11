@@ -622,6 +622,11 @@ ioObj.prototype.io_get_reject_done = function(msg){
 /* model */
 ioObj.prototype.io_get_model_done = function (msg) {
     //this.socket_mutex = false;
+    if(msg.over==true)
+    {
+        alert('该项目用户已满');
+        return;
+    }
     if (msg.error) {
         return;
     } else {
@@ -953,7 +958,7 @@ ioObj.prototype.migrateEmitMsg = function (obj) {
     if (obj == undefined) return;
     for (let key in obj) {
         if (key == obj[key]) continue; //实际上没有发生改变
-        //if(key.indexOf("front_n")!=-1){
+        //if(key.indexOf("front_n")!=-1){1
         //更新emit里面的id
         for (let emitMsgOrder in this.tmpMsg.emit) {
             let tmpMsp = this.tmpMsg.emit[emitMsgOrder];

@@ -185,7 +185,6 @@ singlePolicy = async function() { //单人建立项目
     while(connection.socket_mutex){
         await new Promise(resolve => setTimeout(resolve, 1000));
     }//等待实体创建完成
-    candidate=0;
     for(let key of policy.attrs){
 
         if(key[0]==key[2]) continue;
@@ -222,10 +221,8 @@ singlePolicy = async function() { //单人建立项目
 }
 testPolicy =async function() { //建立项目的集成测试
     let userlist=["0006178148@pku.edu.cn","2010301116@pku.edu.cn","2010301257@pku.edu.cn","2010301256@pku.edu.cn","2010301255@pku.edu.cn","2010301254@pku.edu.cn","2010301253@pku.edu.cn","2010301252@pku.edu.cn","2010301251@pku.edu.cn","2010301250@pku.edu.cn","2010301249@pku.edu.cn","2010301248@pku.edu.cn","2010301247@pku.edu.cn","2010301246@pku.edu.cn","2010301245@pku.edu.cn","2010301244@pku.edu.cn","2010301243@pku.edu.cn","2010301242@pku.edu.cn","2010301241@pku.edu.cn","2010301240@pku.edu.cn","2010301239@pku.edu.cn","2010301238@pku.edu.cn","2010301237@pku.edu.cn","2010301236@pku.edu.cn","2010301235@pku.edu.cn","2010301234@pku.edu.cn","2010301233@pku.edu.cn","2010301232@pku.edu.cn","2010301231@pku.edu.cn","2010301230@pku.edu.cn","2010301229@pku.edu.cn","2010301228@pku.edu.cn","2010301227@pku.edu.cn","2010301226@pku.edu.cn","2010301225@pku.edu.cn","2010301224@pku.edu.cn","2010301223@pku.edu.cn","2010301222@pku.edu.cn","2010301221@pku.edu.cn","2010301220@pku.edu.cn","2010301219@pku.edu.cn","2010301218@pku.edu.cn","2010301217@pku.edu.cn","2010301216@pku.edu.cn","2010301215@pku.edu.cn","2010301214@pku.edu.cn","2010301213@pku.edu.cn","2010301212@pku.edu.cn","2010301211@pku.edu.cn","2010301210@pku.edu.cn","2010301209@pku.edu.cn","2010301208@pku.edu.cn","2010301207@pku.edu.cn","2010301206@pku.edu.cn","2010301205@pku.edu.cn","2010301204@pku.edu.cn","2010301203@pku.edu.cn","2010301202@pku.edu.cn","2010301201@pku.edu.cn","2010301157@pku.edu.cn","2010301156@pku.edu.cn","2010301155@pku.edu.cn","2010301154@pku.edu.cn","2010301153@pku.edu.cn","2010301152@pku.edu.cn","2010301151@pku.edu.cn","2010301150@pku.edu.cn","2010301149@pku.edu.cn","2010301148@pku.edu.cn","2010301147@pku.edu.cn","2010301146@pku.edu.cn","2010301145@pku.edu.cn","2010301144@pku.edu.cn","2010301143@pku.edu.cn","2010301142@pku.edu.cn","2010301141@pku.edu.cn","2010301140@pku.edu.cn","2010301139@pku.edu.cn","2010301138@pku.edu.cn","2010301137@pku.edu.cn","2010301136@pku.edu.cn","2010301135@pku.edu.cn","2010301134@pku.edu.cn","2010301133@pku.edu.cn","2010301132@pku.edu.cn","2010301131@pku.edu.cn","2010301130@pku.edu.cn","2010301129@pku.edu.cn","2010301128@pku.edu.cn","2010301127@pku.edu.cn","2010301126@pku.edu.cn","2010301125@pku.edu.cn","2010301124@pku.edu.cn","2010301123@pku.edu.cn","2010301122@pku.edu.cn","2010301121@pku.edu.cn","2010301120@pku.edu.cn","2010301119@pku.edu.cn","2010301118@pku.edu.cn","2010301117@pku.edu.cn","2010301115@pku.edu.cn","2010301114@pku.edu.cn","2010301113@pku.edu.cn","2010301112@pku.edu.cn","2010301111@pku.edu.cn","2010301110@pku.edu.cn","2010301109@pku.edu.cn","2010301108@pku.edu.cn","2010301107@pku.edu.cn","2010301106@pku.edu.cn","2010301105@pku.edu.cn","2010301104@pku.edu.cn","2010301103@pku.edu.cn","2010301102@pku.edu.cn","2010301101@pku.edu.cn","2001111331@pku.edu.cn","1901213333@pku.edu.cn","1900013732@pku.edu.cn","1900013712@pku.edu.cn","1801213680@pku.edu.cn","1701111326@pku.edu.cn"]
+    let candidate=0;
     for(let u of userlist)
-
-
-
     {
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -235,7 +232,6 @@ testPolicy =async function() { //建立项目的集成测试
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        let candidate = 0;
         connection.testmode=1;
         for(let key of policy.entities){
             let value = key;
@@ -253,7 +249,6 @@ testPolicy =async function() { //建立项目的集成测试
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
         }//等待实体创建完成
-        candidate=0;
         for(let key of policy.attrs){
 
             if(key[0]==key[2]) continue;
@@ -289,7 +284,6 @@ testPolicy =async function() { //建立项目的集成测试
             connection.io_create_insModel_relation(relations);
             candidate++;
         }
-        console.log(candidate);
     }
 
 }

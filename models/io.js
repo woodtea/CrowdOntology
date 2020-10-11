@@ -11,11 +11,10 @@ var DataManager = require('./dm');
 var dm = new DataManager(server_config);
 
 var fs= require('fs');
-// console.log(dm);
-//mcreate_empty_project_with_name("test");
-//mcreate_hlm_project();
-//mcreate_movie_project_with_name("任意电影");
-//mcreate_algorithm_project_with_name("test4");
+
+let onlineUser={};
+const limit=10000000;
+
 function ioConfig(server){
 
     var io = require('socket.io')(server);
@@ -39,6 +38,19 @@ function ioConfig(server){
         })
         socket.on('model', function(msg){
             logger.info(JSON.stringify(msg))
+            if(msg.project_id=='新冠政策知识图谱')
+            {
+                if(onlineUser[msg.user_id]==undefined)
+                {
+                    //console.log('overtest'+onlineUser);
+                    if(Object.keys(onlineUser).length>=limit)
+                    {
+                        msg['over']=true;
+                        return socket.emit('model',msg);
+                    }
+                    onlineUser[msg.user_id]=true;
+                }
+            }
             //console.log(msg);
             let emitMsg;
             switch (msg.operation){
