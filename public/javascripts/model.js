@@ -30,7 +30,8 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
         "dataType": tmpModel.nodes[id].dataType
     }
     //处理邻接信息
-    for (let relationId in tmpModel.relations) {
+    //edit by cmy on 2020/10/18 临界信息为属性时有缺位问题
+    out:for (let relationId in tmpModel.relations) {
         let isRelated = false;
         let centerIndex;
         let centerRolename;
@@ -51,8 +52,10 @@ modelObj.prototype.getEntity = function (id, tmpModel = instance_model) {
                 //判断是否存在，如果尚未存在则初始化
                 if (entity.neighbours[neighbourID] == undefined) {
                     if (tmpModel.nodes[neighbourID] == undefined) {
+                        //continue out;
                         alert("Not found!" + neighbourID);
                         console.log("alert notfound in getEntity");
+                        console.log(tmpModel.relations[relationId]);
                         console.log(neighbourID);
                         console.log(tmpModel);
                         continue;
@@ -324,4 +327,17 @@ modelObj.prototype.citeRelation = function(){
     connection.io_cite_recommend(1);
 }
 
+modelObj.prototype.checkModelValid = function(tmpModel){
+    for (let relationId in tmpModel.relations) {
+        let valid = true;
+        for (let roleIndex in tmpModel.relations[relationId].roles) {
+            let id =  tmpModel.relations[relationId].roles[roleIndex].node_id
+            if(tmpModel.nodes[id]==undefined){
+                console.log("node "+id+" in relation "+relationId+" notfound");
+                valid = false;
+            }
+        }
+        if(!valid) delete tmpModel.relations[relationId];
+    }
+}
 

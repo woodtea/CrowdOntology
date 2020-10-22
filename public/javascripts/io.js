@@ -192,6 +192,7 @@ ioObj.prototype.socketEmitArray = function (type, msg) {
 ioObj.prototype.socketEmit = function (type, msg) {
     console.log(type)
     console.log(msg)
+    console.log(JSON.stringify(msg))
     //console.trace();
     this.socket_mutex = true;
     this.socket.emit(type, msg);
@@ -450,6 +451,7 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
             {"rolename": keyAttribute, "node_id": entity.valueId}
         ]
     }
+    console.log(JSON.stringify(relations));
     this.io_create_insModel_relation(relations);
 }
 
@@ -826,24 +828,19 @@ ioObj.prototype.io_recommend_insModel_node_done = function (msg) {
             "relations": msg.relations
         }
 
+        data.completeRcmdModel(recommend_model);
+        prepareNewEntity(recommend_model, false);
+        data.checkModelValid(recommend_model);
+
         if(this.initmode==1)//初始化recommend_model以实现network高亮
         {
             //alert(JSON.stringify(recommend_model));
-            data.completeRcmdModel(recommend_model);
-            prepareNewEntity(recommend_model, false);
             this.initmode=0;
             showGlobal();
         }
         else{//正常描绘推荐
             let centerId = $("g.center").attr("id");
             recommend_model.nodes[centerId] = instance_model.nodes[centerId];
-
-            data.completeRcmdModel(recommend_model);
-
-
-            prepareNewEntity(recommend_model, false);
-
-
             //alert(JSON.stringify(recommend_model));
 
             // for(key in recommend_model.nodes)
@@ -954,6 +951,9 @@ ioObj.prototype.migrate = function (obj, model = instance_model) {
     return;
 }
 
+//这个函数可能更改后续发送的信息，如创造一个实体的时候前面创造节点的msg
+//可能会告诉创造实体节点与属性节点之间关系的msg节点的nodeid
+//也就是说，这个函数会改变emit列表中消息的部分属性
 ioObj.prototype.migrateEmitMsg = function (obj) {
     if (obj == undefined) return;
     for (let key in obj) {
