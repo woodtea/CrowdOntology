@@ -12,8 +12,11 @@ var dm = new DataManager(server_config);
 
 var fs= require('fs');
 
+
+//临时使用，实验分组
+let firstg='新冠政策知识图谱'
 let onlineUser={};
-const limit=10000000;
+const limit=2;
 
 function ioConfig(server){
 
