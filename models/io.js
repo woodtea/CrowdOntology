@@ -16,7 +16,7 @@ var fs= require('fs');
 //临时使用，实验分组
 let firstg='新冠政策知识图谱'
 let onlineUser={};
-const limit=33;
+const limit=65;
 
 
 function ioConfig(server){
@@ -42,7 +42,7 @@ function ioConfig(server){
         })
         socket.on('model', function(msg){
             logger.info(JSON.stringify(msg))
-            if(msg.project_id=='新冠政策知识图谱')
+            if(msg.project_id=='新冠政策知识图谱b')
             {
                 if(onlineUser[msg.user_id]==undefined)
                 {
