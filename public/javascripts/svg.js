@@ -164,7 +164,8 @@ svgObj.prototype.drawRecommendation = function(id, rcmdModel = recommend_model, 
     if(this.valuelist.fresh&&(this.rcmd.fresh!==false))
     {
         //console.log('drawRecommendation'+this.valuelist.fresh+this.rcmd.fresh)
-        connection.io_report_recommend(JSON.parse(JSON.stringify(entity1.relations)));
+        //TODO 该功能暂时停用，原意为报告推荐内容，现在有调用次数过多的问题 2020/10/24
+        //connection.io_report_recommend(JSON.parse(JSON.stringify(entity1.relations)));
         this.freshFilter();
         $(".btn.filter-apply").trigger("click");
         return true;
