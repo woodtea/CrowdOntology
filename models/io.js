@@ -13,7 +13,7 @@ var dm = new DataManager(server_config);
 var fs= require('fs');
 
 let onlineUser={};
-const limit=10000000;
+const limit=33;
 
 function ioConfig(server){
 
@@ -50,6 +50,8 @@ function ioConfig(server){
                     }
                     onlineUser[msg.user_id]=true;
                 }
+                console.log('outuser');
+                console.log(onlineUser);
             }
             //console.log(msg);
             let emitMsg;
@@ -1675,7 +1677,7 @@ function create_epi_project(socket,projectName="流行病学图谱")
 
 let prosupple='http://www.openkg.cn/2019-nCoV/event/property/';
 let validproperty=['政策发文字号','政策发文机构','政策发布日期'];
-function mcreate_policy_project(socket,projectName="新冠政策知识图谱")
+function mcreate_policy_project(socket,projectName="新冠政策知识图谱b")
 {
     msg1 = {
         operation: 'create_project',

@@ -23,6 +23,67 @@ outputPolicy = function(){
     }
 }
 
+policyStat = async function(){
+    let userlist=['2010301237@pku.edu.cn', '2010301222@pku.edu.cn', '2010301240@pku.edu.cn', '2010301221@pku.edu.cn', '2010301238@pku.edu.cn', '2010301248@pku.edu.cn', '2010301225@pku.edu.cn', '2010301247@pku.edu.cn', '2010301256@pku.edu.cn', '2010301224@pku.edu.cn', '2010301226@pku.edu.cn', '2010301231@pku.edu.cn', '2010301254@pku.edu.cn', '2010301245@pku.edu.cn', '2010301230@pku.edu.cn', '2010301235@pku.edu.cn', '2010301239@pku.edu.cn', '2010301227@pku.edu.cn', '2010301249@pku.edu.cn', '1900013712@pku.edu.cn', '2010301243@pku.edu.cn', '2010301250@pku.edu.cn', '2010301251@pku.edu.cn', '2010301236@pku.edu.cn', '2010301253@pku.edu.cn', '2010301257@pku.edu.cn', '2010301252@pku.edu.cn', '2010301234@pku.edu.cn', '2010301228@pku.edu.cn', '2010301223@pku.edu.cn', '2010301246@pku.edu.cn', '2010301255@pku.edu.cn']
+    let finalans =  {}
+    let cnoden =0 , crelan = 0;
+    let cnode = {}
+    let crela = {}
+    for(let u of userlist)
+    {
+        user = u;
+        connection.io_get_insModel();
+        while(connection.socket_mutex) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        finalans[u]={};
+        let nodes = instance_model.nodes;
+        let relations = instance_model.relations;
+        let nodenum=0,relanum=0;
+        for(let key in nodes)
+        {
+            let node = nodes[key];
+            if(node.tags[0]=='国家政策事件'&&node.value!=""){
+                if(cnode[key]==undefined){
+                    cnoden++;
+                    cnode[key]=true;
+                }
+                nodenum++;
+            }
+        }
+        //console.log(relations);
+        for(let key in relations)
+        {
+            let relation = relations[key];
+            let type = relation.type;
+            //console.log(type);
+            if(type!='政策依据'&&type!='前期政策') continue;
+            let thisone,otherone;
+            for(let role of relation.roles)
+            {
+                if(role.rolename=='当前政策') thisone=nodes[role.node_id].value;
+                else otherone=nodes[role.node_id].value;
+            }
+            if(thisone!=""&&otherone!="") 
+            {
+                relanum++;
+                if(crela[key]==undefined)
+                {
+                    crela[key]=relation;
+                    crelan++
+                }
+            }
+        }
+        finalans[u]['nodenum']=nodenum;
+        finalans[u]['relanum']=relanum;
+    }
+    finalans['crowd']={};
+    finalans['crowd']['nodenum'] = cnoden;
+    finalans['crowd']['relanum'] = crelan;
+    console.log(finalans);
+    console.log(JSON.stringify(finalans));
+}
+
 loadTest = function(){
     let nodeId = $('g.entity.center').attr("id");
     let node = {}
@@ -256,7 +317,7 @@ testPolicy =async function() { //建立项目的集成测试
             connection.io_create_insModel_entity(entity);
             candidate++;
         }
-        // connection.io_get_insModel();
+        connection.io_get_insModel();
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
         }//等待实体创建完成
