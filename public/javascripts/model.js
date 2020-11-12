@@ -339,7 +339,7 @@ modelObj.prototype.checkModelValid = function(tmpModel){
         }
         //TODO 不好，这是新冠实验的特殊处理，只推荐指定关系
         if(project.indexOf('新冠政策知识图谱')!=-1&&tmpModel.relations[relationId].type!='前期政策'&&tmpModel.relations[relationId].type!='政策依据')
-            valid = true
+            valid = false
         if(!valid) delete tmpModel.relations[relationId];
     }
 }

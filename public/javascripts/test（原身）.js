@@ -23,69 +23,6 @@ outputPolicy = function(){
     }
 }
 
-policyStat = async function(){
-    let userlist = ['user1@mail', '2010301155@pku.edu.cn', '2010301140@pku.edu.cn', '2010301125@pku.edu.cn', '2010301148@pku.edu.cn', '2010301135@pku.edu.cn', '2010301141@pku.edu.cn', '2010301113@pku.edu.cn', '2010301114@pku.edu.cn', '2010301203@pku.edu.cn', '2010301210@pku.edu.cn', '2010301122@pku.edu.cn', '2010301156@pku.edu.cn', '2010301152@pku.edu.cn', '2010301108@pku.edu.cn', '2010301218@pku.edu.cn', '2010301120@pku.edu.cn', '2010301129@pku.edu.cn', '2010301220@pku.edu.cn', '2010301124@pku.edu.cn', '2010301115@pku.edu.cn', '2010301126@pku.edu.cn', '2010301157@pku.edu.cn', '2010301134@pku.edu.cn', '2010301205@pku.edu.cn', '2010301133@pku.edu.cn', '2010301149@pku.edu.cn', '2010301151@pku.edu.cn', '2010301112@pku.edu.cn', '2010301143@pku.edu.cn', '2010301209@pku.edu.cn', '2010301128@pku.edu.cn', '2010301103@pku.edu.cn', '2010301118@pku.edu.cn', '2010301117@pku.edu.cn', '2010301132@pku.edu.cn', '2010301131@pku.edu.cn', '2010301119@pku.edu.cn', '2010301123@pku.edu.cn', '2010301145@pku.edu.cn', '2010301207@pku.edu.cn', '2010301137@pku.edu.cn', '2010301204@pku.edu.cn', '2010301150@pku.edu.cn', '2010301101@pku.edu.cn', '2010301201@pku.edu.cn', '2010301212@pku.edu.cn', '2010301121@pku.edu.cn', '2010301138@pku.edu.cn', '2010301107@pku.edu.cn', '2010301130@pku.edu.cn', '2010301102@pku.edu.cn', '2010301154@pku.edu.cn', '2010301111@pku.edu.cn', '2010301110@pku.edu.cn', '2010301146@pku.edu.cn', '2010301144@pku.edu.cn', '2010301105@pku.edu.cn', '2010301104@pku.edu.cn', '2010301127@pku.edu.cn', '2010301116@pku.edu.cn', '2010301219@pku.edu.cn', '2010301106@pku.edu.cn', '0006178148@pku.edu.cn', '2010301255@pku.edu.cn', 'nick2002@pku.edu.cn', '2010301214@pku.edu.cn', '2010301216@pku.edu.cn', '2010301139@pku.edu.cn', '2010301136@pku.edu.cn', '2010301153@pku.edu.cn', '2010301109@pku.edu.cn', '2010301208@pku.edu.cn', '2010301147@pku.edu.cn', '2010301206@pku.edu.cn', '2010301211@pku.edu.cn']
-
-    let finalans =  {}
-    let cnoden =0 , crelan = 0;
-    let cnode = {}
-    let crela = {}
-    for(let u of userlist)
-    {
-        user = u;
-        connection.testmode = 1;
-        connection.io_get_insModel();
-            while(connection.socket_mutex) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        finalans[u]={};
-        let nodes = instance_model.nodes;
-        let relations = instance_model.relations;
-        let nodenum=0,relanum=0;
-        for(let key in nodes)
-        {
-            let node = nodes[key];
-            if(node.tags[0]=='国家政策事件'&&node.value!=""){
-                if(cnode[key]==undefined){
-                    cnoden++;
-                    cnode[key]=true;
-                }
-                nodenum++;
-            }
-        }
-        //console.log(relations);
-        for(let key in relations)
-        {
-            let relation = relations[key];
-            let type = relation.type;
-            //console.log(type);
-            if(type!='政策依据'&&type!='前期政策') continue;
-            let thisone,otherone;
-            for(let role of relation.roles)
-            {
-                if(role.rolename=='当前政策') thisone=nodes[role.node_id].value;
-                else otherone=nodes[role.node_id].value;
-            }
-            if(thisone!=""&&otherone!="") 
-            {
-                relanum++;
-                if(crela[key]==undefined)
-                {
-                    crela[key]=relation;
-                    crelan++
-                }
-            }
-        }
-        finalans[u]['nodenum']=nodenum;
-        finalans[u]['relanum']=relanum;
-    }
-    finalans['crowd']={};
-    finalans['crowd']['nodenum'] = cnoden;
-    finalans['crowd']['relanum'] = crelan;
-    console.log(finalans);
-    console.log(JSON.stringify(finalans));
-}
-
 loadTest = function(){
     let nodeId = $('g.entity.center').attr("id");
     let node = {}
@@ -295,6 +232,13 @@ testPolicy =async function() { //建立项目的集成测试
         }
         user = u;
         console.log(u+'loading')
+        let msg = {
+        operation: 'mget',  //先这么用着再说吧
+            user_id: user,
+            project_id: project,
+            operation_id: 'op1'
+        };
+        //connection.socketEmit("model", msg);
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -312,7 +256,7 @@ testPolicy =async function() { //建立项目的集成测试
             connection.io_create_insModel_entity(entity);
             candidate++;
         }
-        connection.io_get_insModel();
+        // connection.io_get_insModel();
         while(connection.socket_mutex){
             await new Promise(resolve => setTimeout(resolve, 1000));
         }//等待实体创建完成

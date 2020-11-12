@@ -662,8 +662,14 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
     if (msg.error) {
         return;
     } else {
+        instance_model = {
+            "nodes": msg.nodes,
+            "relations": msg.relations
+        }
+        prepareNewEntity();
         this.tmpMsgPop(msg.operationId);
-        let msg3 = {
+        if(this.testmode==1) return;
+        let msg3 = { 
             operation: 'rcmd_entity',
             user_id: user,
             project_id: project,
@@ -671,11 +677,6 @@ ioObj.prototype.io_get_insModel_done = function (msg) {
             topk: 100
         }
         this.socketEmit("insModel", msg3);
-        instance_model = {
-            "nodes": msg.nodes,
-            "relations": msg.relations
-        }
-        prepareNewEntity();
         //prepareNewEntity(instance_model,false);
         //detail.drawIndex();
         this.initmode=1;
