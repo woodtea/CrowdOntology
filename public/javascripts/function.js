@@ -347,7 +347,7 @@ $(function () {
         if (getJsonLength(rcmd_pending.relations) > 0) {
             connection.io_create_insModel_relation(rcmd_pending.relations);
         }
-        connection.io_cite_recommend(1);
+        connection.io_cite_recommend(1,);
     })
 
     $(document).on("click", '#modalRevise button', function () {

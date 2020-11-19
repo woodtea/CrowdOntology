@@ -163,6 +163,13 @@ ioObj.prototype.init = function () {
                 break;
         }
     });
+    this.socket.on('project',function(msg){
+        if(msg.index=='over') {
+            alert('该项目用户已满')
+            return;
+        }
+        window.location.replace(window.location.href+msg.index);
+    })
 
 }
 
@@ -409,10 +416,11 @@ ioObj.prototype.io_get_insModel = function (user_id, projectId) {
     this.socketEmitArray('insModel', msg);
 }
 
-ioObj.prototype.io_cite_recommend = function (status) {
+ioObj.prototype.io_cite_recommend = function (status,relations={}) {
     let msg = this.emitMsgHeader('cite_rcmd');
     if(status===1) msg["done"] = "true";
     else msg["done"] = "false";
+    msg['relations'] = relations
     this.socketEmitArray('insModel',msg);
 }
 
@@ -624,11 +632,11 @@ ioObj.prototype.io_get_reject_done = function(msg){
 /* model */
 ioObj.prototype.io_get_model_done = function (msg) {
     //this.socket_mutex = false;
-    if(msg.over==true)
-    {
-        alert('该项目用户已满');
-        return;
-    }
+    // if(msg.over==true)
+    // {
+    //     alert('该项目用户已满');
+    //     return;
+    // }
     if (msg.error) {
         return;
     } else {

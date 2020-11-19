@@ -1,21 +1,21 @@
 //config
 var user = $(".glyphicon-user").parent().text().slice(1);
-var independent = ['B1@mail','B2@mail','zhangxy@pku.edu.cn'];
-var groupA = ['wangp@pku.edu.cn','zhangmy@pku.edu.cn','qiaoxh@pku.edu.cn','cuimy@pku.edu.cn'];
-var groupB = ['chuwj@pku.edu.cn','luoyx@pku.edu.cn'];
+// var independent = ['B1@mail','B2@mail','zhangxy@pku.edu.cn'];
+// var groupA = ['wangp@pku.edu.cn','zhangmy@pku.edu.cn','qiaoxh@pku.edu.cn','cuimy@pku.edu.cn'];
+// var groupB = ['chuwj@pku.edu.cn','luoyx@pku.edu.cn'];
 var project=$("#project").text();
-if(independent.indexOf(user) != -1) {
-    console.log("independent user")
-    project= $("#project").text()+user;
-}
-if(groupA.indexOf(user) != -1) {
-    console.log("Group A")
-    project= $("#project").text()+'groupa';
-}
-if(groupB.indexOf(user) != -1) {
-    console.log("Group B")
-    project= $("#project").text()+'groupb';
-}
+// if(independent.indexOf(user) != -1) {
+//     console.log("independent user")
+//     project= $("#project").text()+user;
+// }
+// if(groupA.indexOf(user) != -1) {
+//     console.log("Group A")
+//     project= $("#project").text()+'groupa';
+// }
+// if(groupB.indexOf(user) != -1) {
+//     console.log("Group B")
+//     project= $("#project").text()+'groupb';
+// }
 var historylist = [];
 //model
 var instance_model = {nodes: {}, relations: {}}
@@ -72,10 +72,25 @@ io_test3 = function(data){
 
 
 }
-let msg = {
-    operation: 'mget',  //先这么用着再说吧
-    user_id: user,
-    project_id: project,
-    operation_id: 'op1'
-};
-connection.socketEmit("model", msg);
+
+if(project=='测试图谱'||project=='红楼梦人物关系图谱')
+{
+    let msg = {
+        user_id:user,
+        project_id:project,
+        operation_id:'op_project'
+    }
+    connection.socketEmit('project',msg);
+
+}else{
+    let msg = {
+        operation: 'mget',  //先这么用着再说吧
+        user_id: user,
+        project_id: project,
+        operation_id: 'op1'
+    };
+    connection.socketEmit("model", msg);
+
+}
+
+

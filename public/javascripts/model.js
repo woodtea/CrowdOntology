@@ -324,7 +324,7 @@ modelObj.prototype.citeRelation = function(){
         connection.io_create_insModel_relation(rcmd_pending.relations);
         //console.log(rcmd_pending.relations);
     }
-    connection.io_cite_recommend(1);
+    connection.io_cite_recommend(1,rcmd_pending.relations);
 }
 
 modelObj.prototype.checkModelValid = function(tmpModel){

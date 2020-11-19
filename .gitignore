@@ -6,3 +6,4 @@ logs/*
 fetchlog.sh
 serverLogs/
 public/webpack/
+*/.DS_Store
