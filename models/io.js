@@ -529,8 +529,8 @@ function ioConfig(server){
                 init_project();
             }else if(msg=="mcreate_hlm"){
                 mcreate_hlm_project();
-            }else if(msg=="mcreate_hlm2"){
-                mcreate_hlm2_project(msg.substring(11,msg.length));
+            }else if(msg.substring(0,12)=="mcreate_hlm2"){
+                mcreate_hlm2_project(msg.substring(12,msg.length));
             }else if(msg=="mcreate_movie"){
                 mcreate_movie_project();
             }else if(msg=="mcreate_movie_rzdf"){
