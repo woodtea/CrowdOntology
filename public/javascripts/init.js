@@ -76,6 +76,7 @@ io_test3 = function(data){
 if(project=='测试图谱'||project=='红楼梦人物关系图谱')
 {
     let msg = {
+        operation: 'project',
         user_id:user,
         project_id:project,
         operation_id:'op_project'

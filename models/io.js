@@ -61,7 +61,7 @@ function ioConfig(server){
                     groups[index]--;
                     userList[index][msg.user_id]=true;
                     msg['index']=index;
-                    logger.info(msg);
+                    logger.info(JSON.stringify(msg));
                     return socket.emit('project',msg);
                 }
             }
