@@ -7,5 +7,4 @@ fetchlog.sh
 serverLogs/
 public/webpack/
 */.DS_Store
-nohup.out
-bin/nohup.out
+*/nohup.out
