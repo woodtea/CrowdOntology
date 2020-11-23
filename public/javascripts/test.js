@@ -86,6 +86,132 @@ policyStat = async function(){
     console.log(JSON.stringify(finalans));
 }
 
+policyStat = async function(){
+    
+    let userlist = [];
+    let finalans =  {}
+    let cnoden =0 , crelan = 0;
+    let cnode = {}
+    let crela = {}
+    for(let u of userlist)
+    {
+        user = u;
+        connection.testmode = 1;
+        connection.io_get_insModel();
+            while(connection.socket_mutex) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        finalans[u]={};
+        let nodes = instance_model.nodes;
+        let relations = instance_model.relations;
+        let nodenum=0,relanum=0;
+        for(let key in nodes)
+        {
+            let node = nodes[key];
+            if(node.tags[0]=='国家政策事件'&&node.value!=""){
+                if(cnode[key]==undefined){
+                    cnoden++;
+                    cnode[key]=true;
+                }
+                nodenum++;
+            }
+        }
+        //console.log(relations);
+        for(let key in relations)
+        {
+            let relation = relations[key];
+            let type = relation.type;
+            //console.log(type);
+            if(type!='政策依据'&&type!='前期政策') continue;
+            let thisone,otherone;
+            for(let role of relation.roles)
+            {
+                if(role.rolename=='当前政策') thisone=nodes[role.node_id].value;
+                else otherone=nodes[role.node_id].value;
+            }
+            if(thisone!=""&&otherone!="") 
+            {
+                relanum++;
+                if(crela[key]==undefined)
+                {
+                    crela[key]=relation;
+                    crelan++
+                }
+            }
+        }
+        finalans[u]['nodenum']=nodenum;
+        finalans[u]['relanum']=relanum;
+    }
+    finalans['crowd']={};
+    finalans['crowd']['nodenum'] = cnoden;
+    finalans['crowd']['relanum'] = crelan;
+    console.log(finalans);
+    console.log(JSON.stringify(finalans));
+}
+
+hlmStat = async function(){
+    
+    let userlist = ['2010301113@pku.edu.cn', '2010301252@pku.edu.cn', '2010301108@pku.edu.cn', '2010301246@pku.edu.cn', '2010301131@pku.edu.cn', '2010301156@pku.edu.cn', '2010301147@pku.edu.cn', '2010301241@pku.edu.cn', '2010301230@pku.edu.cn', '2010301103@pku.edu.cn', '2010301146@pku.edu.cn', '2010301207@pku.edu.cn', '2010301138@pku.edu.cn', '2010301120@pku.edu.cn', '2010301116@pku.edu.cn', '2010301124@pku.edu.cn', '2010301102@pku.edu.cn', '2010301114@pku.edu.cn', '2010301129@pku.edu.cn', '2010301211@pku.edu.cn', '2010301223@pku.edu.cn', '2010301140@pku.edu.cn', '2010301233@pku.edu.cn', '2010301222@pku.edu.cn', '2010301142@pku.edu.cn', '2010301232@pku.edu.cn', '2010301130@pku.edu.cn', '2010301218@pku.edu.cn', '2010301137@pku.edu.cn', '2010301219@pku.edu.cn', '2010301213@pku.edu.cn', '2010301127@pku.edu.cn']
+
+    let finalans =  {}
+    let cnoden =0 , crelan = 0;
+    let cnode = {}
+    let crela = {}
+    for(let u of userlist)
+    {
+        user = u;
+        connection.testmode = 1;
+        connection.io_get_insModel();
+            while(connection.socket_mutex) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        finalans[u]={};
+        let nodes = instance_model.nodes;
+        let relations = instance_model.relations;
+        let nodenum=0,relanum=0;
+        for(let key in nodes)
+        {
+            let node = nodes[key];
+            if(node.tags[0]!='String'&&node.value!=""){
+                if(cnode[key]==undefined){
+                    cnoden++;
+                    cnode[key]=true;
+                }
+                nodenum++;
+            }
+            else{
+                delete nodes[key];//不统计属性
+            } 
+        }
+        //console.log(relations);
+        finalans[u]['relations']=[];
+        out:for(let key in relations)
+        {
+            let relation = relations[key];
+            let type = relation.type;
+            //console.log(type);
+            for(let role of relation.roles)
+            {
+                if(nodes[role.node_id]==undefined) continue out; //不统计属性
+            }
+            finalans[u]['relations'].push(key);
+            relanum++;
+            if(crela[key]==undefined)
+            {
+                crela[key]=relation;
+                crelan++
+            }
+        }
+        finalans[u]['nodenum']=nodenum;
+        finalans[u]['relanum']=relanum;
+    }
+    finalans['crowd']={};
+    finalans['crowd']['nodenum'] = cnoden;
+    finalans['crowd']['relanum'] = crelan;
+    console.log(finalans);
+    console.log(JSON.stringify(finalans));
+}
+
 loadTest = function(){
     let nodeId = $('g.entity.center').attr("id");
     let node = {}

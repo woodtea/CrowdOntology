@@ -20,7 +20,7 @@ var fs= require('fs');
 // let useduser = ['2010301135@pku.edu.cn', '2010301140@pku.edu.cn', '2010301212@pku.edu.cn', '2010301156@pku.edu.cn', '2010301144@pku.edu.cn', '2010301146@pku.edu.cn', '2010301111@pku.edu.cn', '2010301113@pku.edu.cn', '2010301125@pku.edu.cn', '2010301105@pku.edu.cn', '2010301205@pku.edu.cn', '2010301114@pku.edu.cn', '2010301218@pku.edu.cn', '2010301116@pku.edu.cn', '2010301152@pku.edu.cn', '2010301104@pku.edu.cn', '2010301106@pku.edu.cn', '2010301101@pku.edu.cn', '2010301103@pku.edu.cn', '2010301122@pku.edu.cn', '2010301108@pku.edu.cn', '2010301203@pku.edu.cn', '2010301157@pku.edu.cn', '2010301121@pku.edu.cn', '2010301149@pku.edu.cn', '2010301133@pku.edu.cn', '2010301207@pku.edu.cn', '2010301107@pku.edu.cn', '2010301110@pku.edu.cn', '2010301123@pku.edu.cn', '2010301126@pku.edu.cn', '2010301129@pku.edu.cn', '2010301134@pku.edu.cn', '2010301128@pku.edu.cn', '2010301150@pku.edu.cn', '2010301216@pku.edu.cn', '2010301120@pku.edu.cn', '2010301151@pku.edu.cn', '2010301201@pku.edu.cn', '2010301124@pku.edu.cn', '2010301154@pku.edu.cn', '2010301138@pku.edu.cn', '2010301209@pku.edu.cn', '2010301143@pku.edu.cn', '2010301119@pku.edu.cn', '2010301204@pku.edu.cn', '2010301115@pku.edu.cn', '2010301220@pku.edu.cn', '2010301117@pku.edu.cn', '2010301219@pku.edu.cn', '2010301102@pku.edu.cn', '2010301208@pku.edu.cn', '2010301127@pku.edu.cn', '2010301130@pku.edu.cn', '2010301131@pku.edu.cn', '2010301137@pku.edu.cn', '2010301211@pku.edu.cn', '2010301132@pku.edu.cn', 'crowd']
 
 // 实验分组
-let groups =  [1,2,3];
+let groups =  [64,32,16];
 let userList ={};
 for(let index in groups)
 {
