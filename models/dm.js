@@ -120,7 +120,7 @@ DataManager.prototype.handle = function (msg, callback) {
                 this.recommendIndex(msg, callback);
                 break;
             case 'new_rcmd':
-                this.newRecommend(msg, callback);
+                this.fastRecommend(msg, callback);
                 break;
             case 'madd_key_attr':
                 this.mAddKeyAttr(msg, callback);
@@ -1852,11 +1852,12 @@ DataManager.prototype.recommend = function (msg, callback) {
 */
 //TODO 现在返回的是全局图谱，可能存在效率问题，恢复注释内容可以针对性地返回推荐图谱
 DataManager.prototype.newRecommend = function (msg, callback) {
-    console.time('rcmdtime');
+    console.time('rcmdtimeAll')
     var session = ogmneo.Connection.session();
     var rcmd_nodes = [];//先保证一个
     for (k in msg.nodes) {
         rcmd_nodes.push(k);
+        break;
     }
     var cypher = 'MATCH (p:Project {name: {pname}})\n\
     MATCH (u:User {name: {uname}})\n\
@@ -1875,11 +1876,12 @@ DataManager.prototype.newRecommend = function (msg, callback) {
     //     rcmd_id: rcmd_nodes[0]
     // });
 
-    console.log('[CYPHER]');
-    console.log(cypher);
+    // console.log('[CYPHER]');
+    // console.log(cypher);
 
     var resp = extractBasic(msg);
     resp.error = false;
+    console.time('rcmdtime1');
     session
         .run(cypher, {
             pname: msg.project_id,
@@ -1887,6 +1889,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
         })
         .then(function (res) {
             // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            console.timeEnd('rcmdtime1')
             var records = res.records;
             var l1_list = [];
             var nodes = {};
@@ -1916,14 +1919,16 @@ DataManager.prototype.newRecommend = function (msg, callback) {
             MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
             RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags, count(distinct ou) AS refer_u'.format({
                 id_list: l1_list_str
-            }); 
-
+            });
+            console.log(relationCypher);
+            console.time('rcmdtime2')
             session
             .run(relationCypher, {
                 pname: msg.project_id,
                 uname: msg.user_id
             })
             .then(function(res){
+                console.timeEnd('rcmdtime2')
                 var relations = {};
                 for (var i = 0; i < res.records.length; i++){
                     var rec = res.records[i];
@@ -1966,7 +1971,7 @@ DataManager.prototype.newRecommend = function (msg, callback) {
                 resp.nodes = nodes;
                 resp.relations = relations;
                 resp.rcmd_list = rcmd_list;
-                console.timeEnd('rcmdtime');
+                console.timeEnd('rcmdtimeAll');
                 callback(resp);
             })
             .catch(function (err) {
@@ -1983,6 +1988,142 @@ DataManager.prototype.newRecommend = function (msg, callback) {
 
 }
 
+//created by cmy on 2020/11/24
+//该函数仍然返回全局推荐图谱，相较于newcommend，它不计算关系被引用的次数，经测试表明这会节省大量查询时间
+DataManager.prototype.fastRecommend = function (msg, callback) {
+    console.time('rcmdtimeAll')
+    var session = ogmneo.Connection.session();
+    var rcmd_nodes = [];//先保证一个
+    for (k in msg.nodes) {
+        rcmd_nodes.push(k);
+        break;
+    }
+    var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    MATCH (u:User {name: {uname}})\n\
+    MATCH (p)-[:has]->(i)<-[:refer]-(u) \n\
+    MATCH (i)<-[:has_role]-(ri:RelInst)-[:has_role]->(l1i) WHERE NOT  (ri)<-[:refer]-(u) \n\
+    MATCH (ri)<-[:refer]-(ou)\n\
+    OPTIONAL MATCH (l1i)-[:from]->(:inst_of)-[:to]->(tag)\n\
+    RETURN l1i, collect(distinct id(tag)) AS tags';
+    // var cypher = 'MATCH (p:Project {name: {pname}})\n\
+    // MATCH (u:User {name: {uname}})\n\
+    // MATCH (p)-[:has]->(i)<-[:refer]-(u) WHERE id(i)={rcmd_id}\n\
+    // MATCH (i)<-[:has_role]-(ri:RelInst)-[:has_role]->(l1i) WHERE NOT (ri)<-[:refer]-(u)\n\
+    // MATCH (ri)<-[:refer]-(ou)\n\
+    // OPTIONAL MATCH (l1i)-[:from]->(:inst_of)-[:to]->(tag)\n\
+    // RETURN l1i, collect(distinct id(tag)) AS tags'.format({
+    //     rcmd_id: rcmd_nodes[0]
+    // });
+
+    // console.log('[CYPHER]');
+    // console.log(cypher);
+
+    var resp = extractBasic(msg);
+    resp.error = false;
+    console.time('rcmdtime1');
+    session
+        .run(cypher, {
+            pname: msg.project_id,
+            uname: msg.user_id
+        })
+        .then(function (res) {
+            // var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            console.timeEnd('rcmdtime1')
+            var records = res.records;
+            var l1_list = [];
+            var nodes = {};
+            for (var i = 0; i < res.records.length; i++){
+                var rec = res.records[i];
+                var l1i = rec.get('l1i');
+                var l1id = l1i.identity.toString();
+                nodes[l1id] = {};
+                // for (k in l1i.properties){
+                //     nodes[l1id][k] = l1i.properties[k];
+                // }
+                var tags = rec.get('tags');
+                var tmp = [];
+                for (t in tags){
+                    tmp.push(tags[t].toString());
+                }
+                nodes[l1id]['tags'] = tmp;
+                l1_list.push(l1id);
+            }
+
+            var l1_list_str = '[' + l1_list.toString() + ']';
+            var relationCypher = 'MATCH (p:Project {name: {pname}})\n\
+            MATCH (u:User {name: {uname}})\n\
+            MATCH (i) WHERE id(i) in {id_list} \n\
+            MATCH (i)<-[:has_role]-(rel) WHERE (NOT ((rel)<-[:refer]-(u) OR (rel)<-[:reject]-(u) OR (u)-[:reject]->()<-[:has_role]-(rel))) OR (rel)-[:from]->(:inst_of)-[:to]->()<-[:has_key_attr]-()\n\
+            MATCH (rel)-[hr:has_role]->(role)\n\
+            MATCH (rel)-[:from]->(:inst_of)-[:to]->(tag)\n\
+            RETURN rel, collect(distinct [hr.name, role]) AS roles,  collect(distinct id(tag)) AS tags'.format({
+                id_list: l1_list_str
+            });
+            console.log(relationCypher);
+            console.time('rcmdtime2')
+            session
+                .run(relationCypher, {
+                    pname: msg.project_id,
+                    uname: msg.user_id
+                })
+                .then(function(res){
+                    console.timeEnd('rcmdtime2')
+                    var relations = {};
+                    for (var i = 0; i < res.records.length; i++){
+                        var rec = res.records[i];
+                        var rid = rec.get('rel').identity.toString();
+                        var roles = rec.get('roles');
+                        var role_tmp = [];
+                        for (var j in roles){
+                            var rname = roles[j][0];
+                            var rnode = roles[j][1];
+                            var roleid = rnode.identity.toString();
+                            if (nodes[roleid] == undefined)
+                                nodes[roleid] = {};
+                            for (k in rnode.properties){
+                                nodes[roleid][k] = rnode.properties[k];
+                            }
+                            // nodes[roleid] = rnode.properties;
+                            role_tmp.push({
+                                rolename: rname,
+                                node_id: roleid
+                            });
+                        }
+                        relations[rid] = rec.get('rel').properties;
+                        relations[rid]['roles'] = role_tmp;
+                        relations[rid]['tag'] = rec.get('tags')[0].toString();//关系应该不会有多个tag
+                    }
+
+                    var tgt_node = rcmd_nodes[0];
+                    rcmd_list = [];
+                    for (k in relations){
+                        var rel = relations[k];
+                        if (rel['roles'][0]['node_id'] == tgt_node || rel['roles'][0]['node_id'] == tgt_node){
+                            rcmd_list.push(k);
+                        }
+                    }
+
+                    session.close();
+                    resp.msg = 'Success';
+                    resp.nodes = nodes;
+                    resp.relations = relations;
+                    resp.rcmd_list = rcmd_list;
+                    console.timeEnd('rcmdtimeAll');
+                    callback(resp);
+                })
+                .catch(function (err) {
+                    resp.error = true;
+                    resp.msg = err;
+                    callback(resp);
+                });
+        })
+        .catch(function (err) {
+            resp.error = true;
+            resp.msg = err;
+            callback(resp);
+        });
+
+}
 
 /*
 msg : {

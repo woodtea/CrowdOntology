@@ -73,7 +73,7 @@ io_test3 = function(data){
 
 }
 
-if(project=='测试图谱'||project=='红楼梦人物关系图谱')
+if(project=='红楼梦人物关系图谱'||project=='三国演义人物关系图谱'||project=='水浒传人物关系图谱'||project=='西游记人物关系图谱')
 {
     let msg = {
         operation: 'project',
