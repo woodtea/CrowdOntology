@@ -532,6 +532,8 @@ function ioConfig(server){
                 mcreate_hlm_project();
             }else if(msg.substring(0,12)=="mcreate_hlm2"){
                 mcreate_hlm2_project(msg.substring(12,msg.length));
+            }else if(msg.substring(0,11)=="mcreate_shz"){
+                mcreate_shz_project(msg.substring(11,msg.length));
             }else if(msg=="mcreate_movie"){
                 mcreate_movie_project();
             }else if(msg=="mcreate_movie_rzdf"){
@@ -1009,58 +1011,7 @@ function mcreate_shz_project(projectname='水浒传人物关系图谱0'){
                 });
                 roles = [{rolename : "", node_id : humanId}, {rolename : "性别", node_id : symbolId}]
                 dm.handle(mcreate_relation("性别",roles,project_id=projectname),function(rep){});
-                roles = [
-                    {rolename : "丈夫", node_id : humanId},
-                    {rolename : "妻子", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("夫妻", roles, project_id = projectname), function (rep) {});
-                //父子间
-                roles = [
-                    {rolename : "父亲", node_id : humanId},
-                    {rolename : "儿子", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("父子", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "母亲", node_id : humanId},
-                    {rolename : "儿子", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("母子", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "父亲", node_id : humanId},
-                    {rolename : "女儿", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("父女", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "母亲", node_id : humanId},
-                    {rolename : "女儿", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("母女", roles, project_id = projectname), function (rep) {});
-                //同辈间
-                roles = [
-                    {rolename : "哥哥", node_id : humanId},
-                    {rolename : "弟弟", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("兄弟", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "哥哥", node_id : humanId},
-                    {rolename : "弟弟", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("结拜兄弟", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "哥哥", node_id : humanId},
-                    {rolename : "妹妹", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("兄妹", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "姐姐", node_id : humanId},
-                    {rolename : "弟弟", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("姐弟", roles, project_id = projectname), function (rep) {});
-                roles = [
-                    {rolename : "姐姐", node_id : humanId},
-                    {rolename : "妹妹", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("姐妹", roles, project_id = projectname), function (rep) {});
+
 
                 roles = [
                     {rolename : "主人", node_id : humanId},
@@ -1068,47 +1019,99 @@ function mcreate_shz_project(projectname='水浒传人物关系图谱0'){
                 ]
                 dm.handle(mcreate_relation("主仆", roles, project_id = projectname), function (rep) {});
 
-                roles = [
-                    {rolename : "君主", node_id : humanId},
-                    {rolename : "臣子", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("君臣", roles, project_id = projectname), function (rep) {});
 
                 roles = [
                     {rolename : "师傅", node_id : humanId},
                     {rolename : "徒弟", node_id : humanId}
                 ]
                 dm.handle(mcreate_relation("师徒", roles, project_id = projectname), function (rep) {});
-
                 roles = [
                     {rolename : "仇人", node_id : humanId},
                     {rolename : "仇人", node_id : humanId}
                 ]
                 dm.handle(mcreate_relation("仇敌", roles, project_id = projectname), function (rep) {});
-
-                roles = [
-                    {rolename : "好友", node_id : humanId},
-                    {rolename : "好友", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("好友", roles, project_id = projectname), function (rep) {});
-
-                roles = [
-                {rolename : "杀人者", node_id : humanId},
-                {rolename : "被杀者", node_id : humanId}
-            ]
-                dm.handle(mcreate_relation("杀害", roles, project_id = projectname), function (rep) {});
-
-                roles = [
-                    {rolename : "救人者", node_id : humanId},
-                    {rolename : "被救者", node_id : humanId}
-                ]
-                dm.handle(mcreate_relation("救命恩人", roles, project_id = projectname), function (rep) {});
-
                 roles = [
                     {rolename : "招募者", node_id : humanId},
                     {rolename : "被招募者", node_id : humanId}
                 ]
                 dm.handle(mcreate_relation("招募", roles, project_id = projectname), function (rep) {});
+                roles = [
+                    {rolename : "义兄", node_id : humanId},
+                    {rolename : "义弟", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("结义兄弟", roles, project_id = projectname), function (rep) {});
+                roles = [
+                    {rolename : "义兄", node_id : humanId},
+                    {rolename : "义妹", node_id : humanId}
+                ]
+                dm.handle(mcreate_relation("结义兄妹", roles, project_id = projectname), function (rep) {});
+
+                //通用关系
+                {
+                    roles = [
+                        {rolename : "丈夫", node_id : humanId},
+                        {rolename : "妻子", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("夫妻", roles, project_id = projectname), function (rep) {});
+                    //父子间
+                    roles = [
+                        {rolename : "父亲", node_id : humanId},
+                        {rolename : "儿子", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("父子", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "母亲", node_id : humanId},
+                        {rolename : "儿子", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("母子", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "父亲", node_id : humanId},
+                        {rolename : "女儿", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("父女", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "母亲", node_id : humanId},
+                        {rolename : "女儿", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("母女", roles, project_id = projectname), function (rep) {});
+                    //同辈间
+                    roles = [
+                        {rolename : "哥哥", node_id : humanId},
+                        {rolename : "弟弟", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("兄弟", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "哥哥", node_id : humanId},
+                        {rolename : "妹妹", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("兄妹", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "姐姐", node_id : humanId},
+                        {rolename : "弟弟", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("姐弟", roles, project_id = projectname), function (rep) {});
+                    roles = [
+                        {rolename : "姐姐", node_id : humanId},
+                        {rolename : "妹妹", node_id : humanId}
+                    ]
+                    dm.handle(mcreate_relation("姐妹", roles, project_id = projectname), function (rep) {});
+                }
+                dm.handle(mcreate_node("Entity", "山寨", projectname), function (rep) {
+                    let roles,hillId;
+                    for (let key in rep.migrate) hillId = rep.migrate[key];
+                    roles = [{rolename : "", node_id : hillId}, {rolename : "山寨名", node_id : symbolId}]
+                    dm.handle(mcreate_relation(value="姓名",roles,project_id=projectname),function(rep){
+                        let relationId;
+                        for (let key in rep.migrate) relationId = rep.migrate[key];
+                        dm.handle(madd_key_attr(node_id=hillId,[relationId],user_id="",project_id=projectname),function(rep){});
+
+                        roles = [
+                            {rolename : "山寨", node_id : hillId},
+                            {rolename : "人物", node_id : humanId}
+                        ]
+                        dm.handle(mcreate_relation("隶属", roles, project_id = projectname), function (rep) {});
+                    });
+                })
             });
         });
     });
