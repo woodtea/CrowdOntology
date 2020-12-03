@@ -407,6 +407,8 @@ detailObj.prototype.classRemoveSubmit = function (item) {
         $(properties).children().remove();
         detail.drawPropertyTitle();
     }
+    //TODO 当删除一个实体的时候，应该返回全局图谱，现在没有这个能力，使用下面语句无法实现这个功能
+    //$(".btn-group.workspace").click();
 }
 
 detailObj.prototype.attributeReviseSubmit = function (item) {

@@ -913,7 +913,8 @@ ioObj.prototype.io_recommend_insModel_entity_done = function (msg) {
             if (instance_model.nodes[key] == undefined) {
                 if (data.isEntity(key, tmpModel)) {
                     //recommend_index.push(tmpModel.nodes[key].value);
-                    recommend_index[tmpModel.nodes[key].tags[0]].push(tmpModel.nodes[key].value);
+                    if(recommend_index[tmpModel.nodes[key].tags[0]]!=undefined&&tmpModel.nodes[key].value!=undefined)
+                        recommend_index[tmpModel.nodes[key].tags[0]].push(tmpModel.nodes[key].value);
                 }
             }
         }

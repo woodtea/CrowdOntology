@@ -78,6 +78,7 @@ $(function () {
 
     $(document).on("click", ".btn-group.workspace", function () {
         switching=true;
+        console.log($(this).children(".btn-default").hasClass("off"))
         if ($(this).children(".btn-default").hasClass("off")) {
             //全局图谱
             //if ($(".btn.recommend").hasClass("active")) $(".btn.recommend").trigger("click");    //当前是推荐的状态的话先关闭推荐 //严重怀疑，一条好像不需要
