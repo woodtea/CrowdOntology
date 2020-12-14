@@ -303,7 +303,7 @@ svgObj.prototype.openZoom = function(){
 }
 
 svgObj.prototype.freshFilter = function(){
-    console.log('freshFilter');
+    //console.log('freshFilter');
     let foldButton="<span class=\"filter-fold glyphicon glyphicon-chevron-down\"></span>"
     let hideButton="<span class=\"filter-fold glyphicon glyphicon-chevron-right\"></span>"
     let temp=$(".filter-panel");

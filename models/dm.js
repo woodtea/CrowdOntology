@@ -642,6 +642,7 @@ msg : {
 }
 */
 //先保证一个点的情况
+//TODO 在创建系统中已有的实体时，该操作将会产生大量冗余节点
 DataManager.prototype.createNode = function (msg, callback) {
     var session = ogmneo.Connection.session();
     var node = msg.nodes[0];
@@ -674,8 +675,13 @@ DataManager.prototype.createNode = function (msg, callback) {
         tagCypher +
         'RETURN id(i) AS nodeId, i AS node';
     console.log('[CYPHER]');
-    console.log(cypher);
-
+    console.log(cypher.format( {
+        pname: msg.project_id,
+        ctag: msg.nodes[0].tag,
+        cvalue: msg.nodes[0].value,
+        uname: msg.user_id,
+        ivalue: node.value
+    }));
     var resp = extractBasic(msg);
     resp.error = false;
 
@@ -689,6 +695,7 @@ DataManager.prototype.createNode = function (msg, callback) {
         })
         .then(function (res) {
             var nodeId = res.records[0].get('nodeId').toString(); //获取id
+            console.log("[NODE_ID]"+nodeId);
             session.close();
             resp.msg = 'Success';
             resp.migrate = {};
@@ -962,8 +969,14 @@ DataManager.prototype.createRelationProxy = function (msg, callback) {
                                 }
                             }
                         }
+
                     // console.log("is_key_attr", is_key_attr, value_id);
                         //如果是关键属性
+                        if(relation.isKeyArribute&&!is_key_attr)
+                        {
+                            is_key_attr=true;
+                            relation.tag=attrs[0]
+                        }
                     if (is_key_attr) {
                         var cypher = 'MATCH (p:Project {name: {pname}})\n\
             MATCH (u:User {name: {uname}})\n\

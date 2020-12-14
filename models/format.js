@@ -174,7 +174,8 @@ format_create_insModel_relation = function (msg) {
     newMsg["relations"]=[{
         "front_id" : frontId,
         "tag" : msg["relations"][frontId].type,
-        "roles": msg["relations"][frontId].roles
+        "roles": msg["relations"][frontId].roles,
+        "isKeyArribute": msg["relations"][frontId].isKeyArribute
     }];
     console.log(newMsg)
     console.log(newMsg["relations"][0])

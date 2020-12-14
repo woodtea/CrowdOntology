@@ -778,6 +778,7 @@ $(function () {
     $(document).on("click","#modalAddEntityInModel .btn-primary",function(){
         let type = $("#modalAddEntityInModel input.type").val();
         let attr = $("#modalAddEntityInModel input.attr").val();
+        attr=type+"名"
 
         let array = getEntityTypes();
         if (array.indexOf(type) != -1) {

@@ -452,12 +452,14 @@ ioObj.prototype.io_create_insModel_entity = function (entity) {
     //生成关系
     let relations = {};
     let keyAttribute = data.getKeyAttribute(entity.tags);
+    //TODO 这里的type仅为主属性名称，在有实体类型主属性名称重合时会出现错误
     relations[entity.relationId] = {
         "type": keyAttribute,
         "roles": [
             {"rolename": "", "node_id": entity.nodeId},
             {"rolename": keyAttribute, "node_id": entity.valueId}
-        ]
+        ],
+        "isKeyArribute": true
     }
     console.log(JSON.stringify(relations));
     this.io_create_insModel_relation(relations);
