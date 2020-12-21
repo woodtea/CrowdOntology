@@ -1319,11 +1319,10 @@ let tagReformat = {
                 let tmp = msg.relations[relationId].tag;    //前台获得情况
                 if (tmp == undefined) tmp = msg.relations[relationId].type;   //获取本地的情况
 
-                if(model.relations[tmp]==undefined){
-                    alert("存在未知的数据错误，请刷新后重试.","refresh");
-                    return;
+                if(model.relations[tmp]!=undefined) {
+                    //alert("存在未知的数据错误，请刷新后重试.","refresh");
+                    msg.relations[relationId].type = model.relations[tmp].value;
                 }
-                msg.relations[relationId].type = model.relations[tmp].value;
 
                 //临时处理recommend没有tags的问题 - 开始
                 let roles = msg.relations[relationId].roles;

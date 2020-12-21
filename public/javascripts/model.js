@@ -211,6 +211,9 @@ modelObj.prototype.isCreationIllegal = function (type, tag, value, roles) {
     switch (type) {
         case "class":
             hasError = true;
+            //TODO edited by Cui on 2020/12/19 实体名称合法性判断
+            if(value.indexOf(" ")!=-1) err += "实体名称不允许包含空格"
+            break;
             for (let key in model.nodes) {
                 if (model.nodes[key].value == tag) hasError = false;
             }
