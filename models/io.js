@@ -570,6 +570,8 @@ function ioConfig(server){
                 mcreate_empty_project_with_name(msg.substring(13,msg.length));
             }else if(msg=="mcreate_ontology"){
                 mcreate_ontology_project();
+            }else if(msg=="mcreate_medical"){
+                mcreate_medical_project();
             }else if(msg=='create_user'){
                 batch_create_user();
             } else{
@@ -1217,6 +1219,7 @@ function mcreate_xyj_project(projectname='西游记人物关系图谱0'){
     return;
 }
 
+
 function mcreate_sgy_project(projectname='三国演义人物关系图谱0'){
     msg1 = {
         operation: 'create_project',
@@ -1340,7 +1343,80 @@ function mcreate_sgy_project(projectname='三国演义人物关系图谱0'){
     return;
 }
 
+function mcreate_medical_project(projectname='医疗知识图谱'){
+    msg1 = {
+        operation: 'create_project',
+        operation_id: 'opt2',
+        name: projectname
+    };
+    var illId,mediId,symId,treatId,symbolId;
+    dm.handle(msg1, function(rep) {
+        dm.handle(mcreate_node("Entity", "疾病", projectname), function (rep) {
+            for (let key in rep.migrate) illId = rep.migrate[key];
+            dm.handle(mcreate_node("Entity", "症状", projectname), function (rep) {
+                for (let key in rep.migrate) symId = rep.migrate[key];
+                dm.handle(mcreate_node("Entity", "药物", projectname), function (rep) {
+                    for (let key in rep.migrate) mediId = rep.migrate[key];
+                    dm.handle(mcreate_node("Entity", "诊疗", projectname), function (rep) {
+                        for (let key in rep.migrate) treatId = rep.migrate[key];
+                        dm.handle(mcreate_node("Symbol", "String", projectname), function (rep) {
+                            for (let key in rep.migrate) symbolId = rep.migrate[key];
+                            //创建属性
+                            let roles;
+                            roles = [{rolename: "", node_id: illId}, {rolename: "疾病名", node_id: symbolId}]
+                            dm.handle(mcreate_relation(value = "疾病名", roles, project_id = projectname), function (rep) {
+                                let relationId;
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id = illId, [relationId], user_id = "", project_id = projectname), function (rep) {
+                                });
+                            });
+                            roles = [{rolename: "", node_id: mediId}, {rolename: "药物名", node_id: symbolId}]
+                            dm.handle(mcreate_relation(value = "药物名", roles, project_id = projectname), function (rep) {
+                                let relationId;
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id = mediId, [relationId], user_id = "", project_id = projectname), function (rep) {
+                                });
+                            });
+                            roles = [{rolename: "", node_id: symId}, {rolename: "症状名", node_id: symbolId}]
+                            dm.handle(mcreate_relation(value = "症状名", roles, project_id = projectname), function (rep) {
+                                let relationId;
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id = symId, [relationId], user_id = "", project_id = projectname), function (rep) {
+                                });
+                            });
+                            roles = [{rolename: "", node_id: treatId}, {rolename: "诊疗名", node_id: symbolId}]
+                            dm.handle(mcreate_relation(value = "诊疗名", roles, project_id = projectname), function (rep) {
+                                let relationId;
+                                for (let key in rep.migrate) relationId = rep.migrate[key];
+                                dm.handle(madd_key_attr(node_id = treatId, [relationId], user_id = "", project_id = projectname), function (rep) {
+                                });
+                            });
+                            //创建关系
+                            let relas = ['疾病 鉴别诊断 疾病', '疾病 药物治疗 药物', '疾病 影像学检查 诊疗', '疾病 临床症状及体征 症状', '疾病 高危因素 疾病', '疾病 实验室检查 诊疗', '疾病 并发症 疾病', '疾病 病因 疾病', '疾病 病理分型 疾病', '疾病 检查 诊疗', '疾病 辅助检查 诊疗', '症状 相关疾病 疾病', '症状 检查 诊疗', '症状 相关症状 症状', '疾病 药物引起的并发症 疾病', '药物 禁忌症 疾病', '药物 不良反应 症状', '药物 适应症 疾病', '药物 成份 药物', '药物 药物相互作用 药物', '诊疗 相关疾病 疾病', '诊疗 相关症状 症状', '疾病 预防 药物', '疾病 相关转化 疾病', '疾病 相关疾病 疾病', '疾病 治疗引起的并发症 疾病']
+                            let keymap={
+                                "疾病":illId,
+                                "药物":mediId,
+                                "诊疗":treatId,
+                                "症状":symId
+                            }
+                            for(let rela of relas){
+                                let strs = rela.split(" ")
+                                roles = [
+                                    {rolename : strs[0], node_id : keymap[strs[0]]},
+                                    {rolename : strs[2], node_id : keymap[strs[2]]}
+                                ]
+                                dm.handle(mcreate_relation(strs[1], roles, project_id = projectname), function (rep) {});
 
+                            }
+
+                        });
+                    });
+                });
+            });
+        });
+    });
+    return;
+}
 function mcreate_movie_project(){
     msg1 = {
         operation: 'create_project',
